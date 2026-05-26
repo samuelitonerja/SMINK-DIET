@@ -7,31 +7,34 @@ import { supabase } from './supabase.js';
 // ── Leer datos del usuario desde Supabase ──────────────────
 export async function loadUserData(userId) {
   try {
-    const [
-      { data: profile },
-      { data: nutrition },
-      { data: workouts },
-      { data: measures },
-      { data: routine },
-      { data: race },
-      { data: water },
-      { data: sleep },
-      { data: foods },
-      { data: training },
-      { data: plan },
-    ] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', userId).single(),
+    // Usar maybeSingle() en vez de single() para evitar error 406 cuando no hay datos
+    const results = await Promise.allSettled([
+      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
       supabase.from('nutrition_history').select('*').eq('user_id', userId),
       supabase.from('workout_log').select('*').eq('user_id', userId),
       supabase.from('measure_log').select('*').eq('user_id', userId),
-      supabase.from('saved_routine').select('*').eq('user_id', userId).single(),
-      supabase.from('race_plan').select('*').eq('user_id', userId).single(),
+      supabase.from('saved_routine').select('*').eq('user_id', userId).maybeSingle(),
+      supabase.from('race_plan').select('*').eq('user_id', userId).maybeSingle(),
       supabase.from('water_log').select('*').eq('user_id', userId),
       supabase.from('sleep_log').select('*').eq('user_id', userId),
-      supabase.from('custom_foods').select('*').eq('user_id', userId).single(),
-      supabase.from('training_state').select('*').eq('user_id', userId).single(),
-      supabase.from('user_plans').select('*').eq('user_id', userId).single(),
+      supabase.from('custom_foods').select('*').eq('user_id', userId).maybeSingle(),
+      supabase.from('training_state').select('*').eq('user_id', userId).maybeSingle(),
+      supabase.from('user_plans').select('*').eq('user_id', userId).maybeSingle(),
     ]);
+
+    const get = (i) => results[i].status === 'fulfilled' ? (results[i].value?.data || null) : null;
+    const getArr = (i) => results[i].status === 'fulfilled' ? (results[i].value?.data || []) : [];
+
+    const profile = get(0);
+    const nutrition = getArr(1);
+    const workouts = getArr(2);
+    const measures = getArr(3);
+    const routine = get(4);
+    const race = get(5);
+    const water = getArr(6);
+    const sleep = getArr(7);
+    const foods = get(8);
+    const plan = get(10);
 
     // Convertir arrays a objetos clave-valor (como el localStorage)
     const nutritionObj = {};
@@ -58,8 +61,7 @@ export async function loadUserData(userId) {
       racePlan: race?.data || null,
       waterLog: waterObj,
       sleepLog: sleepObj,
-      customFoods: foods?.data || [],
-      trainingState: training?.data || null,
+      customFoods: Array.isArray(foods) ? foods : (foods?.data || []),
       userPlan: plan?.plan || 'free',
       planExpiresAt: plan?.plan_expires_at || null,
     };
