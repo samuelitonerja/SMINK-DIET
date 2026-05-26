@@ -5995,7 +5995,7 @@ export default function App({ userId, userEmail, cloudData }) {
       )}
 
       {/* Top bar */}
-      <div style={{ position:"sticky", top:0, zIndex:120, background:"rgba(15,15,20,0.85)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", borderBottom:"1px solid #1e1e28", padding:"14px 18px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <div style={{ position:"sticky", top:0, zIndex:120, background:"rgba(15,15,20,0.85)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", borderBottom:"1px solid #1e1e28", padding:"14px 18px", paddingTop:"calc(14px + env(safe-area-inset-top))", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
         <div style={{ display:"flex", alignItems:"center", gap:14 }}>
           <button onClick={()=>setMenuOpen(true)} style={{ background:"none", border:"none", cursor:"pointer", padding:0, display:"flex", flexDirection:"column", gap:4, width:22 }}>
             <span style={{ height:2.5, background:"#A8FF60", borderRadius:2, width:"100%" }} />
