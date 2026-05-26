@@ -5779,8 +5779,6 @@ function BottomNav({ active, onChange }) {
 // APP PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════
 export default function App({ userId, userEmail, cloudData }) {
-  const [userData, setUserData] = useLS("userData_v10", null);
-  const [history, setHistory] = useLS("history_v10", {});
   // ── Estados inicializados desde Supabase (cloudData) o localStorage como fallback ──
   const cd = cloudData || {};
   const [userData, setUserDataRaw] = useLS("userData_v10", {});
