@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { saveProfile, saveNutritionDay, saveWorkout, saveMeasure, saveRoutine, saveRacePlan, saveWater, saveSleep, saveCustomFoods } from "./db.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // BASE DE DATOS Y LÓGICA — SMINK FIT
@@ -5777,20 +5778,129 @@ function BottomNav({ active, onChange }) {
 // ═══════════════════════════════════════════════════════════════════════════
 // APP PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════
-export default function App() {
+export default function App({ userId, userEmail, cloudData }) {
   const [userData, setUserData] = useLS("userData_v10", null);
   const [history, setHistory] = useLS("history_v10", {});
-  const [measureLog, setMeasureLog] = useLS("measureLog_v10", {});
+  // ── Estados inicializados desde Supabase (cloudData) o localStorage como fallback ──
+  const cd = cloudData || {};
+  const [userData, setUserDataRaw] = useLS("userData_v10", {});
+  const [history, setHistoryRaw] = useLS("history_v10", {});
+  const [measureLog, setMeasureLogRaw] = useLS("measureLog_v10", {});
   const [mealDist, setMealDist] = useLS("mealDist_v10", DEFAULT_MEAL_DIST);
-  const [customFoods, setCustomFoods] = useLS("customFoods_v10", []);
+  const [customFoods, setCustomFoodsRaw] = useLS("customFoods_v10", []);
   const [trainingState, setTrainingState] = useLS("trainingState_v10", null);
-  const [savedRoutine, setSavedRoutine] = useLS("savedRoutine_v10", null);
-  const [racePlan, setRacePlan] = useLS("racePlan_v10", null);
-  const [workoutLog, setWorkoutLog] = useLS("workoutLog_v10", {});
-  const [sleepLog, setSleepLog] = useLS("sleepLog_v10", {});
-  const [waterLog, setWaterLog] = useLS("waterLog_v10", {});
+  const [savedRoutine, setSavedRoutineRaw] = useLS("savedRoutine_v10", null);
+  const [racePlan, setRacePlanRaw] = useLS("racePlan_v10", null);
+  const [workoutLog, setWorkoutLogRaw] = useLS("workoutLog_v10", {});
+  const [sleepLog, setSleepLogRaw] = useLS("sleepLog_v10", {});
+  const [waterLog, setWaterLogRaw] = useLS("waterLog_v10", {});
   const [shoppingPlan, setShoppingPlan] = useLS("shoppingPlan_v10", { dias:{} });
   const [savedLists, setSavedLists] = useLS("savedLists_v10", []);
+  const [cloudLoaded, setCloudLoaded] = useState(false);
+
+  // Al recibir cloudData, sobrescribir el estado local con los datos de Supabase
+  useEffect(() => {
+    if (!cloudData || cloudLoaded) return;
+    if (cloudData.userData) setUserDataRaw(cloudData.userData);
+    if (cloudData.history && Object.keys(cloudData.history).length) setHistoryRaw(cloudData.history);
+    if (cloudData.workoutLog && Object.keys(cloudData.workoutLog).length) setWorkoutLogRaw(cloudData.workoutLog);
+    if (cloudData.measureLog && Object.keys(cloudData.measureLog).length) setMeasureLogRaw(cloudData.measureLog);
+    if (cloudData.savedRoutine) setSavedRoutineRaw(cloudData.savedRoutine);
+    if (cloudData.racePlan) setRacePlanRaw(cloudData.racePlan);
+    if (cloudData.waterLog && Object.keys(cloudData.waterLog).length) setWaterLogRaw(cloudData.waterLog);
+    if (cloudData.sleepLog && Object.keys(cloudData.sleepLog).length) setSleepLogRaw(cloudData.sleepLog);
+    if (cloudData.customFoods && cloudData.customFoods.length) setCustomFoodsRaw(cloudData.customFoods);
+    setCloudLoaded(true);
+  }, [cloudData]);
+
+  // Wrappers que guardan en Supabase + localStorage simultáneamente
+  const setUserData = useCallback(v => {
+    setUserDataRaw(prev => {
+      const nv = typeof v === "function" ? v(prev) : v;
+      if (userId) saveProfile(userId, { name:nv.name, weight:nv.weight, height:nv.height, age:nv.age, sex:nv.sex, activity:nv.activity, goal:nv.goal, num_meals:nv.numMeals, kcal_adjust:nv.kcalAdjust });
+      return nv;
+    });
+  }, [userId]);
+
+  const setHistory = useCallback(v => {
+    setHistoryRaw(prev => {
+      const nv = typeof v === "function" ? v(prev) : v;
+      if (userId) {
+        // Guardar solo los días que hayan cambiado
+        const changed = Object.keys(nv).filter(k => JSON.stringify(nv[k]) !== JSON.stringify(prev[k]));
+        changed.forEach(k => saveNutritionDay(userId, k, nv[k]));
+      }
+      return nv;
+    });
+  }, [userId]);
+
+  const setWorkoutLog = useCallback(v => {
+    setWorkoutLogRaw(prev => {
+      const nv = typeof v === "function" ? v(prev) : v;
+      if (userId) {
+        const changed = Object.keys(nv).filter(k => !prev[k]);
+        changed.forEach(k => saveWorkout(userId, k, nv[k]));
+      }
+      return nv;
+    });
+  }, [userId]);
+
+  const setMeasureLog = useCallback(v => {
+    setMeasureLogRaw(prev => {
+      const nv = typeof v === "function" ? v(prev) : v;
+      if (userId) {
+        const changed = Object.keys(nv).filter(k => JSON.stringify(nv[k]) !== JSON.stringify(prev[k]));
+        changed.forEach(k => saveMeasure(userId, k, nv[k]));
+      }
+      return nv;
+    });
+  }, [userId]);
+
+  const setSavedRoutine = useCallback(v => {
+    setSavedRoutineRaw(prev => {
+      const nv = typeof v === "function" ? v(prev) : v;
+      if (userId) saveRoutine(userId, nv);
+      return nv;
+    });
+  }, [userId]);
+
+  const setRacePlan = useCallback(v => {
+    setRacePlanRaw(prev => {
+      const nv = typeof v === "function" ? v(prev) : v;
+      if (userId) saveRacePlan(userId, nv);
+      return nv;
+    });
+  }, [userId]);
+
+  const setWaterLog = useCallback(v => {
+    setWaterLogRaw(prev => {
+      const nv = typeof v === "function" ? v(prev) : v;
+      if (userId) {
+        const changed = Object.keys(nv).filter(k => nv[k] !== prev[k]);
+        changed.forEach(k => saveWater(userId, k, nv[k]));
+      }
+      return nv;
+    });
+  }, [userId]);
+
+  const setSleepLog = useCallback(v => {
+    setSleepLogRaw(prev => {
+      const nv = typeof v === "function" ? v(prev) : v;
+      if (userId) {
+        const changed = Object.keys(nv).filter(k => JSON.stringify(nv[k]) !== JSON.stringify(prev[k]));
+        changed.forEach(k => saveSleep(userId, k, nv[k]));
+      }
+      return nv;
+    });
+  }, [userId]);
+
+  const setCustomFoods = useCallback(v => {
+    setCustomFoodsRaw(prev => {
+      const nv = typeof v === "function" ? v(prev) : v;
+      if (userId) saveCustomFoods(userId, nv);
+      return nv;
+    });
+  }, [userId]);
   const [editing, setEditing] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [tab, setTab] = useState("inicio");
