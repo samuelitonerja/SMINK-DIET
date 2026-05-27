@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
 import SettingsScreen from "./SettingsScreen.jsx";
+import { supabase } from "./supabase.js";
 
-// ═══════════════════════════════════════════════════════════════════════════
-// BASE DE DATOS Y LÓGICA — SMINK FIT
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// BASE DE DATOS Y LÃ“GICA â€” SMINK FIT
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 const FOOD_DB = [
   // HIDRATOS
@@ -12,13 +13,13 @@ const FOOD_DB = [
   { id:"pas1", name:"Pasta (espaguetis)", cat:"hidrato", kcal:358, p:12, g:1, c:72 },
   { id:"pas2", name:"Pasta integral", cat:"hidrato", kcal:340, p:13, g:2, c:68 },
   { id:"pas3", name:"Macarrones", cat:"hidrato", kcal:358, p:12, g:1, c:72 },
-  { id:"gno1", name:"Ñoquis Hacendado", cat:"hidrato", kcal:174, p:4, g:0, c:37 },
+  { id:"gno1", name:"Ã‘oquis Hacendado", cat:"hidrato", kcal:174, p:4, g:0, c:37 },
   { id:"pat1", name:"Patata cruda", cat:"hidrato", kcal:77, p:2, g:0, c:17 },
   { id:"pat2", name:"Boniato crudo", cat:"hidrato", kcal:86, p:2, g:0, c:20 },
-  { id:"tor1", name:"Tortitas maíz Hacendado natural", cat:"hidrato", kcal:367, p:8, g:2, c:80 },
-  { id:"tor2", name:"Tortitas maíz sabor jamón", cat:"hidrato", kcal:417, p:8, g:5, c:80 },
+  { id:"tor1", name:"Tortitas maÃ­z Hacendado natural", cat:"hidrato", kcal:367, p:8, g:2, c:80 },
+  { id:"tor2", name:"Tortitas maÃ­z sabor jamÃ³n", cat:"hidrato", kcal:417, p:8, g:5, c:80 },
   { id:"tor3", name:"Bicentury tomate", cat:"hidrato", kcal:460, p:6, g:14, c:72 },
-  { id:"faj1", name:"Fajitas pequeñas Hacendado", cat:"hidrato", kcal:287, p:8, g:5, c:55 },
+  { id:"faj1", name:"Fajitas pequeÃ±as Hacendado", cat:"hidrato", kcal:287, p:8, g:5, c:55 },
   { id:"faj2", name:"Fajitas avena 51% Hacendado", cat:"hidrato", kcal:287, p:15, g:6, c:40 },
   { id:"pan1", name:"Pan centeno 51% Mercadona", cat:"hidrato", kcal:262, p:9, g:2, c:50 },
   { id:"pan2", name:"Pan 12 cereales Hacendado", cat:"hidrato", kcal:263, p:10, g:4, c:47 },
@@ -28,17 +29,17 @@ const FOOD_DB = [
   { id:"qui1", name:"Quinoa cruda (en seco)", cat:"hidrato", kcal:368, p:14, g:6, c:64 },
   { id:"len1", name:"Lentejas crudas (en seco)", cat:"hidrato", kcal:336, p:24, g:1, c:60 },
   { id:"gar1", name:"Garbanzos crudos (en seco)", cat:"hidrato", kcal:364, p:19, g:6, c:61 },
-  { id:"mai1", name:"Maíz dulce (lata escurrido)", cat:"hidrato", kcal:86, p:3, g:1, c:19 },
-  { id:"cop1", name:"Copos de maíz (cornflakes)", cat:"hidrato", kcal:357, p:7, g:1, c:80 },
-  // PROTEÍNAS
+  { id:"mai1", name:"MaÃ­z dulce (lata escurrido)", cat:"hidrato", kcal:86, p:3, g:1, c:19 },
+  { id:"cop1", name:"Copos de maÃ­z (cornflakes)", cat:"hidrato", kcal:357, p:7, g:1, c:80 },
+  // PROTEÃNAS
   { id:"pol1", name:"Pechuga de pollo", cat:"proteina", kcal:165, p:31, g:4, c:0 },
   { id:"pol2", name:"Muslo de pollo sin piel", cat:"proteina", kcal:177, p:25, g:8, c:0 },
-  { id:"sal1", name:"Salmón fresco", cat:"proteina", kcal:208, p:20, g:13, c:0 },
-  { id:"sal2", name:"Salmón ahumado", cat:"proteina", kcal:172, p:25, g:8, c:0 },
+  { id:"sal1", name:"SalmÃ³n fresco", cat:"proteina", kcal:208, p:20, g:13, c:0 },
+  { id:"sal2", name:"SalmÃ³n ahumado", cat:"proteina", kcal:172, p:25, g:8, c:0 },
   { id:"mer1", name:"Merluza", cat:"proteina", kcal:80, p:17, g:2, c:0 },
   { id:"bac1", name:"Bacalao", cat:"proteina", kcal:82, p:18, g:1, c:0 },
-  { id:"atu1", name:"Atún en conserva (agua)", cat:"proteina", kcal:116, p:26, g:1, c:0 },
-  { id:"atu2", name:"Atún en aceite", cat:"proteina", kcal:200, p:29, g:9, c:0 },
+  { id:"atu1", name:"AtÃºn en conserva (agua)", cat:"proteina", kcal:116, p:26, g:1, c:0 },
+  { id:"atu2", name:"AtÃºn en aceite", cat:"proteina", kcal:200, p:29, g:9, c:0 },
   { id:"ter1", name:"Ternera molida 5%", cat:"proteina", kcal:137, p:21, g:5, c:0 },
   { id:"ter2", name:"Filete de ternera", cat:"proteina", kcal:150, p:22, g:6, c:0 },
   { id:"pav1", name:"Pechuga de pavo", cat:"proteina", kcal:135, p:29, g:2, c:0 },
@@ -60,7 +61,7 @@ const FOOD_DB = [
   { id:"alm1", name:"Almendras", cat:"grasa", kcal:579, p:21, g:50, c:22 },
   { id:"cac1", name:"Cacahuetes", cat:"grasa", kcal:567, p:26, g:49, c:16 },
   { id:"man1", name:"Mantequilla de cacahuete", cat:"grasa", kcal:588, p:25, g:50, c:20 },
-  { id:"sem1", name:"Semillas de chía", cat:"grasa", kcal:486, p:17, g:31, c:42 },
+  { id:"sem1", name:"Semillas de chÃ­a", cat:"grasa", kcal:486, p:17, g:31, c:42 },
   { id:"sem2", name:"Semillas de lino", cat:"grasa", kcal:534, p:18, g:42, c:29 },
   { id:"hum1", name:"Hummus", cat:"grasa", kcal:177, p:5, g:10, c:17 },
   { id:"que3", name:"Queso parmesano", cat:"grasa", kcal:431, p:38, g:29, c:4 },
@@ -69,11 +70,11 @@ const FOOD_DB = [
   { id:"tom2", name:"Tomate natural", cat:"verdura", kcal:18, p:1, g:0, c:4 },
   { id:"ceb1", name:"Cebolla", cat:"verdura", kcal:40, p:1, g:0, c:9 },
   { id:"lec1", name:"Lechuga", cat:"verdura", kcal:15, p:1, g:0, c:2 },
-  { id:"esp1", name:"Espárragos", cat:"verdura", kcal:20, p:2, g:0, c:4 },
-  { id:"cha1", name:"Champiñones", cat:"verdura", kcal:22, p:3, g:0, c:3 },
-  { id:"jud1", name:"Judías verdes", cat:"verdura", kcal:31, p:2, g:0, c:7 },
-  { id:"bro1", name:"Brócoli", cat:"verdura", kcal:34, p:3, g:0, c:7 },
-  { id:"cal1", name:"Calabacín", cat:"verdura", kcal:17, p:1, g:0, c:3 },
+  { id:"esp1", name:"EspÃ¡rragos", cat:"verdura", kcal:20, p:2, g:0, c:4 },
+  { id:"cha1", name:"ChampiÃ±ones", cat:"verdura", kcal:22, p:3, g:0, c:3 },
+  { id:"jud1", name:"JudÃ­as verdes", cat:"verdura", kcal:31, p:2, g:0, c:7 },
+  { id:"bro1", name:"BrÃ³coli", cat:"verdura", kcal:34, p:3, g:0, c:7 },
+  { id:"cal1", name:"CalabacÃ­n", cat:"verdura", kcal:17, p:1, g:0, c:3 },
   { id:"pip1", name:"Pimiento rojo", cat:"verdura", kcal:31, p:1, g:0, c:6 },
   { id:"pip2", name:"Pimiento verde", cat:"verdura", kcal:20, p:1, g:0, c:4 },
   { id:"zah1", name:"Zanahoria", cat:"verdura", kcal:41, p:1, g:0, c:10 },
@@ -92,8 +93,8 @@ const FOOD_DB = [
   { id:"lec2p", name:"Leche semidesnatada", cat:"postre", kcal:46, p:3, g:2, c:5 },
   { id:"lec3p", name:"Leche desnatada", cat:"postre", kcal:35, p:3, g:0, c:5 },
   { id:"lec4p", name:"Leche de avena", cat:"postre", kcal:43, p:1, g:1, c:7 },
-  { id:"lec5p", name:"Leche de almendras sin azúcar", cat:"postre", kcal:13, p:0, g:1, c:0 },
-  { id:"cor1p", name:"Cornflakes (copos de maíz)", cat:"postre", kcal:357, p:7, g:1, c:80 },
+  { id:"lec5p", name:"Leche de almendras sin azÃºcar", cat:"postre", kcal:13, p:0, g:1, c:0 },
+  { id:"cor1p", name:"Cornflakes (copos de maÃ­z)", cat:"postre", kcal:357, p:7, g:1, c:80 },
   { id:"cor2p", name:"Cornflakes chocolate", cat:"postre", kcal:380, p:6, g:3, c:78 },
   { id:"ave1p", name:"Avena en copos", cat:"postre", kcal:370, p:13, g:7, c:63 },
   { id:"gra1p", name:"Granola", cat:"postre", kcal:480, p:10, g:20, c:60 },
@@ -108,49 +109,49 @@ const FOOD_DB = [
   { id:"alm1p", name:"Almendras", cat:"postre", kcal:579, p:21, g:50, c:22 },
   { id:"ana1p", name:"Anacardos", cat:"postre", kcal:553, p:18, g:44, c:30 },
   { id:"pis1p", name:"Pistachos", cat:"postre", kcal:560, p:20, g:45, c:28 },
-  { id:"pla1p", name:"Plátano", cat:"postre", kcal:89, p:1, g:0, c:23 },
+  { id:"pla1p", name:"PlÃ¡tano", cat:"postre", kcal:89, p:1, g:0, c:23 },
   { id:"man1p", name:"Manzana", cat:"postre", kcal:52, p:0, g:0, c:14 },
   { id:"fre1p", name:"Fresas", cat:"postre", kcal:32, p:1, g:0, c:8 },
-  { id:"aran1p", name:"Arándanos", cat:"postre", kcal:57, p:1, g:0, c:14 },
-  { id:"req1p", name:"Requesón light", cat:"postre", kcal:98, p:11, g:4, c:3 },
+  { id:"aran1p", name:"ArÃ¡ndanos", cat:"postre", kcal:57, p:1, g:0, c:14 },
+  { id:"req1p", name:"RequesÃ³n light", cat:"postre", kcal:98, p:11, g:4, c:3 },
   { id:"queq1p", name:"Queso quark 0%", cat:"postre", kcal:60, p:11, g:0, c:4 },
   // Alimentos de las recetas
   { id:"rec_quesofresco", name:"Queso fresco batido", cat:"proteina", kcal:60, p:11, g:0, c:4 },
-  { id:"rec_requeson", name:"Requesón", cat:"proteina", kcal:98, p:11, g:4, c:3 },
+  { id:"rec_requeson", name:"RequesÃ³n", cat:"proteina", kcal:98, p:11, g:4, c:3 },
   { id:"rec_quesobatido", name:"Queso batido 0%", cat:"proteina", kcal:60, p:11, g:0, c:4 },
-  { id:"rec_kefir", name:"Kéfir", cat:"proteina", kcal:60, p:3, g:3, c:4 },
+  { id:"rec_kefir", name:"KÃ©fir", cat:"proteina", kcal:60, p:3, g:3, c:4 },
   { id:"rec_leche", name:"Leche semidesnatada", cat:"proteina", kcal:46, p:3, g:2, c:5 },
   { id:"rec_kiwi", name:"Kiwi", cat:"verdura", kcal:61, p:1, g:1, c:15 },
   { id:"rec_quinoa_seca", name:"Quinoa (en seco)", cat:"hidrato", kcal:368, p:14, g:6, c:64 },
-  { id:"rec_cuscus", name:"Cuscús (en seco)", cat:"hidrato", kcal:376, p:12, g:1, c:77 },
+  { id:"rec_cuscus", name:"CuscÃºs (en seco)", cat:"hidrato", kcal:376, p:12, g:1, c:77 },
   { id:"rec_tortilla_trigo", name:"Tortilla de trigo (wrap)", cat:"hidrato", kcal:287, p:8, g:5, c:55 },
   { id:"rec_tofu", name:"Tofu", cat:"proteina", kcal:76, p:8, g:5, c:2 },
   { id:"rec_sardinas", name:"Sardinas", cat:"proteina", kcal:185, p:25, g:10, c:0 },
   { id:"rec_panint", name:"Pan integral", cat:"hidrato", kcal:247, p:9, g:3, c:46 },
 
-  // ═══ AMPLIACIÓN — alimentos genéricos verificados (valores por 100g en crudo/seco salvo indicación) ═══
-  // ── HIDRATOS ──
+  // â•â•â• AMPLIACIÃ“N â€” alimentos genÃ©ricos verificados (valores por 100g en crudo/seco salvo indicaciÃ³n) â•â•â•
+  // â”€â”€ HIDRATOS â”€â”€
   { id:"hd01", name:"Arroz basmati", cat:"hidrato", kcal:356, p:8, g:1, c:78 },
-  { id:"hd02", name:"Cuscús (seco)", cat:"hidrato", kcal:376, p:13, g:1, c:77 },
+  { id:"hd02", name:"CuscÃºs (seco)", cat:"hidrato", kcal:376, p:13, g:1, c:77 },
   { id:"hd03", name:"Bulgur (seco)", cat:"hidrato", kcal:342, p:12, g:1, c:76 },
-  { id:"hd04", name:"Polenta / sémola de maíz", cat:"hidrato", kcal:362, p:8, g:2, c:79 },
+  { id:"hd04", name:"Polenta / sÃ©mola de maÃ­z", cat:"hidrato", kcal:362, p:8, g:2, c:79 },
   { id:"hd05", name:"Avena en copos", cat:"hidrato", kcal:389, p:17, g:7, c:66 },
   { id:"hd06", name:"Pan blanco", cat:"hidrato", kcal:265, p:9, g:3, c:49 },
   { id:"hd07", name:"Pan de centeno", cat:"hidrato", kcal:259, p:9, g:3, c:48 },
   { id:"hd08", name:"Pan de molde blanco", cat:"hidrato", kcal:266, p:8, g:4, c:49 },
   { id:"hd09", name:"Pan de molde integral", cat:"hidrato", kcal:248, p:9, g:4, c:42 },
-  { id:"hd10", name:"Picos / regañás", cat:"hidrato", kcal:412, p:11, g:9, c:71 },
+  { id:"hd10", name:"Picos / regaÃ±Ã¡s", cat:"hidrato", kcal:412, p:11, g:9, c:71 },
   { id:"hd11", name:"Tostadas de pan", cat:"hidrato", kcal:380, p:12, g:5, c:71 },
   { id:"hd12", name:"Tortitas de arroz", cat:"hidrato", kcal:387, p:8, g:3, c:81 },
-  { id:"hd13", name:"Tortitas de maíz", cat:"hidrato", kcal:385, p:7, g:3, c:82 },
-  { id:"hd14", name:"Cereales de maíz (cornflakes)", cat:"hidrato", kcal:357, p:7, g:1, c:84 },
+  { id:"hd13", name:"Tortitas de maÃ­z", cat:"hidrato", kcal:385, p:7, g:3, c:82 },
+  { id:"hd14", name:"Cereales de maÃ­z (cornflakes)", cat:"hidrato", kcal:357, p:7, g:1, c:84 },
   { id:"hd15", name:"Muesli", cat:"hidrato", kcal:367, p:10, g:6, c:66 },
   { id:"hd16", name:"Granola", cat:"hidrato", kcal:471, p:10, g:20, c:64 },
   { id:"hd17", name:"Boniato / batata", cat:"hidrato", kcal:86, p:2, g:0, c:20 },
   { id:"hd18", name:"Patata cocida", cat:"hidrato", kcal:87, p:2, g:0, c:20 },
   { id:"hd19", name:"Yuca", cat:"hidrato", kcal:160, p:1, g:0, c:38 },
-  { id:"hd20", name:"Maíz dulce (lata)", cat:"hidrato", kcal:86, p:3, g:1, c:19 },
-  { id:"hd21", name:"Castañas", cat:"hidrato", kcal:213, p:3, g:2, c:46 },
+  { id:"hd20", name:"MaÃ­z dulce (lata)", cat:"hidrato", kcal:86, p:3, g:1, c:19 },
+  { id:"hd21", name:"CastaÃ±as", cat:"hidrato", kcal:213, p:3, g:2, c:46 },
   { id:"hd22", name:"Quinoa (seca)", cat:"hidrato", kcal:368, p:14, g:6, c:64 },
   { id:"hd23", name:"Trigo sarraceno (seco)", cat:"hidrato", kcal:343, p:13, g:3, c:72 },
   { id:"hd24", name:"Fideos / noodles (secos)", cat:"hidrato", kcal:348, p:11, g:1, c:71 },
@@ -158,7 +159,7 @@ const FOOD_DB = [
   { id:"hd26", name:"Pan pita", cat:"hidrato", kcal:275, p:9, g:1, c:55 },
   { id:"hd27", name:"Harina de trigo", cat:"hidrato", kcal:364, p:10, g:1, c:76 },
   { id:"hd28", name:"Harina de avena", cat:"hidrato", kcal:389, p:17, g:7, c:66 },
-  // ── PROTEÍNAS ──
+  // â”€â”€ PROTEÃNAS â”€â”€
   { id:"pr01", name:"Pechuga de pollo", cat:"proteina", kcal:165, p:31, g:4, c:0 },
   { id:"pr02", name:"Muslo de pollo (sin piel)", cat:"proteina", kcal:177, p:24, g:9, c:0 },
   { id:"pr03", name:"Pechuga de pavo", cat:"proteina", kcal:135, p:29, g:1, c:0 },
@@ -169,9 +170,9 @@ const FOOD_DB = [
   { id:"pr08", name:"Conejo", cat:"proteina", kcal:173, p:33, g:4, c:0 },
   { id:"pr09", name:"Huevo entero", cat:"proteina", kcal:155, p:13, g:11, c:1 },
   { id:"pr10", name:"Clara de huevo", cat:"proteina", kcal:52, p:11, g:0, c:1 },
-  { id:"pr11", name:"Atún al natural (lata)", cat:"proteina", kcal:116, p:26, g:1, c:0 },
-  { id:"pr12", name:"Atún en aceite (escurrido)", cat:"proteina", kcal:200, p:26, g:10, c:0 },
-  { id:"pr13", name:"Salmón", cat:"proteina", kcal:208, p:20, g:13, c:0 },
+  { id:"pr11", name:"AtÃºn al natural (lata)", cat:"proteina", kcal:116, p:26, g:1, c:0 },
+  { id:"pr12", name:"AtÃºn en aceite (escurrido)", cat:"proteina", kcal:200, p:26, g:10, c:0 },
+  { id:"pr13", name:"SalmÃ³n", cat:"proteina", kcal:208, p:20, g:13, c:0 },
   { id:"pr14", name:"Merluza", cat:"proteina", kcal:90, p:18, g:2, c:0 },
   { id:"pr15", name:"Bacalao fresco", cat:"proteina", kcal:82, p:18, g:1, c:0 },
   { id:"pr16", name:"Dorada", cat:"proteina", kcal:96, p:20, g:2, c:0 },
@@ -183,23 +184,23 @@ const FOOD_DB = [
   { id:"pr22", name:"Boquerones / anchoa fresca", cat:"proteina", kcal:131, p:20, g:5, c:0 },
   { id:"pr23", name:"Caballa", cat:"proteina", kcal:205, p:19, g:14, c:0 },
   { id:"pr24", name:"Trucha", cat:"proteina", kcal:119, p:20, g:4, c:0 },
-  { id:"pr25", name:"Jamón serrano", cat:"proteina", kcal:241, p:31, g:13, c:0 },
-  { id:"pr26", name:"Jamón cocido / york", cat:"proteina", kcal:107, p:18, g:4, c:1 },
+  { id:"pr25", name:"JamÃ³n serrano", cat:"proteina", kcal:241, p:31, g:13, c:0 },
+  { id:"pr26", name:"JamÃ³n cocido / york", cat:"proteina", kcal:107, p:18, g:4, c:1 },
   { id:"pr27", name:"Pavo en lonchas", cat:"proteina", kcal:104, p:18, g:3, c:1 },
-  { id:"pr28", name:"Lacón", cat:"proteina", kcal:120, p:20, g:4, c:0 },
+  { id:"pr28", name:"LacÃ³n", cat:"proteina", kcal:120, p:20, g:4, c:0 },
   { id:"pr29", name:"Queso fresco batido 0%", cat:"proteina", kcal:47, p:8, g:0, c:4 },
-  { id:"pr30", name:"Requesón", cat:"proteina", kcal:97, p:11, g:4, c:3 },
+  { id:"pr30", name:"RequesÃ³n", cat:"proteina", kcal:97, p:11, g:4, c:3 },
   { id:"pr31", name:"Queso cottage", cat:"proteina", kcal:98, p:11, g:4, c:3 },
-  { id:"pr32", name:"Seitán", cat:"proteina", kcal:121, p:21, g:2, c:4 },
+  { id:"pr32", name:"SeitÃ¡n", cat:"proteina", kcal:121, p:21, g:2, c:4 },
   { id:"pr33", name:"Tempeh", cat:"proteina", kcal:193, p:19, g:11, c:9 },
   { id:"pr34", name:"Soja texturizada (seca)", cat:"proteina", kcal:345, p:52, g:1, c:30 },
-  { id:"pr35", name:"Proteína whey (polvo)", cat:"proteina", kcal:400, p:80, g:7, c:8 },
+  { id:"pr35", name:"ProteÃ­na whey (polvo)", cat:"proteina", kcal:400, p:80, g:7, c:8 },
   { id:"pr36", name:"Lentejas (cocidas)", cat:"proteina", kcal:116, p:9, g:0, c:20 },
   { id:"pr37", name:"Garbanzos (cocidos)", cat:"proteina", kcal:139, p:8, g:3, c:21 },
-  { id:"pr38", name:"Alubias / judías (cocidas)", cat:"proteina", kcal:127, p:9, g:1, c:23 },
+  { id:"pr38", name:"Alubias / judÃ­as (cocidas)", cat:"proteina", kcal:127, p:9, g:1, c:23 },
   { id:"pr39", name:"Guisantes", cat:"proteina", kcal:81, p:5, g:0, c:14 },
   { id:"pr40", name:"Edamame", cat:"proteina", kcal:121, p:12, g:5, c:9 },
-  // ── GRASAS ──
+  // â”€â”€ GRASAS â”€â”€
   { id:"gr01", name:"Aceite de oliva virgen extra", cat:"grasa", kcal:899, p:0, g:100, c:0 },
   { id:"gr02", name:"Aceite de girasol", cat:"grasa", kcal:899, p:0, g:100, c:0 },
   { id:"gr03", name:"Mantequilla", cat:"grasa", kcal:717, p:1, g:81, c:1 },
@@ -211,68 +212,68 @@ const FOOD_DB = [
   { id:"gr09", name:"Pistachos", cat:"grasa", kcal:562, p:20, g:45, c:28 },
   { id:"gr10", name:"Cacahuetes", cat:"grasa", kcal:567, p:26, g:49, c:16 },
   { id:"gr11", name:"Crema de cacahuete", cat:"grasa", kcal:588, p:25, g:50, c:20 },
-  { id:"gr12", name:"Semillas de chía", cat:"grasa", kcal:486, p:17, g:31, c:42 },
+  { id:"gr12", name:"Semillas de chÃ­a", cat:"grasa", kcal:486, p:17, g:31, c:42 },
   { id:"gr13", name:"Semillas de lino", cat:"grasa", kcal:534, p:18, g:42, c:29 },
   { id:"gr14", name:"Semillas de girasol", cat:"grasa", kcal:584, p:21, g:51, c:20 },
   { id:"gr15", name:"Semillas de calabaza", cat:"grasa", kcal:559, p:30, g:49, c:11 },
   { id:"gr16", name:"Aceitunas", cat:"grasa", kcal:145, p:1, g:15, c:4 },
   { id:"gr17", name:"Coco rallado", cat:"grasa", kcal:660, p:7, g:65, c:14 },
-  { id:"gr18", name:"Tahini (pasta de sésamo)", cat:"grasa", kcal:595, p:17, g:54, c:21 },
-  // ── VERDURAS ──
+  { id:"gr18", name:"Tahini (pasta de sÃ©samo)", cat:"grasa", kcal:595, p:17, g:54, c:21 },
+  // â”€â”€ VERDURAS â”€â”€
   { id:"vd01", name:"Tomate", cat:"verdura", kcal:18, p:1, g:0, c:4 },
   { id:"vd02", name:"Lechuga", cat:"verdura", kcal:15, p:1, g:0, c:3 },
   { id:"vd03", name:"Pepino", cat:"verdura", kcal:16, p:1, g:0, c:4 },
   { id:"vd04", name:"Pimiento rojo", cat:"verdura", kcal:31, p:1, g:0, c:6 },
   { id:"vd05", name:"Pimiento verde", cat:"verdura", kcal:20, p:1, g:0, c:5 },
-  { id:"vd06", name:"Calabacín", cat:"verdura", kcal:17, p:1, g:0, c:3 },
+  { id:"vd06", name:"CalabacÃ­n", cat:"verdura", kcal:17, p:1, g:0, c:3 },
   { id:"vd07", name:"Berenjena", cat:"verdura", kcal:25, p:1, g:0, c:6 },
   { id:"vd08", name:"Zanahoria", cat:"verdura", kcal:41, p:1, g:0, c:10 },
   { id:"vd09", name:"Cebolla", cat:"verdura", kcal:40, p:1, g:0, c:9 },
-  { id:"vd10", name:"Brócoli", cat:"verdura", kcal:34, p:3, g:0, c:7 },
+  { id:"vd10", name:"BrÃ³coli", cat:"verdura", kcal:34, p:3, g:0, c:7 },
   { id:"vd11", name:"Coliflor", cat:"verdura", kcal:25, p:2, g:0, c:5 },
   { id:"vd12", name:"Espinacas", cat:"verdura", kcal:23, p:3, g:0, c:4 },
   { id:"vd13", name:"Acelga", cat:"verdura", kcal:19, p:2, g:0, c:4 },
-  { id:"vd14", name:"Judías verdes", cat:"verdura", kcal:31, p:2, g:0, c:7 },
-  { id:"vd15", name:"Champiñones", cat:"verdura", kcal:22, p:3, g:0, c:3 },
+  { id:"vd14", name:"JudÃ­as verdes", cat:"verdura", kcal:31, p:2, g:0, c:7 },
+  { id:"vd15", name:"ChampiÃ±ones", cat:"verdura", kcal:22, p:3, g:0, c:3 },
   { id:"vd16", name:"Setas", cat:"verdura", kcal:26, p:3, g:0, c:4 },
-  { id:"vd17", name:"Espárragos", cat:"verdura", kcal:20, p:2, g:0, c:4 },
+  { id:"vd17", name:"EspÃ¡rragos", cat:"verdura", kcal:20, p:2, g:0, c:4 },
   { id:"vd18", name:"Alcachofa", cat:"verdura", kcal:47, p:3, g:0, c:11 },
   { id:"vd19", name:"Col / repollo", cat:"verdura", kcal:25, p:1, g:0, c:6 },
   { id:"vd20", name:"Coles de Bruselas", cat:"verdura", kcal:43, p:3, g:0, c:9 },
   { id:"vd21", name:"Puerro", cat:"verdura", kcal:61, p:1, g:0, c:14 },
   { id:"vd22", name:"Apio", cat:"verdura", kcal:16, p:1, g:0, c:3 },
-  { id:"vd23", name:"Rúcula", cat:"verdura", kcal:25, p:3, g:1, c:4 },
-  { id:"vd24", name:"Canónigos", cat:"verdura", kcal:21, p:2, g:0, c:4 },
+  { id:"vd23", name:"RÃºcula", cat:"verdura", kcal:25, p:3, g:1, c:4 },
+  { id:"vd24", name:"CanÃ³nigos", cat:"verdura", kcal:21, p:2, g:0, c:4 },
   { id:"vd25", name:"Tomate cherry", cat:"verdura", kcal:18, p:1, g:0, c:4 },
   { id:"vd26", name:"Remolacha", cat:"verdura", kcal:43, p:2, g:0, c:10 },
-  { id:"vd27", name:"Rábano", cat:"verdura", kcal:16, p:1, g:0, c:3 },
+  { id:"vd27", name:"RÃ¡bano", cat:"verdura", kcal:16, p:1, g:0, c:3 },
   { id:"vd28", name:"Calabaza", cat:"verdura", kcal:26, p:1, g:0, c:7 },
   { id:"vd29", name:"Setas shiitake", cat:"verdura", kcal:34, p:2, g:0, c:7 },
   { id:"vd30", name:"Endivia", cat:"verdura", kcal:17, p:1, g:0, c:3 },
-  // ── FRUTAS (postre/snack) ──
-  { id:"fr01", name:"Plátano", cat:"postre", kcal:89, p:1, g:0, c:23 },
+  // â”€â”€ FRUTAS (postre/snack) â”€â”€
+  { id:"fr01", name:"PlÃ¡tano", cat:"postre", kcal:89, p:1, g:0, c:23 },
   { id:"fr02", name:"Manzana", cat:"postre", kcal:52, p:0, g:0, c:14 },
   { id:"fr03", name:"Pera", cat:"postre", kcal:57, p:0, g:0, c:15 },
   { id:"fr04", name:"Naranja", cat:"postre", kcal:47, p:1, g:0, c:12 },
   { id:"fr05", name:"Mandarina", cat:"postre", kcal:53, p:1, g:0, c:13 },
   { id:"fr06", name:"Fresas", cat:"postre", kcal:32, p:1, g:0, c:8 },
-  { id:"fr07", name:"Arándanos", cat:"postre", kcal:57, p:1, g:0, c:14 },
+  { id:"fr07", name:"ArÃ¡ndanos", cat:"postre", kcal:57, p:1, g:0, c:14 },
   { id:"fr08", name:"Frambuesas", cat:"postre", kcal:52, p:1, g:1, c:12 },
   { id:"fr09", name:"Uvas", cat:"postre", kcal:69, p:1, g:0, c:18 },
-  { id:"fr10", name:"Melón", cat:"postre", kcal:34, p:1, g:0, c:8 },
-  { id:"fr11", name:"Sandía", cat:"postre", kcal:30, p:1, g:0, c:8 },
-  { id:"fr12", name:"Piña", cat:"postre", kcal:50, p:1, g:0, c:13 },
+  { id:"fr10", name:"MelÃ³n", cat:"postre", kcal:34, p:1, g:0, c:8 },
+  { id:"fr11", name:"SandÃ­a", cat:"postre", kcal:30, p:1, g:0, c:8 },
+  { id:"fr12", name:"PiÃ±a", cat:"postre", kcal:50, p:1, g:0, c:13 },
   { id:"fr13", name:"Mango", cat:"postre", kcal:60, p:1, g:0, c:15 },
   { id:"fr14", name:"Kiwi", cat:"postre", kcal:61, p:1, g:1, c:15 },
-  { id:"fr15", name:"Melocotón", cat:"postre", kcal:39, p:1, g:0, c:10 },
+  { id:"fr15", name:"MelocotÃ³n", cat:"postre", kcal:39, p:1, g:0, c:10 },
   { id:"fr16", name:"Cerezas", cat:"postre", kcal:63, p:1, g:0, c:16 },
   { id:"fr17", name:"Ciruela", cat:"postre", kcal:46, p:1, g:0, c:11 },
   { id:"fr18", name:"Higos", cat:"postre", kcal:74, p:1, g:0, c:19 },
   { id:"fr19", name:"Granada", cat:"postre", kcal:83, p:2, g:1, c:19 },
-  { id:"fr20", name:"Dátiles", cat:"postre", kcal:282, p:2, g:0, c:75 },
+  { id:"fr20", name:"DÃ¡tiles", cat:"postre", kcal:282, p:2, g:0, c:75 },
   { id:"fr21", name:"Pasas", cat:"postre", kcal:299, p:3, g:0, c:79 },
   { id:"fr22", name:"Orejones (albaricoque seco)", cat:"postre", kcal:241, p:3, g:1, c:63 },
-  // ── LÁCTEOS / POSTRES ──
+  // â”€â”€ LÃCTEOS / POSTRES â”€â”€
   { id:"lc01", name:"Leche entera", cat:"postre", kcal:61, p:3, g:3, c:5 },
   { id:"lc02", name:"Leche semidesnatada", cat:"postre", kcal:46, p:3, g:2, c:5 },
   { id:"lc03", name:"Leche desnatada", cat:"postre", kcal:34, p:3, g:0, c:5 },
@@ -283,12 +284,12 @@ const FOOD_DB = [
   { id:"lc08", name:"Yogur griego natural", cat:"postre", kcal:97, p:9, g:5, c:4 },
   { id:"lc09", name:"Yogur desnatado", cat:"postre", kcal:42, p:4, g:0, c:6 },
   { id:"lc10", name:"Yogur proteico (skyr)", cat:"postre", kcal:63, p:11, g:0, c:4 },
-  { id:"lc11", name:"Kéfir", cat:"postre", kcal:55, p:3, g:3, c:4 },
+  { id:"lc11", name:"KÃ©fir", cat:"postre", kcal:55, p:3, g:3, c:4 },
   { id:"lc12", name:"Cuajada", cat:"postre", kcal:90, p:5, g:5, c:6 },
   { id:"lc13", name:"Natillas", cat:"postre", kcal:118, p:4, g:3, c:18 },
   { id:"lc14", name:"Flan de huevo", cat:"postre", kcal:126, p:4, g:3, c:20 },
   { id:"lc15", name:"Helado de vainilla", cat:"postre", kcal:207, p:4, g:11, c:24 },
-  // ── QUESOS (grasa/proteína) ──
+  // â”€â”€ QUESOS (grasa/proteÃ­na) â”€â”€
   { id:"qs01", name:"Queso curado", cat:"grasa", kcal:387, p:27, g:31, c:1 },
   { id:"qs02", name:"Queso semicurado", cat:"grasa", kcal:357, p:25, g:28, c:1 },
   { id:"qs03", name:"Queso fresco", cat:"proteina", kcal:174, p:13, g:13, c:3 },
@@ -297,10 +298,10 @@ const FOOD_DB = [
   { id:"qs06", name:"Queso parmesano", cat:"grasa", kcal:431, p:38, g:29, c:4 },
   { id:"qs07", name:"Queso crema (tipo Philadelphia)", cat:"grasa", kcal:255, p:6, g:25, c:4 },
   { id:"qs08", name:"Queso en lonchas", cat:"grasa", kcal:300, p:18, g:24, c:3 },
-  // ── SNACKS / OTROS ──
+  // â”€â”€ SNACKS / OTROS â”€â”€
   { id:"sn01", name:"Chocolate negro 85%", cat:"postre", kcal:592, p:10, g:46, c:30 },
   { id:"sn02", name:"Chocolate con leche", cat:"postre", kcal:535, p:8, g:30, c:59 },
-  { id:"sn03", name:"Galletas tipo María", cat:"postre", kcal:436, p:7, g:11, c:75 },
+  { id:"sn03", name:"Galletas tipo MarÃ­a", cat:"postre", kcal:436, p:7, g:11, c:75 },
   { id:"sn04", name:"Miel", cat:"postre", kcal:304, p:0, g:0, c:82 },
   { id:"sn05", name:"Mermelada", cat:"postre", kcal:250, p:0, g:0, c:62 },
   { id:"sn06", name:"Tomate frito", cat:"verdura", kcal:82, p:2, g:4, c:9 },
@@ -309,37 +310,37 @@ const FOOD_DB = [
 
 const ACTIVITY_LEVELS = [
   { id:"sedentario", label:"Sedentario", desc:"Sin ejercicio", factor:1.2 },
-  { id:"ligero", label:"Ligero", desc:"1-2 días/semana", factor:1.375 },
-  { id:"moderado", label:"Moderado", desc:"3-5 días/semana", factor:1.55 },
-  { id:"activo", label:"Muy activo", desc:"6-7 días/semana", factor:1.725 },
+  { id:"ligero", label:"Ligero", desc:"1-2 dÃ­as/semana", factor:1.375 },
+  { id:"moderado", label:"Moderado", desc:"3-5 dÃ­as/semana", factor:1.55 },
+  { id:"activo", label:"Muy activo", desc:"6-7 dÃ­as/semana", factor:1.725 },
 ];
 
 const GOALS = [
-  { id:"perdida", label:"Pérdida de grasa", emoji:"🔥", kcalOffset:-400, proteinMult:2.2, fatPct:0.25 },
-  { id:"mantenimiento", label:"Mantenimiento", emoji:"⚖️", kcalOffset:0, proteinMult:1.8, fatPct:0.28 },
-  { id:"ganancia", label:"Ganancia muscular", emoji:"💪", kcalOffset:300, proteinMult:2.0, fatPct:0.28 },
+  { id:"perdida", label:"PÃ©rdida de grasa", emoji:"ðŸ”¥", kcalOffset:-400, proteinMult:2.2, fatPct:0.25 },
+  { id:"mantenimiento", label:"Mantenimiento", emoji:"âš–ï¸", kcalOffset:0, proteinMult:1.8, fatPct:0.28 },
+  { id:"ganancia", label:"Ganancia muscular", emoji:"ðŸ’ª", kcalOffset:300, proteinMult:2.0, fatPct:0.28 },
 ];
 
 const BLOCKS = [
-  { id:"hidrato", label:"Hidratos", emoji:"🍚", color:{ border:"#ff9800", accent:"#e65100" } },
-  { id:"proteina", label:"Proteínas", emoji:"🥩", color:{ border:"#4caf50", accent:"#2e7d32" } },
-  { id:"grasa", label:"Grasas", emoji:"🫒", color:{ border:"#e91e63", accent:"#880e4f" } },
-  { id:"verdura", label:"Verduras", emoji:"🥦", color:{ border:"#2196f3", accent:"#0d47a1" } },
+  { id:"hidrato", label:"Hidratos", emoji:"ðŸš", color:{ border:"#ff9800", accent:"#e65100" } },
+  { id:"proteina", label:"ProteÃ­nas", emoji:"ðŸ¥©", color:{ border:"#4caf50", accent:"#2e7d32" } },
+  { id:"grasa", label:"Grasas", emoji:"ðŸ«’", color:{ border:"#e91e63", accent:"#880e4f" } },
+  { id:"verdura", label:"Verduras", emoji:"ðŸ¥¦", color:{ border:"#2196f3", accent:"#0d47a1" } },
 ];
 
-const POSTRE_BLOCK = { id:"postre", label:"Postre", emoji:"🍯", color:{ border:"#9c27b0", accent:"#6a1b9a" } };
+const POSTRE_BLOCK = { id:"postre", label:"Postre", emoji:"ðŸ¯", color:{ border:"#9c27b0", accent:"#6a1b9a" } };
 
-// Catálogo de todas las comidas posibles (se usan según el número elegido)
+// CatÃ¡logo de todas las comidas posibles (se usan segÃºn el nÃºmero elegido)
 const ALL_MEALS = [
-  { id:"desayuno", label:"Desayuno", emoji:"🌅" },
-  { id:"mediamanana", label:"Media mañana", emoji:"🥪" },
-  { id:"almuerzo", label:"Almuerzo", emoji:"☀️" },
-  { id:"merienda", label:"Merienda", emoji:"🍎" },
-  { id:"cena", label:"Cena", emoji:"🌙" },
-  { id:"recena", label:"Recena", emoji:"🌃" },
+  { id:"desayuno", label:"Desayuno", emoji:"ðŸŒ…" },
+  { id:"mediamanana", label:"Media maÃ±ana", emoji:"ðŸ¥ª" },
+  { id:"almuerzo", label:"Almuerzo", emoji:"â˜€ï¸" },
+  { id:"merienda", label:"Merienda", emoji:"ðŸŽ" },
+  { id:"cena", label:"Cena", emoji:"ðŸŒ™" },
+  { id:"recena", label:"Recena", emoji:"ðŸŒƒ" },
 ];
 
-// Devuelve las comidas según el número elegido (2 a 6), en orden lógico del día
+// Devuelve las comidas segÃºn el nÃºmero elegido (2 a 6), en orden lÃ³gico del dÃ­a
 function getMeals(num) {
   const n = Math.max(2, Math.min(6, num || 3));
   const orders = {
@@ -353,7 +354,7 @@ function getMeals(num) {
   return ids.map(id => ALL_MEALS.find(m => m.id === id));
 }
 
-// Reparto por defecto: partes iguales según número de comidas
+// Reparto por defecto: partes iguales segÃºn nÃºmero de comidas
 function getDefaultDist(num) {
   const meals = getMeals(num);
   const base = Math.floor(100 / meals.length);
@@ -370,430 +371,430 @@ const DEFAULT_MEAL_DIST = { desayuno: 33, almuerzo: 34, cena: 33 };
 
 
 const MEASURES = [
-  { id:"peso", label:"Peso", unit:"kg", emoji:"⚖️", primary:true, tip:"Pésate siempre por la mañana, en ayunas, después de ir al baño y sin ropa. Usa la misma báscula y superficie firme." },
-  { id:"pecho", label:"Pecho", unit:"cm", emoji:"💪", tip:"Mide rodeando el pecho a la altura de los pezones, con los brazos relajados y al final de una espiración normal. Cinta paralela al suelo." },
-  { id:"brazo", label:"Brazo", unit:"cm", emoji:"💪", tip:"Mide el bíceps en su punto más ancho, con el brazo relajado a un lado del cuerpo (o flexionado si quieres ver el pico). Sé constante con el método." },
-  { id:"abdomen", label:"Abdomen", unit:"cm", emoji:"📏", tip:"Mide rodeando justo a la altura del ombligo, con el abdomen relajado al final de una espiración. Mantén la cinta horizontal." },
-  { id:"cadera", label:"Cadera", unit:"cm", emoji:"📏", tip:"Mide rodeando la parte más ancha de los glúteos, con los pies juntos. La cinta debe quedar paralela al suelo." },
-  { id:"cuadriceps", label:"Cuádriceps", unit:"cm", emoji:"🦵", tip:"Mide el muslo en su punto más ancho, normalmente a unos 15-20 cm por encima de la rodilla. De pie y pierna relajada. Mide siempre la misma pierna." },
+  { id:"peso", label:"Peso", unit:"kg", emoji:"âš–ï¸", primary:true, tip:"PÃ©sate siempre por la maÃ±ana, en ayunas, despuÃ©s de ir al baÃ±o y sin ropa. Usa la misma bÃ¡scula y superficie firme." },
+  { id:"pecho", label:"Pecho", unit:"cm", emoji:"ðŸ’ª", tip:"Mide rodeando el pecho a la altura de los pezones, con los brazos relajados y al final de una espiraciÃ³n normal. Cinta paralela al suelo." },
+  { id:"brazo", label:"Brazo", unit:"cm", emoji:"ðŸ’ª", tip:"Mide el bÃ­ceps en su punto mÃ¡s ancho, con el brazo relajado a un lado del cuerpo (o flexionado si quieres ver el pico). SÃ© constante con el mÃ©todo." },
+  { id:"abdomen", label:"Abdomen", unit:"cm", emoji:"ðŸ“", tip:"Mide rodeando justo a la altura del ombligo, con el abdomen relajado al final de una espiraciÃ³n. MantÃ©n la cinta horizontal." },
+  { id:"cadera", label:"Cadera", unit:"cm", emoji:"ðŸ“", tip:"Mide rodeando la parte mÃ¡s ancha de los glÃºteos, con los pies juntos. La cinta debe quedar paralela al suelo." },
+  { id:"cuadriceps", label:"CuÃ¡driceps", unit:"cm", emoji:"ðŸ¦µ", tip:"Mide el muslo en su punto mÃ¡s ancho, normalmente a unos 15-20 cm por encima de la rodilla. De pie y pierna relajada. Mide siempre la misma pierna." },
 ];
 
 // Ideas de comidas predefinidas. Cada una define ingredientes con su alimento (id del FOOD_DB
 // o macros propios) y un "peso base". La app escala las cantidades para cuadrar con el
 // objetivo de kcal de cada comida del usuario.
 const MEAL_IDEAS = [
-  { id:"dm_avena", name:"Bowl de avena proteico", grupo:"desayuno_merienda", emoji:"🥣", desc:"Pon la avena en un cazo con agua o leche y cuécela a fuego medio 3-4 minutos removiendo hasta que espese. Pásala a un bol y deja templar un par de minutos. Añade el yogur griego por encima, coloca el plátano cortado en rodajas y termina con un hilo de crema de cacahuete. Remueve ligeramente antes de comer para integrar los sabores.",
-    ingredients:[{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:60 },{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:150 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:80 },{ name:"Crema de cacahuete", kcal:588, p:25, g:50, c:20, base:15 }] },
-  { id:"dm_tostadas_pavo", name:"Tostadas de pavo y aguacate", grupo:"desayuno_merienda", emoji:"🥑", desc:"Tuesta las rebanadas de pan hasta que estén doradas y crujientes. Mientras, machaca el aguacate en un bol con un poco de sal y unas gotas de limón hasta lograr una crema. Extiende el aguacate sobre las tostadas, coloca encima las lonchas de pavo y remata con el tomate en rodajas finas. Un toque de pimienta negra y listo para comer.",
+  { id:"dm_avena", name:"Bowl de avena proteico", grupo:"desayuno_merienda", emoji:"ðŸ¥£", desc:"Pon la avena en un cazo con agua o leche y cuÃ©cela a fuego medio 3-4 minutos removiendo hasta que espese. PÃ¡sala a un bol y deja templar un par de minutos. AÃ±ade el yogur griego por encima, coloca el plÃ¡tano cortado en rodajas y termina con un hilo de crema de cacahuete. Remueve ligeramente antes de comer para integrar los sabores.",
+    ingredients:[{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:60 },{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:150 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:80 },{ name:"Crema de cacahuete", kcal:588, p:25, g:50, c:20, base:15 }] },
+  { id:"dm_tostadas_pavo", name:"Tostadas de pavo y aguacate", grupo:"desayuno_merienda", emoji:"ðŸ¥‘", desc:"Tuesta las rebanadas de pan hasta que estÃ©n doradas y crujientes. Mientras, machaca el aguacate en un bol con un poco de sal y unas gotas de limÃ³n hasta lograr una crema. Extiende el aguacate sobre las tostadas, coloca encima las lonchas de pavo y remata con el tomate en rodajas finas. Un toque de pimienta negra y listo para comer.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:80 },{ name:"Pechuga de pavo", kcal:135, p:29, g:2, c:0, base:80 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:50 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:50 }] },
-  { id:"dm_huevos", name:"Huevos revueltos con tostada", grupo:"desayuno_merienda", emoji:"🍳", desc:"Casca los huevos en un bol junto con las claras y bátelos bien con una pizca de sal. Calienta una sartén antiadherente a fuego medio con unas gotas de aceite y vierte el huevo. Remueve constantemente con una espátula para que quede cremoso y no se reseque, retirándolo cuando aún esté algo jugoso. Acompaña con el pan tostado.",
+  { id:"dm_huevos", name:"Huevos revueltos con tostada", grupo:"desayuno_merienda", emoji:"ðŸ³", desc:"Casca los huevos en un bol junto con las claras y bÃ¡telos bien con una pizca de sal. Calienta una sartÃ©n antiadherente a fuego medio con unas gotas de aceite y vierte el huevo. Remueve constantemente con una espÃ¡tula para que quede cremoso y no se reseque, retirÃ¡ndolo cuando aÃºn estÃ© algo jugoso. AcompaÃ±a con el pan tostado.",
     ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 },{ name:"Clara de huevo", kcal:52, p:11, g:0, c:1, base:100 },{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:60 }] },
-  { id:"dm_yogur_granola", name:"Yogur con granola y fruta", grupo:"desayuno_merienda", emoji:"🥛", desc:"Vierte el yogur en un bol amplio. Añade la granola por encima repartida de forma uniforme para que quede crujiente. Lava y corta las fresas en cuartos y repártelas junto con los arándanos. Si quieres un toque dulce extra, añade un hilo de miel. Come inmediatamente para que la granola no se reblandezca.",
-    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:200 },{ name:"Granola", kcal:480, p:10, g:20, c:60, base:40 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 },{ name:"Arándanos", kcal:57, p:1, g:0, c:14, base:40 }] },
-  { id:"dm_tortitas", name:"Tortitas de avena y plátano", grupo:"desayuno_merienda", emoji:"🥞", desc:"Tritura el plátano con un tenedor hasta hacer un puré. Mézclalo en un bol con la avena, los huevos y una pizca de canela hasta obtener una masa homogénea. Calienta una sartén antiadherente a fuego medio y vierte pequeñas porciones formando tortitas. Cocina 1-2 minutos por cada lado hasta que doren. Sirve apiladas con un hilo de miel.",
-    ingredients:[{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:50 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:100 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:15 }] },
-  { id:"dm_tostada_tomate", name:"Tostada de tomate y aceite", grupo:"desayuno_merienda", emoji:"🍅", desc:"Tuesta el pan hasta que esté crujiente. Ralla el tomate maduro con un rallador y descarta la piel. Reparte el tomate rallado sobre la tostada, riega con un hilo de aceite de oliva virgen extra y añade una pizca de sal. Si quieres más proteína, acompaña con unas lonchas de pavo o jamón.",
+  { id:"dm_yogur_granola", name:"Yogur con granola y fruta", grupo:"desayuno_merienda", emoji:"ðŸ¥›", desc:"Vierte el yogur en un bol amplio. AÃ±ade la granola por encima repartida de forma uniforme para que quede crujiente. Lava y corta las fresas en cuartos y repÃ¡rtelas junto con los arÃ¡ndanos. Si quieres un toque dulce extra, aÃ±ade un hilo de miel. Come inmediatamente para que la granola no se reblandezca.",
+    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:200 },{ name:"Granola", kcal:480, p:10, g:20, c:60, base:40 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 },{ name:"ArÃ¡ndanos", kcal:57, p:1, g:0, c:14, base:40 }] },
+  { id:"dm_tortitas", name:"Tortitas de avena y plÃ¡tano", grupo:"desayuno_merienda", emoji:"ðŸ¥ž", desc:"Tritura el plÃ¡tano con un tenedor hasta hacer un purÃ©. MÃ©zclalo en un bol con la avena, los huevos y una pizca de canela hasta obtener una masa homogÃ©nea. Calienta una sartÃ©n antiadherente a fuego medio y vierte pequeÃ±as porciones formando tortitas. Cocina 1-2 minutos por cada lado hasta que doren. Sirve apiladas con un hilo de miel.",
+    ingredients:[{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:50 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:100 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:15 }] },
+  { id:"dm_tostada_tomate", name:"Tostada de tomate y aceite", grupo:"desayuno_merienda", emoji:"ðŸ…", desc:"Tuesta el pan hasta que estÃ© crujiente. Ralla el tomate maduro con un rallador y descarta la piel. Reparte el tomate rallado sobre la tostada, riega con un hilo de aceite de oliva virgen extra y aÃ±ade una pizca de sal. Si quieres mÃ¡s proteÃ­na, acompaÃ±a con unas lonchas de pavo o jamÃ³n.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:100 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 },{ name:"Pechuga de pavo", kcal:135, p:29, g:2, c:0, base:60 }] },
-  { id:"dm_batido_proteico", name:"Batido proteico de plátano", grupo:"desayuno_merienda", emoji:"🥤", desc:"Pela el plátano y trocéalo. Ponlo en la batidora junto con la leche, el yogur y la crema de cacahuete. Bate a velocidad alta hasta obtener una textura cremosa y sin grumos. Si lo prefieres más frío y espeso, añade unos cubitos de hielo y vuelve a batir. Sirve recién hecho.",
-    ingredients:[{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:120 },{ name:"Leche", kcal:46, p:3, g:2, c:5, base:200 },{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:100 },{ name:"Crema de cacahuete", kcal:588, p:25, g:50, c:20, base:15 }] },
-  { id:"dm_pan_quesofresco", name:"Pan con queso fresco y pavo", grupo:"desayuno_merienda", emoji:"🧀", desc:"Tuesta ligeramente el pan. Extiende el queso fresco batido sobre las rebanadas formando una capa uniforme. Coloca encima las lonchas de pavo dobladas y unas rodajas de tomate. Salpimienta al gusto y añade un hilo de aceite si lo deseas.",
+  { id:"dm_batido_proteico", name:"Batido proteico de plÃ¡tano", grupo:"desayuno_merienda", emoji:"ðŸ¥¤", desc:"Pela el plÃ¡tano y trocÃ©alo. Ponlo en la batidora junto con la leche, el yogur y la crema de cacahuete. Bate a velocidad alta hasta obtener una textura cremosa y sin grumos. Si lo prefieres mÃ¡s frÃ­o y espeso, aÃ±ade unos cubitos de hielo y vuelve a batir. Sirve reciÃ©n hecho.",
+    ingredients:[{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:120 },{ name:"Leche", kcal:46, p:3, g:2, c:5, base:200 },{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:100 },{ name:"Crema de cacahuete", kcal:588, p:25, g:50, c:20, base:15 }] },
+  { id:"dm_pan_quesofresco", name:"Pan con queso fresco y pavo", grupo:"desayuno_merienda", emoji:"ðŸ§€", desc:"Tuesta ligeramente el pan. Extiende el queso fresco batido sobre las rebanadas formando una capa uniforme. Coloca encima las lonchas de pavo dobladas y unas rodajas de tomate. Salpimienta al gusto y aÃ±ade un hilo de aceite si lo deseas.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:80 },{ name:"Queso fresco batido", kcal:60, p:11, g:0, c:4, base:80 },{ name:"Pechuga de pavo", kcal:135, p:29, g:2, c:0, base:80 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:50 }] },
-  { id:"dm_porridge", name:"Porridge de avena con frutos rojos", grupo:"desayuno_merienda", emoji:"🫐", desc:"Calienta la leche en un cazo y, cuando empiece a humear, añade la avena. Cuece a fuego medio-bajo removiendo durante 5 minutos hasta que quede cremoso. Retira del fuego, deja reposar un minuto y sírvelo en un bol. Corona con los arándanos y las fresas troceadas y un toque de miel.",
-    ingredients:[{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:60 },{ name:"Leche", kcal:46, p:3, g:2, c:5, base:200 },{ name:"Arándanos", kcal:57, p:1, g:0, c:14, base:60 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:60 }] },
-  { id:"dm_yogur_nueces", name:"Yogur con nueces y miel", grupo:"desayuno_merienda", emoji:"🍯", desc:"Vierte el yogur en un bol. Trocea las nueces ligeramente con las manos y repártelas por encima. Añade un hilo generoso de miel y, si quieres, un poco de canela. Remueve y disfruta como desayuno o merienda saciante.",
-    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:200 },{ name:"Nueces", kcal:654, p:15, g:65, c:14, base:25 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:15 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:80 }] },
-  { id:"dm_tostada_aguacate_huevo", name:"Tostada de aguacate y huevo", grupo:"desayuno_merienda", emoji:"🥚", desc:"Cuece el huevo en agua hirviendo 7 minutos para que quede con la yema algo jugosa, o fríelo a la plancha. Tuesta el pan y extiende el aguacate machacado con sal y limón. Coloca el huevo encima, parte la yema y salpimienta. Un desayuno completo y saciante.",
+  { id:"dm_porridge", name:"Porridge de avena con frutos rojos", grupo:"desayuno_merienda", emoji:"ðŸ«", desc:"Calienta la leche en un cazo y, cuando empiece a humear, aÃ±ade la avena. Cuece a fuego medio-bajo removiendo durante 5 minutos hasta que quede cremoso. Retira del fuego, deja reposar un minuto y sÃ­rvelo en un bol. Corona con los arÃ¡ndanos y las fresas troceadas y un toque de miel.",
+    ingredients:[{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:60 },{ name:"Leche", kcal:46, p:3, g:2, c:5, base:200 },{ name:"ArÃ¡ndanos", kcal:57, p:1, g:0, c:14, base:60 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:60 }] },
+  { id:"dm_yogur_nueces", name:"Yogur con nueces y miel", grupo:"desayuno_merienda", emoji:"ðŸ¯", desc:"Vierte el yogur en un bol. Trocea las nueces ligeramente con las manos y repÃ¡rtelas por encima. AÃ±ade un hilo generoso de miel y, si quieres, un poco de canela. Remueve y disfruta como desayuno o merienda saciante.",
+    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:200 },{ name:"Nueces", kcal:654, p:15, g:65, c:14, base:25 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:15 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:80 }] },
+  { id:"dm_tostada_aguacate_huevo", name:"Tostada de aguacate y huevo", grupo:"desayuno_merienda", emoji:"ðŸ¥š", desc:"Cuece el huevo en agua hirviendo 7 minutos para que quede con la yema algo jugosa, o frÃ­elo a la plancha. Tuesta el pan y extiende el aguacate machacado con sal y limÃ³n. Coloca el huevo encima, parte la yema y salpimienta. Un desayuno completo y saciante.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:80 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:60 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:50 }] },
-  { id:"dm_smoothie_bowl", name:"Smoothie bowl de frutas", grupo:"desayuno_merienda", emoji:"🍓", desc:"Tritura el plátano congelado con los frutos rojos y un poco de yogur hasta lograr una crema espesa tipo helado. Viértelo en un bol y decora con granola, rodajas de fruta fresca y un hilo de crema de cacahuete. Cómelo con cuchara inmediatamente.",
-    ingredients:[{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 },{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:100 },{ name:"Granola", kcal:480, p:10, g:20, c:60, base:30 }] },
-  { id:"dm_requeson", name:"Requesón con fruta y miel", grupo:"desayuno_merienda", emoji:"🥝", desc:"Pon el requesón en un bol. Pela y trocea el kiwi y añádelo junto con la manzana en dados. Riega con un poco de miel y espolvorea unas almendras laminadas. Una opción rica en proteína ideal para merienda.",
-    ingredients:[{ name:"Requesón", kcal:98, p:11, g:4, c:3, base:200 },{ name:"Kiwi", kcal:61, p:1, g:1, c:15, base:80 },{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:80 },{ name:"Almendras", kcal:579, p:21, g:50, c:22, base:15 }] },
-  { id:"dm_tortilla_francesa_pan", name:"Tortilla francesa en pan", grupo:"desayuno_merienda", emoji:"🍞", desc:"Bate los huevos con las claras y una pizca de sal. Cuájalos en una sartén antiadherente formando una tortilla francesa fina. Tuesta el pan, coloca la tortilla dentro a modo de bocadillo y añade unas rodajas de tomate. Cierra y disfruta.",
+  { id:"dm_smoothie_bowl", name:"Smoothie bowl de frutas", grupo:"desayuno_merienda", emoji:"ðŸ“", desc:"Tritura el plÃ¡tano congelado con los frutos rojos y un poco de yogur hasta lograr una crema espesa tipo helado. ViÃ©rtelo en un bol y decora con granola, rodajas de fruta fresca y un hilo de crema de cacahuete. CÃ³melo con cuchara inmediatamente.",
+    ingredients:[{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 },{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:100 },{ name:"Granola", kcal:480, p:10, g:20, c:60, base:30 }] },
+  { id:"dm_requeson", name:"RequesÃ³n con fruta y miel", grupo:"desayuno_merienda", emoji:"ðŸ¥", desc:"Pon el requesÃ³n en un bol. Pela y trocea el kiwi y aÃ±Ã¡delo junto con la manzana en dados. Riega con un poco de miel y espolvorea unas almendras laminadas. Una opciÃ³n rica en proteÃ­na ideal para merienda.",
+    ingredients:[{ name:"RequesÃ³n", kcal:98, p:11, g:4, c:3, base:200 },{ name:"Kiwi", kcal:61, p:1, g:1, c:15, base:80 },{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:80 },{ name:"Almendras", kcal:579, p:21, g:50, c:22, base:15 }] },
+  { id:"dm_tortilla_francesa_pan", name:"Tortilla francesa en pan", grupo:"desayuno_merienda", emoji:"ðŸž", desc:"Bate los huevos con las claras y una pizca de sal. CuÃ¡jalos en una sartÃ©n antiadherente formando una tortilla francesa fina. Tuesta el pan, coloca la tortilla dentro a modo de bocadillo y aÃ±ade unas rodajas de tomate. Cierra y disfruta.",
     ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:100 },{ name:"Clara de huevo", kcal:52, p:11, g:0, c:1, base:100 },{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:80 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:40 }] },
-  { id:"dm_avena_choco", name:"Avena con chocolate y plátano", grupo:"desayuno_merienda", emoji:"🍫", desc:"Cuece la avena con la leche removiendo hasta que espese. Fuera del fuego, ralla un poco de chocolate negro 85% y mézclalo para que se funda con el calor. Sirve en un bol con el plátano en rodajas por encima.",
-    ingredients:[{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:60 },{ name:"Leche", kcal:46, p:3, g:2, c:5, base:200 },{ name:"Chocolate negro 85%", kcal:600, p:8, g:46, c:34, base:15 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:80 }] },
-  { id:"dm_kefir_fruta", name:"Kéfir con fruta y avena", grupo:"desayuno_merienda", emoji:"🥥", desc:"Sirve el kéfir en un bol. Añade la avena en copos en crudo, que se ablandará ligeramente, y reparte la fruta troceada por encima. Deja reposar 5 minutos si lo prefieres más cremoso. Opción muy digestiva y probiótica.",
-    ingredients:[{ name:"Kéfir", kcal:60, p:3, g:3, c:4, base:200 },{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:40 },{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:80 },{ name:"Arándanos", kcal:57, p:1, g:0, c:14, base:40 }] },
-  { id:"dm_sandwich_pavo", name:"Sándwich de pavo y queso", grupo:"desayuno_merienda", emoji:"🥪", desc:"Tuesta ligeramente el pan. Monta el sándwich con las lonchas de pavo, el queso fresco y unas rodajas de tomate y lechuga. Aplasta un poco y, si quieres, dale un golpe de sartén para que el queso se funda. Práctico para llevar.",
+  { id:"dm_avena_choco", name:"Avena con chocolate y plÃ¡tano", grupo:"desayuno_merienda", emoji:"ðŸ«", desc:"Cuece la avena con la leche removiendo hasta que espese. Fuera del fuego, ralla un poco de chocolate negro 85% y mÃ©zclalo para que se funda con el calor. Sirve en un bol con el plÃ¡tano en rodajas por encima.",
+    ingredients:[{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:60 },{ name:"Leche", kcal:46, p:3, g:2, c:5, base:200 },{ name:"Chocolate negro 85%", kcal:600, p:8, g:46, c:34, base:15 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:80 }] },
+  { id:"dm_kefir_fruta", name:"KÃ©fir con fruta y avena", grupo:"desayuno_merienda", emoji:"ðŸ¥¥", desc:"Sirve el kÃ©fir en un bol. AÃ±ade la avena en copos en crudo, que se ablandarÃ¡ ligeramente, y reparte la fruta troceada por encima. Deja reposar 5 minutos si lo prefieres mÃ¡s cremoso. OpciÃ³n muy digestiva y probiÃ³tica.",
+    ingredients:[{ name:"KÃ©fir", kcal:60, p:3, g:3, c:4, base:200 },{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:40 },{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:80 },{ name:"ArÃ¡ndanos", kcal:57, p:1, g:0, c:14, base:40 }] },
+  { id:"dm_sandwich_pavo", name:"SÃ¡ndwich de pavo y queso", grupo:"desayuno_merienda", emoji:"ðŸ¥ª", desc:"Tuesta ligeramente el pan. Monta el sÃ¡ndwich con las lonchas de pavo, el queso fresco y unas rodajas de tomate y lechuga. Aplasta un poco y, si quieres, dale un golpe de sartÃ©n para que el queso se funda. PrÃ¡ctico para llevar.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:80 },{ name:"Pechuga de pavo", kcal:135, p:29, g:2, c:0, base:80 },{ name:"Queso fresco batido", kcal:60, p:11, g:0, c:4, base:40 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:30 }] },
-  { id:"dm_crepes_avena", name:"Crepes de avena rellenos", grupo:"desayuno_merienda", emoji:"🥯", desc:"Tritura la avena con los huevos y un poco de leche hasta tener una masa líquida. Vierte un poco en una sartén caliente y extiende formando un crep fino. Cocina por ambos lados. Rellena con queso fresco y fruta, enrolla y sirve.",
+  { id:"dm_crepes_avena", name:"Crepes de avena rellenos", grupo:"desayuno_merienda", emoji:"ðŸ¥¯", desc:"Tritura la avena con los huevos y un poco de leche hasta tener una masa lÃ­quida. Vierte un poco en una sartÃ©n caliente y extiende formando un crep fino. Cocina por ambos lados. Rellena con queso fresco y fruta, enrolla y sirve.",
     ingredients:[{ name:"Avena en copos", kcal:370, p:13, g:7, c:63, base:40 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:100 },{ name:"Queso fresco batido", kcal:60, p:11, g:0, c:4, base:80 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 }] },
-  { id:"dm_yogur_platano_almendra", name:"Yogur con plátano y almendras", grupo:"desayuno_merienda", emoji:"🥜", desc:"Vierte el yogur en un bol y añade el plátano en rodajas. Reparte las almendras troceadas por encima y un hilo de miel. Una merienda rápida, saciante y rica en grasas saludables.",
-    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:200 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Almendras", kcal:579, p:21, g:50, c:22, base:20 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:10 }] },
-  { id:"dm_tostada_mantequilla", name:"Tostada con crema de cacahuete y plátano", grupo:"desayuno_merienda", emoji:"🍌", desc:"Tuesta el pan. Extiende una capa de crema de cacahuete y coloca el plátano en rodajas por encima. Espolvorea un poco de canela y, si quieres, un hilo de miel. Energética e ideal antes de entrenar.",
-    ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:80 },{ name:"Crema de cacahuete", kcal:588, p:25, g:50, c:20, base:20 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:10 }] },
-  { id:"dm_bowl_quesobatido", name:"Bowl de queso batido y frutos secos", grupo:"desayuno_merienda", emoji:"🫙", desc:"Pon el queso batido en un bol. Añade los arándanos, unas nueces troceadas y un poco de granola para dar crujiente. Termina con un hilo de miel. Muy alto en proteína para merienda.",
-    ingredients:[{ name:"Queso batido 0%", kcal:60, p:11, g:0, c:4, base:200 },{ name:"Arándanos", kcal:57, p:1, g:0, c:14, base:60 },{ name:"Nueces", kcal:654, p:15, g:65, c:14, base:20 },{ name:"Granola", kcal:480, p:10, g:20, c:60, base:25 }] },
-  { id:"dm_pan_aguacate_pavo", name:"Pan con aguacate, pavo y huevo", grupo:"desayuno_merienda", emoji:"🥗", desc:"Tuesta el pan y extiende el aguacate machacado. Coloca el pavo y un huevo a la plancha encima. Salpimienta y añade tomate. Un desayuno completo con proteína, grasa buena e hidratos.",
+  { id:"dm_yogur_platano_almendra", name:"Yogur con plÃ¡tano y almendras", grupo:"desayuno_merienda", emoji:"ðŸ¥œ", desc:"Vierte el yogur en un bol y aÃ±ade el plÃ¡tano en rodajas. Reparte las almendras troceadas por encima y un hilo de miel. Una merienda rÃ¡pida, saciante y rica en grasas saludables.",
+    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:200 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Almendras", kcal:579, p:21, g:50, c:22, base:20 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:10 }] },
+  { id:"dm_tostada_mantequilla", name:"Tostada con crema de cacahuete y plÃ¡tano", grupo:"desayuno_merienda", emoji:"ðŸŒ", desc:"Tuesta el pan. Extiende una capa de crema de cacahuete y coloca el plÃ¡tano en rodajas por encima. Espolvorea un poco de canela y, si quieres, un hilo de miel. EnergÃ©tica e ideal antes de entrenar.",
+    ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:80 },{ name:"Crema de cacahuete", kcal:588, p:25, g:50, c:20, base:20 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:10 }] },
+  { id:"dm_bowl_quesobatido", name:"Bowl de queso batido y frutos secos", grupo:"desayuno_merienda", emoji:"ðŸ«™", desc:"Pon el queso batido en un bol. AÃ±ade los arÃ¡ndanos, unas nueces troceadas y un poco de granola para dar crujiente. Termina con un hilo de miel. Muy alto en proteÃ­na para merienda.",
+    ingredients:[{ name:"Queso batido 0%", kcal:60, p:11, g:0, c:4, base:200 },{ name:"ArÃ¡ndanos", kcal:57, p:1, g:0, c:14, base:60 },{ name:"Nueces", kcal:654, p:15, g:65, c:14, base:20 },{ name:"Granola", kcal:480, p:10, g:20, c:60, base:25 }] },
+  { id:"dm_pan_aguacate_pavo", name:"Pan con aguacate, pavo y huevo", grupo:"desayuno_merienda", emoji:"ðŸ¥—", desc:"Tuesta el pan y extiende el aguacate machacado. Coloca el pavo y un huevo a la plancha encima. Salpimienta y aÃ±ade tomate. Un desayuno completo con proteÃ­na, grasa buena e hidratos.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:80 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:50 },{ name:"Pechuga de pavo", kcal:135, p:29, g:2, c:0, base:60 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:60 }] },
-  { id:"dm_macedonia", name:"Macedonia con yogur", grupo:"desayuno_merienda", emoji:"🍉", desc:"Lava y trocea la manzana, el kiwi y las fresas en dados pequeños. Mézclalos en un bol y añade el yogur por encima. Remata con unas almendras laminadas. Fresco y ligero para merienda.",
+  { id:"dm_macedonia", name:"Macedonia con yogur", grupo:"desayuno_merienda", emoji:"ðŸ‰", desc:"Lava y trocea la manzana, el kiwi y las fresas en dados pequeÃ±os. MÃ©zclalos en un bol y aÃ±ade el yogur por encima. Remata con unas almendras laminadas. Fresco y ligero para merienda.",
     ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:150 },{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:100 },{ name:"Kiwi", kcal:61, p:1, g:1, c:15, base:80 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 }] },
-  { id:"dm_gachas_quinoa", name:"Gachas de quinoa con fruta", grupo:"desayuno_merienda", emoji:"🌾", desc:"Cuece la quinoa en la leche a fuego medio unos 12 minutos hasta que absorba el líquido y quede cremosa. Sirve en bol con el plátano en rodajas y unos arándanos. Alternativa sin gluten a la avena.",
-    ingredients:[{ name:"Quinoa (seca)", kcal:368, p:14, g:6, c:64, base:50 },{ name:"Leche", kcal:46, p:3, g:2, c:5, base:200 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:80 },{ name:"Arándanos", kcal:57, p:1, g:0, c:14, base:40 }] },
-  { id:"dm_tostada_hummus", name:"Tostada de hummus y pavo", grupo:"desayuno_merienda", emoji:"🧆", desc:"Tuesta el pan. Extiende una capa generosa de hummus y coloca encima las lonchas de pavo y unas rodajas de tomate. Un toque de pimienta y aceite. Opción vegetal y saciante.",
+  { id:"dm_gachas_quinoa", name:"Gachas de quinoa con fruta", grupo:"desayuno_merienda", emoji:"ðŸŒ¾", desc:"Cuece la quinoa en la leche a fuego medio unos 12 minutos hasta que absorba el lÃ­quido y quede cremosa. Sirve en bol con el plÃ¡tano en rodajas y unos arÃ¡ndanos. Alternativa sin gluten a la avena.",
+    ingredients:[{ name:"Quinoa (seca)", kcal:368, p:14, g:6, c:64, base:50 },{ name:"Leche", kcal:46, p:3, g:2, c:5, base:200 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:80 },{ name:"ArÃ¡ndanos", kcal:57, p:1, g:0, c:14, base:40 }] },
+  { id:"dm_tostada_hummus", name:"Tostada de hummus y pavo", grupo:"desayuno_merienda", emoji:"ðŸ§†", desc:"Tuesta el pan. Extiende una capa generosa de hummus y coloca encima las lonchas de pavo y unas rodajas de tomate. Un toque de pimienta y aceite. OpciÃ³n vegetal y saciante.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:80 },{ name:"Hummus", kcal:177, p:5, g:10, c:17, base:60 },{ name:"Pechuga de pavo", kcal:135, p:29, g:2, c:0, base:60 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:50 }] },
-  { id:"ac_pollo_arroz", name:"Pollo con arroz y verduras", grupo:"almuerzo_cena", emoji:"🍗", desc:"Cuece el arroz en abundante agua con sal el tiempo que indique el paquete y escúrrelo. Salpimienta el pollo en dados y márcalo en una sartén con unas gotas de aceite hasta que dore por todos lados. Saltea el brócoli al vapor o en la misma sartén. Mezcla todo, riega con el aceite restante y sirve caliente.",
-    ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Arroz blanco (seco)", kcal:360, p:7, g:1, c:80, base:70 },{ name:"Brócoli", kcal:34, p:3, g:0, c:7, base:150 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_pasta_ternera", name:"Pasta con ternera y tomate", grupo:"almuerzo_cena", emoji:"🍝", desc:"Cuece la pasta al dente en agua con sal. Mientras, saltea la ternera picada en una sartén con un poco de aceite hasta que pierda el color rojo. Añade el tomate triturado y deja reducir 8-10 minutos a fuego medio con sal y orégano. Mezcla la salsa con la pasta escurrida y sirve.",
+  { id:"ac_pollo_arroz", name:"Pollo con arroz y verduras", grupo:"almuerzo_cena", emoji:"ðŸ—", desc:"Cuece el arroz en abundante agua con sal el tiempo que indique el paquete y escÃºrrelo. Salpimienta el pollo en dados y mÃ¡rcalo en una sartÃ©n con unas gotas de aceite hasta que dore por todos lados. Saltea el brÃ³coli al vapor o en la misma sartÃ©n. Mezcla todo, riega con el aceite restante y sirve caliente.",
+    ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Arroz blanco (seco)", kcal:360, p:7, g:1, c:80, base:70 },{ name:"BrÃ³coli", kcal:34, p:3, g:0, c:7, base:150 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 }] },
+  { id:"ac_pasta_ternera", name:"Pasta con ternera y tomate", grupo:"almuerzo_cena", emoji:"ðŸ", desc:"Cuece la pasta al dente en agua con sal. Mientras, saltea la ternera picada en una sartÃ©n con un poco de aceite hasta que pierda el color rojo. AÃ±ade el tomate triturado y deja reducir 8-10 minutos a fuego medio con sal y orÃ©gano. Mezcla la salsa con la pasta escurrida y sirve.",
     ingredients:[{ name:"Pasta (seca)", kcal:358, p:12, g:1, c:72, base:80 },{ name:"Ternera molida 5%", kcal:137, p:21, g:5, c:0, base:130 },{ name:"Tomate natural", kcal:18, p:1, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
-  { id:"ac_salmon_patata", name:"Salmón al horno con patata", grupo:"almuerzo_cena", emoji:"🐟", desc:"Precalienta el horno a 200°C. Coloca el salmón en una bandeja con sal, pimienta y un hilo de aceite, y hornéalo 12-15 minutos. Mientras, cuece o asa la patata en dados. Sirve el salmón con la patata y una ensalada de lechuga aliñada.",
-    ingredients:[{ name:"Salmón fresco", kcal:208, p:20, g:13, c:0, base:150 },{ name:"Patata (cruda)", kcal:77, p:2, g:0, c:17, base:200 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:80 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
-  { id:"ac_lentejas", name:"Lentejas estofadas con verduras", grupo:"almuerzo_cena", emoji:"🍲", desc:"Pica la cebolla y la zanahoria y sofríelas en una olla con el aceite hasta que ablanden. Añade las lentejas y cúbrelas con agua. Cuece a fuego medio unos 25-30 minutos hasta que estén tiernas, añadiendo agua si hace falta. Salpimienta al final y deja reposar antes de servir.",
+  { id:"ac_salmon_patata", name:"SalmÃ³n al horno con patata", grupo:"almuerzo_cena", emoji:"ðŸŸ", desc:"Precalienta el horno a 200Â°C. Coloca el salmÃ³n en una bandeja con sal, pimienta y un hilo de aceite, y hornÃ©alo 12-15 minutos. Mientras, cuece o asa la patata en dados. Sirve el salmÃ³n con la patata y una ensalada de lechuga aliÃ±ada.",
+    ingredients:[{ name:"SalmÃ³n fresco", kcal:208, p:20, g:13, c:0, base:150 },{ name:"Patata (cruda)", kcal:77, p:2, g:0, c:17, base:200 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:80 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
+  { id:"ac_lentejas", name:"Lentejas estofadas con verduras", grupo:"almuerzo_cena", emoji:"ðŸ²", desc:"Pica la cebolla y la zanahoria y sofrÃ­elas en una olla con el aceite hasta que ablanden. AÃ±ade las lentejas y cÃºbrelas con agua. Cuece a fuego medio unos 25-30 minutos hasta que estÃ©n tiernas, aÃ±adiendo agua si hace falta. Salpimienta al final y deja reposar antes de servir.",
     ingredients:[{ name:"Lentejas (secas)", kcal:336, p:24, g:1, c:60, base:80 },{ name:"Zanahoria", kcal:41, p:1, g:0, c:10, base:60 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:50 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_pavo_boniato", name:"Pavo con boniato asado", grupo:"almuerzo_cena", emoji:"🍠", desc:"Precalienta el horno a 200°C. Corta el boniato en dados, alíñalo con aceite y sal y ásalo 25 minutos. Salpimienta el pavo y márcalo a la plancha hasta que esté hecho. Saltea los espárragos. Sirve todo junto.",
-    ingredients:[{ name:"Pechuga de pavo", kcal:135, p:29, g:2, c:0, base:160 },{ name:"Boniato (crudo)", kcal:86, p:2, g:0, c:20, base:180 },{ name:"Espárragos", kcal:20, p:2, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
-  { id:"ac_merluza_horno", name:"Merluza al horno con verduras", grupo:"almuerzo_cena", emoji:"🐠", desc:"Precalienta el horno a 190°C. Coloca la merluza en una bandeja rodeada del calabacín y el pimiento en rodajas. Riega con aceite, sal y un poco de limón. Hornea 15 minutos hasta que el pescado esté jugoso. Sirve en la misma bandeja.",
-    ingredients:[{ name:"Merluza", kcal:80, p:17, g:2, c:0, base:200 },{ name:"Calabacín", kcal:17, p:1, g:0, c:3, base:150 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
-  { id:"ac_tortilla_ensalada", name:"Tortilla francesa con ensalada", grupo:"almuerzo_cena", emoji:"🍳", desc:"Bate los huevos con las claras y una pizca de sal. Cuaja la tortilla en una sartén antiadherente al gusto. Mientras, prepara una ensalada con lechuga y tomate aliñada con aceite y sal. Sirve la tortilla junto a la ensalada.",
+  { id:"ac_pavo_boniato", name:"Pavo con boniato asado", grupo:"almuerzo_cena", emoji:"ðŸ ", desc:"Precalienta el horno a 200Â°C. Corta el boniato en dados, alÃ­Ã±alo con aceite y sal y Ã¡salo 25 minutos. Salpimienta el pavo y mÃ¡rcalo a la plancha hasta que estÃ© hecho. Saltea los espÃ¡rragos. Sirve todo junto.",
+    ingredients:[{ name:"Pechuga de pavo", kcal:135, p:29, g:2, c:0, base:160 },{ name:"Boniato (crudo)", kcal:86, p:2, g:0, c:20, base:180 },{ name:"EspÃ¡rragos", kcal:20, p:2, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
+  { id:"ac_merluza_horno", name:"Merluza al horno con verduras", grupo:"almuerzo_cena", emoji:"ðŸ ", desc:"Precalienta el horno a 190Â°C. Coloca la merluza en una bandeja rodeada del calabacÃ­n y el pimiento en rodajas. Riega con aceite, sal y un poco de limÃ³n. Hornea 15 minutos hasta que el pescado estÃ© jugoso. Sirve en la misma bandeja.",
+    ingredients:[{ name:"Merluza", kcal:80, p:17, g:2, c:0, base:200 },{ name:"CalabacÃ­n", kcal:17, p:1, g:0, c:3, base:150 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
+  { id:"ac_tortilla_ensalada", name:"Tortilla francesa con ensalada", grupo:"almuerzo_cena", emoji:"ðŸ³", desc:"Bate los huevos con las claras y una pizca de sal. Cuaja la tortilla en una sartÃ©n antiadherente al gusto. Mientras, prepara una ensalada con lechuga y tomate aliÃ±ada con aceite y sal. Sirve la tortilla junto a la ensalada.",
     ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:150 },{ name:"Clara de huevo", kcal:52, p:11, g:0, c:1, base:100 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:80 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:80 }] },
-  { id:"ac_atun_ensalada", name:"Ensalada de atún y huevo", grupo:"almuerzo_cena", emoji:"🥗", desc:"Cuece el huevo 10 minutos, enfríalo, pélalo y trocéalo. Escurre el atún. En un bol grande mezcla la lechuga, el maíz, el tomate, el atún y el huevo. Aliña con aceite, sal y vinagre. Una cena ligera y proteica.",
-    ingredients:[{ name:"Atún en conserva", kcal:116, p:26, g:1, c:0, base:120 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:60 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:100 },{ name:"Maíz dulce", kcal:86, p:3, g:1, c:19, base:50 }] },
-  { id:"ac_wrap_pollo", name:"Wrap de pollo y verduras", grupo:"almuerzo_cena", emoji:"🌯", desc:"Marca el pollo en tiras a la plancha con sal. Calienta la tortilla de trigo unos segundos por cada lado. Rellénala con el pollo, la lechuga y el tomate en tiras. Añade un poco de salsa de yogur si quieres, enrolla apretando y corta por la mitad.",
+  { id:"ac_atun_ensalada", name:"Ensalada de atÃºn y huevo", grupo:"almuerzo_cena", emoji:"ðŸ¥—", desc:"Cuece el huevo 10 minutos, enfrÃ­alo, pÃ©lalo y trocÃ©alo. Escurre el atÃºn. En un bol grande mezcla la lechuga, el maÃ­z, el tomate, el atÃºn y el huevo. AliÃ±a con aceite, sal y vinagre. Una cena ligera y proteica.",
+    ingredients:[{ name:"AtÃºn en conserva", kcal:116, p:26, g:1, c:0, base:120 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:60 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:100 },{ name:"MaÃ­z dulce", kcal:86, p:3, g:1, c:19, base:50 }] },
+  { id:"ac_wrap_pollo", name:"Wrap de pollo y verduras", grupo:"almuerzo_cena", emoji:"ðŸŒ¯", desc:"Marca el pollo en tiras a la plancha con sal. Calienta la tortilla de trigo unos segundos por cada lado. RellÃ©nala con el pollo, la lechuga y el tomate en tiras. AÃ±ade un poco de salsa de yogur si quieres, enrolla apretando y corta por la mitad.",
     ingredients:[{ name:"Tortilla de trigo", kcal:287, p:8, g:5, c:55, base:80 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:120 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:40 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:50 }] },
-  { id:"ac_arroz_gambas", name:"Arroz salteado con gambas", grupo:"almuerzo_cena", emoji:"🍤", desc:"Cuece el arroz y escúrrelo. Saltea las gambas peladas en una sartén bien caliente con un poco de aceite y ajo. Añade el pimiento en tiras y saltea. Incorpora el arroz y saltea todo junto un par de minutos a fuego fuerte. Sirve enseguida.",
+  { id:"ac_arroz_gambas", name:"Arroz salteado con gambas", grupo:"almuerzo_cena", emoji:"ðŸ¤", desc:"Cuece el arroz y escÃºrrelo. Saltea las gambas peladas en una sartÃ©n bien caliente con un poco de aceite y ajo. AÃ±ade el pimiento en tiras y saltea. Incorpora el arroz y saltea todo junto un par de minutos a fuego fuerte. Sirve enseguida.",
     ingredients:[{ name:"Arroz blanco (seco)", kcal:360, p:7, g:1, c:80, base:70 },{ name:"Gambas", kcal:85, p:18, g:1, c:0, base:150 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_bacalao_verduras", name:"Bacalao con verduras al horno", grupo:"almuerzo_cena", emoji:"🐡", desc:"Precalienta el horno a 190°C. Coloca el bacalao desalado sobre una cama de calabacín y cebolla en rodajas. Riega con aceite y sal y hornea 15-18 minutos. El pescado debe quedar jugoso y las verduras tiernas.",
-    ingredients:[{ name:"Bacalao", kcal:82, p:18, g:1, c:0, base:200 },{ name:"Calabacín", kcal:17, p:1, g:0, c:3, base:150 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:60 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
-  { id:"ac_cerdo_quinoa", name:"Solomillo de cerdo con quinoa", grupo:"almuerzo_cena", emoji:"🥩", desc:"Cuece la quinoa en agua con sal 12-15 minutos y escúrrela. Salpimienta el solomillo y márcalo en una sartén caliente por todos los lados hasta que esté dorado por fuera y jugoso por dentro. Saltea el brócoli. Sirve el cerdo en medallones con la quinoa y el brócoli.",
-    ingredients:[{ name:"Cerdo solomillo", kcal:143, p:22, g:6, c:0, base:150 },{ name:"Quinoa (seca)", kcal:368, p:14, g:6, c:64, base:60 },{ name:"Brócoli", kcal:34, p:3, g:0, c:7, base:150 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
-  { id:"ac_pollo_pasta", name:"Pasta con pollo y verduras", grupo:"almuerzo_cena", emoji:"🍜", desc:"Cuece la pasta al dente. Saltea el pollo en dados con un poco de aceite y añade el calabacín y el pimiento en tiras. Cuando estén tiernos, incorpora la pasta escurrida y saltea todo junto con sal y orégano.",
-    ingredients:[{ name:"Pasta (seca)", kcal:358, p:12, g:1, c:72, base:80 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:130 },{ name:"Calabacín", kcal:17, p:1, g:0, c:3, base:100 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:60 }] },
-  { id:"ac_garbanzos_espinacas", name:"Garbanzos con espinacas", grupo:"almuerzo_cena", emoji:"🫘", desc:"Si usas garbanzos secos, déjalos en remojo la noche anterior y cuécelos hasta que estén tiernos. Sofríe la cebolla, añade las espinacas hasta que reduzcan y luego los garbanzos. Saltea todo junto con aceite, sal y un poco de pimentón. Plato vegetal completo.",
+  { id:"ac_bacalao_verduras", name:"Bacalao con verduras al horno", grupo:"almuerzo_cena", emoji:"ðŸ¡", desc:"Precalienta el horno a 190Â°C. Coloca el bacalao desalado sobre una cama de calabacÃ­n y cebolla en rodajas. Riega con aceite y sal y hornea 15-18 minutos. El pescado debe quedar jugoso y las verduras tiernas.",
+    ingredients:[{ name:"Bacalao", kcal:82, p:18, g:1, c:0, base:200 },{ name:"CalabacÃ­n", kcal:17, p:1, g:0, c:3, base:150 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:60 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
+  { id:"ac_cerdo_quinoa", name:"Solomillo de cerdo con quinoa", grupo:"almuerzo_cena", emoji:"ðŸ¥©", desc:"Cuece la quinoa en agua con sal 12-15 minutos y escÃºrrela. Salpimienta el solomillo y mÃ¡rcalo en una sartÃ©n caliente por todos los lados hasta que estÃ© dorado por fuera y jugoso por dentro. Saltea el brÃ³coli. Sirve el cerdo en medallones con la quinoa y el brÃ³coli.",
+    ingredients:[{ name:"Cerdo solomillo", kcal:143, p:22, g:6, c:0, base:150 },{ name:"Quinoa (seca)", kcal:368, p:14, g:6, c:64, base:60 },{ name:"BrÃ³coli", kcal:34, p:3, g:0, c:7, base:150 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
+  { id:"ac_pollo_pasta", name:"Pasta con pollo y verduras", grupo:"almuerzo_cena", emoji:"ðŸœ", desc:"Cuece la pasta al dente. Saltea el pollo en dados con un poco de aceite y aÃ±ade el calabacÃ­n y el pimiento en tiras. Cuando estÃ©n tiernos, incorpora la pasta escurrida y saltea todo junto con sal y orÃ©gano.",
+    ingredients:[{ name:"Pasta (seca)", kcal:358, p:12, g:1, c:72, base:80 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:130 },{ name:"CalabacÃ­n", kcal:17, p:1, g:0, c:3, base:100 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:60 }] },
+  { id:"ac_garbanzos_espinacas", name:"Garbanzos con espinacas", grupo:"almuerzo_cena", emoji:"ðŸ«˜", desc:"Si usas garbanzos secos, dÃ©jalos en remojo la noche anterior y cuÃ©celos hasta que estÃ©n tiernos. SofrÃ­e la cebolla, aÃ±ade las espinacas hasta que reduzcan y luego los garbanzos. Saltea todo junto con aceite, sal y un poco de pimentÃ³n. Plato vegetal completo.",
     ingredients:[{ name:"Garbanzos (secos)", kcal:336, p:19, g:6, c:61, base:80 },{ name:"Espinacas", kcal:23, p:3, g:0, c:4, base:150 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:50 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_ternera_patata", name:"Ternera con patata y verduras", grupo:"almuerzo_cena", emoji:"🍖", desc:"Marca el filete de ternera en una sartén muy caliente al punto que prefieras. Cuece o asa la patata en dados. Saltea las judías o el brócoli. Sirve la ternera con la guarnición y un hilo de aceite crudo por encima.",
-    ingredients:[{ name:"Filete de ternera", kcal:137, p:21, g:5, c:0, base:150 },{ name:"Patata (cruda)", kcal:77, p:2, g:0, c:17, base:200 },{ name:"Brócoli", kcal:34, p:3, g:0, c:7, base:120 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
-  { id:"ac_salmon_quinoa", name:"Salmón con quinoa y aguacate", grupo:"almuerzo_cena", emoji:"🍱", desc:"Cuece la quinoa y escúrrela. Hornea o marca el salmón a la plancha con sal. Sirve la quinoa de base, coloca el salmón encima y acompaña con aguacate en láminas. Un plato completo rico en omega-3.",
-    ingredients:[{ name:"Salmón fresco", kcal:208, p:20, g:13, c:0, base:150 },{ name:"Quinoa (seca)", kcal:368, p:14, g:6, c:64, base:60 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:50 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:60 }] },
-  { id:"ac_pollo_boniato", name:"Pollo con boniato y brócoli", grupo:"almuerzo_cena", emoji:"🍛", desc:"Asa el boniato en dados al horno a 200°C unos 25 minutos. Marca el pollo en dados a la plancha con sal. Cuece el brócoli al vapor. Mezcla todo en un bol y aliña con aceite y especias al gusto. Clásico fitness equilibrado.",
-    ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Boniato (crudo)", kcal:86, p:2, g:0, c:20, base:180 },{ name:"Brócoli", kcal:34, p:3, g:0, c:7, base:150 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
-  { id:"ac_tofu_salteado", name:"Tofu salteado con verduras", grupo:"almuerzo_cena", emoji:"🥡", desc:"Corta el tofu en dados y séllalo en una sartén caliente con un poco de aceite hasta que dore. Retíralo y saltea el pimiento, el calabacín y la cebolla. Devuelve el tofu, añade salsa de soja y saltea todo junto. Sirve con arroz si quieres.",
-    ingredients:[{ name:"Tofu", kcal:76, p:8, g:5, c:2, base:200 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:100 },{ name:"Calabacín", kcal:17, p:1, g:0, c:3, base:100 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_couscous_pollo", name:"Cuscús con pollo y verduras", grupo:"almuerzo_cena", emoji:"🍲", desc:"Hidrata el cuscús cubriéndolo con agua hirviendo y sal, tapa 5 minutos y suelta los granos con un tenedor. Marca el pollo en dados y saltea las verduras. Mezcla todo con el cuscús y un hilo de aceite. Rápido y completo.",
-    ingredients:[{ name:"Cuscús (seco)", kcal:376, p:12, g:1, c:77, base:70 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:130 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 },{ name:"Calabacín", kcal:17, p:1, g:0, c:3, base:80 }] },
-  { id:"ac_sardinas_ensalada", name:"Sardinas con ensalada de patata", grupo:"almuerzo_cena", emoji:"🐟", desc:"Cuece la patata entera, pélala y córtala en rodajas. Mézclala con cebolla picada, aceite y sal. Sirve las sardinas (a la plancha o en conserva) sobre la ensalada templada de patata. Económico y rico en omega-3.",
+  { id:"ac_ternera_patata", name:"Ternera con patata y verduras", grupo:"almuerzo_cena", emoji:"ðŸ–", desc:"Marca el filete de ternera en una sartÃ©n muy caliente al punto que prefieras. Cuece o asa la patata en dados. Saltea las judÃ­as o el brÃ³coli. Sirve la ternera con la guarniciÃ³n y un hilo de aceite crudo por encima.",
+    ingredients:[{ name:"Filete de ternera", kcal:137, p:21, g:5, c:0, base:150 },{ name:"Patata (cruda)", kcal:77, p:2, g:0, c:17, base:200 },{ name:"BrÃ³coli", kcal:34, p:3, g:0, c:7, base:120 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
+  { id:"ac_salmon_quinoa", name:"SalmÃ³n con quinoa y aguacate", grupo:"almuerzo_cena", emoji:"ðŸ±", desc:"Cuece la quinoa y escÃºrrela. Hornea o marca el salmÃ³n a la plancha con sal. Sirve la quinoa de base, coloca el salmÃ³n encima y acompaÃ±a con aguacate en lÃ¡minas. Un plato completo rico en omega-3.",
+    ingredients:[{ name:"SalmÃ³n fresco", kcal:208, p:20, g:13, c:0, base:150 },{ name:"Quinoa (seca)", kcal:368, p:14, g:6, c:64, base:60 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:50 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:60 }] },
+  { id:"ac_pollo_boniato", name:"Pollo con boniato y brÃ³coli", grupo:"almuerzo_cena", emoji:"ðŸ›", desc:"Asa el boniato en dados al horno a 200Â°C unos 25 minutos. Marca el pollo en dados a la plancha con sal. Cuece el brÃ³coli al vapor. Mezcla todo en un bol y aliÃ±a con aceite y especias al gusto. ClÃ¡sico fitness equilibrado.",
+    ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Boniato (crudo)", kcal:86, p:2, g:0, c:20, base:180 },{ name:"BrÃ³coli", kcal:34, p:3, g:0, c:7, base:150 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
+  { id:"ac_tofu_salteado", name:"Tofu salteado con verduras", grupo:"almuerzo_cena", emoji:"ðŸ¥¡", desc:"Corta el tofu en dados y sÃ©llalo en una sartÃ©n caliente con un poco de aceite hasta que dore. RetÃ­ralo y saltea el pimiento, el calabacÃ­n y la cebolla. Devuelve el tofu, aÃ±ade salsa de soja y saltea todo junto. Sirve con arroz si quieres.",
+    ingredients:[{ name:"Tofu", kcal:76, p:8, g:5, c:2, base:200 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:100 },{ name:"CalabacÃ­n", kcal:17, p:1, g:0, c:3, base:100 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 }] },
+  { id:"ac_couscous_pollo", name:"CuscÃºs con pollo y verduras", grupo:"almuerzo_cena", emoji:"ðŸ²", desc:"Hidrata el cuscÃºs cubriÃ©ndolo con agua hirviendo y sal, tapa 5 minutos y suelta los granos con un tenedor. Marca el pollo en dados y saltea las verduras. Mezcla todo con el cuscÃºs y un hilo de aceite. RÃ¡pido y completo.",
+    ingredients:[{ name:"CuscÃºs (seco)", kcal:376, p:12, g:1, c:77, base:70 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:130 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 },{ name:"CalabacÃ­n", kcal:17, p:1, g:0, c:3, base:80 }] },
+  { id:"ac_sardinas_ensalada", name:"Sardinas con ensalada de patata", grupo:"almuerzo_cena", emoji:"ðŸŸ", desc:"Cuece la patata entera, pÃ©lala y cÃ³rtala en rodajas. MÃ©zclala con cebolla picada, aceite y sal. Sirve las sardinas (a la plancha o en conserva) sobre la ensalada templada de patata. EconÃ³mico y rico en omega-3.",
     ingredients:[{ name:"Sardinas", kcal:185, p:25, g:10, c:0, base:120 },{ name:"Patata (cruda)", kcal:77, p:2, g:0, c:17, base:200 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:40 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:8 }] },
-  { id:"ac_huevos_revueltos_verdura", name:"Revuelto de huevos con verduras", grupo:"almuerzo_cena", emoji:"🍳", desc:"Saltea el calabacín y el pimiento picados en una sartén con aceite hasta que ablanden. Baja el fuego, añade los huevos batidos con las claras y remueve hasta cuajar al gusto. Salpimienta. Cena rápida y proteica.",
-    ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 },{ name:"Clara de huevo", kcal:52, p:11, g:0, c:1, base:100 },{ name:"Calabacín", kcal:17, p:1, g:0, c:3, base:100 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 }] },
-  { id:"ac_pollo_ensalada", name:"Ensalada completa de pollo", grupo:"almuerzo_cena", emoji:"🥙", desc:"Marca el pollo en tiras a la plancha y deja templar. En un bol grande mezcla lechuga, tomate, maíz y el pollo. Añade aguacate en dados. Aliña con aceite, sal y vinagre. Una ensalada saciante de plato único.",
+  { id:"ac_huevos_revueltos_verdura", name:"Revuelto de huevos con verduras", grupo:"almuerzo_cena", emoji:"ðŸ³", desc:"Saltea el calabacÃ­n y el pimiento picados en una sartÃ©n con aceite hasta que ablanden. Baja el fuego, aÃ±ade los huevos batidos con las claras y remueve hasta cuajar al gusto. Salpimienta. Cena rÃ¡pida y proteica.",
+    ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 },{ name:"Clara de huevo", kcal:52, p:11, g:0, c:1, base:100 },{ name:"CalabacÃ­n", kcal:17, p:1, g:0, c:3, base:100 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 }] },
+  { id:"ac_pollo_ensalada", name:"Ensalada completa de pollo", grupo:"almuerzo_cena", emoji:"ðŸ¥™", desc:"Marca el pollo en tiras a la plancha y deja templar. En un bol grande mezcla lechuga, tomate, maÃ­z y el pollo. AÃ±ade aguacate en dados. AliÃ±a con aceite, sal y vinagre. Una ensalada saciante de plato Ãºnico.",
     ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Lechuga", kcal:15, p:1, g:0, c:2, base:100 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:80 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:50 }] },
-  { id:"ac_arroz_atun", name:"Arroz con atún y tomate", grupo:"almuerzo_cena", emoji:"🍚", desc:"Cuece el arroz y escúrrelo. Escurre el atún y mézclalo con el arroz templado. Añade tomate natural en dados, maíz y un hilo de aceite. Remueve bien. Se puede comer caliente o frío como ensalada de arroz.",
-    ingredients:[{ name:"Arroz blanco (seco)", kcal:360, p:7, g:1, c:80, base:70 },{ name:"Atún en conserva", kcal:116, p:26, g:1, c:0, base:120 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:80 },{ name:"Maíz dulce", kcal:86, p:3, g:1, c:19, base:50 }] },
-  { id:"ac_pavo_pasta", name:"Pasta integral con pavo", grupo:"almuerzo_cena", emoji:"🍝", desc:"Cuece la pasta al dente. Saltea el pavo picado con cebolla y tomate triturado hasta reducir. Mezcla con la pasta y sirve con un poco de queso rallado por encima si quieres. Cena ligera y proteica.",
+  { id:"ac_arroz_atun", name:"Arroz con atÃºn y tomate", grupo:"almuerzo_cena", emoji:"ðŸš", desc:"Cuece el arroz y escÃºrrelo. Escurre el atÃºn y mÃ©zclalo con el arroz templado. AÃ±ade tomate natural en dados, maÃ­z y un hilo de aceite. Remueve bien. Se puede comer caliente o frÃ­o como ensalada de arroz.",
+    ingredients:[{ name:"Arroz blanco (seco)", kcal:360, p:7, g:1, c:80, base:70 },{ name:"AtÃºn en conserva", kcal:116, p:26, g:1, c:0, base:120 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:80 },{ name:"MaÃ­z dulce", kcal:86, p:3, g:1, c:19, base:50 }] },
+  { id:"ac_pavo_pasta", name:"Pasta integral con pavo", grupo:"almuerzo_cena", emoji:"ðŸ", desc:"Cuece la pasta al dente. Saltea el pavo picado con cebolla y tomate triturado hasta reducir. Mezcla con la pasta y sirve con un poco de queso rallado por encima si quieres. Cena ligera y proteica.",
     ingredients:[{ name:"Pasta (seca)", kcal:358, p:12, g:1, c:72, base:80 },{ name:"Pechuga de pavo", kcal:135, p:29, g:2, c:0, base:140 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:100 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:40 }] },
-  { id:"ac_merluza_patata", name:"Merluza con patata cocida", grupo:"almuerzo_cena", emoji:"🍽️", desc:"Cuece la patata en dados. En la misma agua o al vapor, cuece la merluza unos minutos hasta que esté jugosa. Sirve con un sofrito ligero de ajo y pimentón con aceite por encima, y unas judías verdes de guarnición.",
-    ingredients:[{ name:"Merluza", kcal:80, p:17, g:2, c:0, base:200 },{ name:"Patata (cruda)", kcal:77, p:2, g:0, c:17, base:180 },{ name:"Brócoli", kcal:34, p:3, g:0, c:7, base:120 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 }] },
+  { id:"ac_merluza_patata", name:"Merluza con patata cocida", grupo:"almuerzo_cena", emoji:"ðŸ½ï¸", desc:"Cuece la patata en dados. En la misma agua o al vapor, cuece la merluza unos minutos hasta que estÃ© jugosa. Sirve con un sofrito ligero de ajo y pimentÃ³n con aceite por encima, y unas judÃ­as verdes de guarniciÃ³n.",
+    ingredients:[{ name:"Merluza", kcal:80, p:17, g:2, c:0, base:200 },{ name:"Patata (cruda)", kcal:77, p:2, g:0, c:17, base:180 },{ name:"BrÃ³coli", kcal:34, p:3, g:0, c:7, base:120 },{ name:"Aceite de oliva", kcal:900, p:0, g:100, c:0, base:10 }] },
 
-  // ═══ AMPLIACIÓN — Desayuno / Merienda ═══
-  { id:"dm_x01", name:"Tortilla francesa con pan", grupo:"desayuno_merienda", emoji:"🍳", desc:"Bate los huevos con una pizca de sal. Cuájalos en una sartén antiadherente con unas gotas de aceite, doblando la tortilla. Acompaña con el pan tostado.",
+  // â•â•â• AMPLIACIÃ“N â€” Desayuno / Merienda â•â•â•
+  { id:"dm_x01", name:"Tortilla francesa con pan", grupo:"desayuno_merienda", emoji:"ðŸ³", desc:"Bate los huevos con una pizca de sal. CuÃ¡jalos en una sartÃ©n antiadherente con unas gotas de aceite, doblando la tortilla. AcompaÃ±a con el pan tostado.",
     ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 },{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:50 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:5 }] },
-  { id:"dm_x02", name:"Tostada de aguacate y huevo", grupo:"desayuno_merienda", emoji:"🥑", desc:"Tuesta el pan. Machaca el aguacate con sal y extiéndelo sobre la tostada. Coloca encima un huevo poché o a la plancha.",
+  { id:"dm_x02", name:"Tostada de aguacate y huevo", grupo:"desayuno_merienda", emoji:"ðŸ¥‘", desc:"Tuesta el pan. Machaca el aguacate con sal y extiÃ©ndelo sobre la tostada. Coloca encima un huevo pochÃ© o a la plancha.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:60 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:60 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:60 }] },
-  { id:"dm_x03", name:"Yogur griego con frutos rojos y nueces", grupo:"desayuno_merienda", emoji:"🫐", desc:"Pon el yogur en un bol, añade los frutos rojos y las nueces troceadas por encima. Endulza con un hilo de miel si quieres.",
-    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:170 },{ name:"Arándanos", kcal:57, p:1, g:0, c:14, base:60 },{ name:"Nueces", kcal:654, p:15, g:65, c:14, base:15 }] },
-  { id:"dm_x04", name:"Porridge de avena con manzana y canela", grupo:"desayuno_merienda", emoji:"🍎", desc:"Cuece la avena con la leche a fuego medio removiendo hasta que espese. Añade la manzana en dados y espolvorea canela.",
+  { id:"dm_x03", name:"Yogur griego con frutos rojos y nueces", grupo:"desayuno_merienda", emoji:"ðŸ«", desc:"Pon el yogur en un bol, aÃ±ade los frutos rojos y las nueces troceadas por encima. Endulza con un hilo de miel si quieres.",
+    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:170 },{ name:"ArÃ¡ndanos", kcal:57, p:1, g:0, c:14, base:60 },{ name:"Nueces", kcal:654, p:15, g:65, c:14, base:15 }] },
+  { id:"dm_x04", name:"Porridge de avena con manzana y canela", grupo:"desayuno_merienda", emoji:"ðŸŽ", desc:"Cuece la avena con la leche a fuego medio removiendo hasta que espese. AÃ±ade la manzana en dados y espolvorea canela.",
     ingredients:[{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:50 },{ name:"Leche semidesnatada", kcal:46, p:3, g:2, c:5, base:200 },{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:100 }] },
-  { id:"dm_x05", name:"Batido de plátano y avena", grupo:"desayuno_merienda", emoji:"🥤", desc:"Tritura el plátano con la leche, la avena y la proteína hasta que quede cremoso. Sirve frío.",
-    ingredients:[{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Leche desnatada", kcal:34, p:3, g:0, c:5, base:200 },{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:30 },{ name:"Proteína whey", kcal:400, p:80, g:7, c:8, base:30 }] },
-  { id:"dm_x06", name:"Tostadas con queso fresco y tomate", grupo:"desayuno_merienda", emoji:"🍅", desc:"Tuesta el pan, unta el queso fresco batido y cubre con rodajas de tomate. Sal, pimienta y un hilo de aceite.",
+  { id:"dm_x05", name:"Batido de plÃ¡tano y avena", grupo:"desayuno_merienda", emoji:"ðŸ¥¤", desc:"Tritura el plÃ¡tano con la leche, la avena y la proteÃ­na hasta que quede cremoso. Sirve frÃ­o.",
+    ingredients:[{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Leche desnatada", kcal:34, p:3, g:0, c:5, base:200 },{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:30 },{ name:"ProteÃ­na whey", kcal:400, p:80, g:7, c:8, base:30 }] },
+  { id:"dm_x06", name:"Tostadas con queso fresco y tomate", grupo:"desayuno_merienda", emoji:"ðŸ…", desc:"Tuesta el pan, unta el queso fresco batido y cubre con rodajas de tomate. Sal, pimienta y un hilo de aceite.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:70 },{ name:"Queso fresco batido 0%", kcal:47, p:8, g:0, c:4, base:80 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:80 }] },
-  { id:"dm_x07", name:"Tortitas de avena y clara", grupo:"desayuno_merienda", emoji:"🥞", desc:"Tritura la avena con las claras y el plátano hasta una masa homogénea. Haz las tortitas en sartén antiadherente vuelta y vuelta.",
-    ingredients:[{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:50 },{ name:"Clara de huevo", kcal:52, p:11, g:0, c:1, base:120 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:60 }] },
-  { id:"dm_x08", name:"Bol de skyr con granola", grupo:"desayuno_merienda", emoji:"🥛", desc:"Pon el skyr en un bol y añade la granola y unas fresas troceadas por encima.",
+  { id:"dm_x07", name:"Tortitas de avena y clara", grupo:"desayuno_merienda", emoji:"ðŸ¥ž", desc:"Tritura la avena con las claras y el plÃ¡tano hasta una masa homogÃ©nea. Haz las tortitas en sartÃ©n antiadherente vuelta y vuelta.",
+    ingredients:[{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:50 },{ name:"Clara de huevo", kcal:52, p:11, g:0, c:1, base:120 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:60 }] },
+  { id:"dm_x08", name:"Bol de skyr con granola", grupo:"desayuno_merienda", emoji:"ðŸ¥›", desc:"Pon el skyr en un bol y aÃ±ade la granola y unas fresas troceadas por encima.",
     ingredients:[{ name:"Yogur proteico (skyr)", kcal:63, p:11, g:0, c:4, base:170 },{ name:"Granola", kcal:471, p:10, g:20, c:64, base:40 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 }] },
-  { id:"dm_x09", name:"Sándwich de pavo y queso", grupo:"desayuno_merienda", emoji:"🥪", desc:"Monta el sándwich con el pan, las lonchas de pavo y el queso. Tuesta en sandwichera o sartén.",
+  { id:"dm_x09", name:"SÃ¡ndwich de pavo y queso", grupo:"desayuno_merienda", emoji:"ðŸ¥ª", desc:"Monta el sÃ¡ndwich con el pan, las lonchas de pavo y el queso. Tuesta en sandwichera o sartÃ©n.",
     ingredients:[{ name:"Pan de molde integral", kcal:248, p:9, g:4, c:42, base:70 },{ name:"Pavo en lonchas", kcal:104, p:18, g:3, c:1, base:60 },{ name:"Queso en lonchas", kcal:300, p:18, g:24, c:3, base:20 }] },
-  { id:"dm_x10", name:"Requesón con miel y nueces", grupo:"desayuno_merienda", emoji:"🍯", desc:"Pon el requesón en un bol, añade un hilo de miel y las nueces troceadas.",
-    ingredients:[{ name:"Requesón", kcal:97, p:11, g:4, c:3, base:150 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:15 },{ name:"Nueces", kcal:654, p:15, g:65, c:14, base:15 }] },
-  { id:"dm_x11", name:"Tostada de crema de cacahuete y plátano", grupo:"desayuno_merienda", emoji:"🥜", desc:"Tuesta el pan, unta la crema de cacahuete y coloca el plátano en rodajas encima.",
-    ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:60 },{ name:"Crema de cacahuete", kcal:588, p:25, g:50, c:20, base:20 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:80 }] },
-  { id:"dm_x12", name:"Huevos revueltos con espinacas", grupo:"desayuno_merienda", emoji:"🍳", desc:"Saltea las espinacas en la sartén. Añade los huevos batidos y remueve a fuego suave hasta cuajar. Acompaña con pan.",
+  { id:"dm_x10", name:"RequesÃ³n con miel y nueces", grupo:"desayuno_merienda", emoji:"ðŸ¯", desc:"Pon el requesÃ³n en un bol, aÃ±ade un hilo de miel y las nueces troceadas.",
+    ingredients:[{ name:"RequesÃ³n", kcal:97, p:11, g:4, c:3, base:150 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:15 },{ name:"Nueces", kcal:654, p:15, g:65, c:14, base:15 }] },
+  { id:"dm_x11", name:"Tostada de crema de cacahuete y plÃ¡tano", grupo:"desayuno_merienda", emoji:"ðŸ¥œ", desc:"Tuesta el pan, unta la crema de cacahuete y coloca el plÃ¡tano en rodajas encima.",
+    ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:60 },{ name:"Crema de cacahuete", kcal:588, p:25, g:50, c:20, base:20 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:80 }] },
+  { id:"dm_x12", name:"Huevos revueltos con espinacas", grupo:"desayuno_merienda", emoji:"ðŸ³", desc:"Saltea las espinacas en la sartÃ©n. AÃ±ade los huevos batidos y remueve a fuego suave hasta cuajar. AcompaÃ±a con pan.",
     ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 },{ name:"Espinacas", kcal:23, p:3, g:0, c:4, base:80 },{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:40 }] },
-  { id:"dm_x13", name:"Smoothie verde", grupo:"desayuno_merienda", emoji:"🥬", desc:"Tritura las espinacas con el plátano, el kiwi y la bebida vegetal hasta que quede fino.",
-    ingredients:[{ name:"Espinacas", kcal:23, p:3, g:0, c:4, base:40 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Kiwi", kcal:61, p:1, g:1, c:15, base:80 },{ name:"Bebida de avena", kcal:46, p:1, g:1, c:8, base:200 }] },
-  { id:"dm_x14", name:"Pan con tomate y jamón serrano", grupo:"desayuno_merienda", emoji:"🍅", desc:"Tuesta el pan, restriega el tomate, añade un hilo de aceite y cubre con el jamón serrano.",
-    ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:70 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:60 },{ name:"Jamón serrano", kcal:241, p:31, g:13, c:0, base:40 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:5 }] },
-  { id:"dm_x15", name:"Cuenco de fruta y yogur", grupo:"desayuno_merienda", emoji:"🍓", desc:"Trocea la fruta variada en un bol y añade el yogur natural por encima.",
-    ingredients:[{ name:"Yogur natural", kcal:61, p:4, g:3, c:5, base:150 },{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:100 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 },{ name:"Arándanos", kcal:57, p:1, g:0, c:14, base:40 }] },
-  { id:"dm_x16", name:"Tortilla de claras con avena", grupo:"desayuno_merienda", emoji:"🍳", desc:"Mezcla las claras con la avena y cuaja en sartén como una tortita grande. Ideal pre/post entreno.",
+  { id:"dm_x13", name:"Smoothie verde", grupo:"desayuno_merienda", emoji:"ðŸ¥¬", desc:"Tritura las espinacas con el plÃ¡tano, el kiwi y la bebida vegetal hasta que quede fino.",
+    ingredients:[{ name:"Espinacas", kcal:23, p:3, g:0, c:4, base:40 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:100 },{ name:"Kiwi", kcal:61, p:1, g:1, c:15, base:80 },{ name:"Bebida de avena", kcal:46, p:1, g:1, c:8, base:200 }] },
+  { id:"dm_x14", name:"Pan con tomate y jamÃ³n serrano", grupo:"desayuno_merienda", emoji:"ðŸ…", desc:"Tuesta el pan, restriega el tomate, aÃ±ade un hilo de aceite y cubre con el jamÃ³n serrano.",
+    ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:70 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:60 },{ name:"JamÃ³n serrano", kcal:241, p:31, g:13, c:0, base:40 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:5 }] },
+  { id:"dm_x15", name:"Cuenco de fruta y yogur", grupo:"desayuno_merienda", emoji:"ðŸ“", desc:"Trocea la fruta variada en un bol y aÃ±ade el yogur natural por encima.",
+    ingredients:[{ name:"Yogur natural", kcal:61, p:4, g:3, c:5, base:150 },{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:100 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 },{ name:"ArÃ¡ndanos", kcal:57, p:1, g:0, c:14, base:40 }] },
+  { id:"dm_x16", name:"Tortilla de claras con avena", grupo:"desayuno_merienda", emoji:"ðŸ³", desc:"Mezcla las claras con la avena y cuaja en sartÃ©n como una tortita grande. Ideal pre/post entreno.",
     ingredients:[{ name:"Clara de huevo", kcal:52, p:11, g:0, c:1, base:200 },{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:40 }] },
-  { id:"dm_x17", name:"Tostadas de pavo y aguacate", grupo:"desayuno_merienda", emoji:"🥑", desc:"Tuesta el pan, extiende el aguacate machacado y coloca las lonchas de pavo encima.",
+  { id:"dm_x17", name:"Tostadas de pavo y aguacate", grupo:"desayuno_merienda", emoji:"ðŸ¥‘", desc:"Tuesta el pan, extiende el aguacate machacado y coloca las lonchas de pavo encima.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:60 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:50 },{ name:"Pavo en lonchas", kcal:104, p:18, g:3, c:1, base:50 }] },
-  { id:"dm_x18", name:"Café con leche y tostada integral", grupo:"desayuno_merienda", emoji:"☕", desc:"Prepara el café con la leche. Acompaña con pan integral tostado con un poco de aceite.",
+  { id:"dm_x18", name:"CafÃ© con leche y tostada integral", grupo:"desayuno_merienda", emoji:"â˜•", desc:"Prepara el cafÃ© con la leche. AcompaÃ±a con pan integral tostado con un poco de aceite.",
     ingredients:[{ name:"Leche semidesnatada", kcal:46, p:3, g:2, c:5, base:200 },{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:60 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:5 }] },
-  { id:"dm_x19", name:"Yogur con dátiles y almendras", grupo:"desayuno_merienda", emoji:"🌰", desc:"Trocea los dátiles y las almendras y mézclalos con el yogur griego.",
-    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:170 },{ name:"Dátiles", kcal:282, p:2, g:0, c:75, base:30 },{ name:"Almendras", kcal:579, p:21, g:50, c:22, base:15 }] },
-  { id:"dm_x20", name:"Tortitas de arroz con queso y pavo", grupo:"desayuno_merienda", emoji:"🍘", desc:"Unta las tortitas de arroz con queso crema y coloca pavo en lonchas encima.",
+  { id:"dm_x19", name:"Yogur con dÃ¡tiles y almendras", grupo:"desayuno_merienda", emoji:"ðŸŒ°", desc:"Trocea los dÃ¡tiles y las almendras y mÃ©zclalos con el yogur griego.",
+    ingredients:[{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:170 },{ name:"DÃ¡tiles", kcal:282, p:2, g:0, c:75, base:30 },{ name:"Almendras", kcal:579, p:21, g:50, c:22, base:15 }] },
+  { id:"dm_x20", name:"Tortitas de arroz con queso y pavo", grupo:"desayuno_merienda", emoji:"ðŸ˜", desc:"Unta las tortitas de arroz con queso crema y coloca pavo en lonchas encima.",
     ingredients:[{ name:"Tortitas de arroz", kcal:387, p:8, g:3, c:81, base:30 },{ name:"Queso crema (tipo Philadelphia)", kcal:255, p:6, g:25, c:4, base:30 },{ name:"Pavo en lonchas", kcal:104, p:18, g:3, c:1, base:50 }] },
-  { id:"dm_x21", name:"Gachas de avena con cacao", grupo:"desayuno_merienda", emoji:"🍫", desc:"Cuece la avena con la leche y añade cacao puro en polvo removiendo. Endulza al gusto.",
+  { id:"dm_x21", name:"Gachas de avena con cacao", grupo:"desayuno_merienda", emoji:"ðŸ«", desc:"Cuece la avena con la leche y aÃ±ade cacao puro en polvo removiendo. Endulza al gusto.",
     ingredients:[{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:50 },{ name:"Leche desnatada", kcal:34, p:3, g:0, c:5, base:200 },{ name:"Chocolate negro 85%", kcal:592, p:10, g:46, c:30, base:10 }] },
-  { id:"dm_x22", name:"Bocadillo de tortilla", grupo:"desayuno_merienda", emoji:"🥖", desc:"Haz una tortilla francesa y métela en el pan. Clásico y saciante.",
+  { id:"dm_x22", name:"Bocadillo de tortilla", grupo:"desayuno_merienda", emoji:"ðŸ¥–", desc:"Haz una tortilla francesa y mÃ©tela en el pan. ClÃ¡sico y saciante.",
     ingredients:[{ name:"Pan blanco", kcal:265, p:9, g:3, c:49, base:80 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:5 }] },
-  { id:"dm_x23", name:"Bol de kéfir con semillas", grupo:"desayuno_merienda", emoji:"🥣", desc:"Pon el kéfir en un bol, añade semillas de chía y fruta troceada. Deja reposar 5 min.",
-    ingredients:[{ name:"Kéfir", kcal:55, p:3, g:3, c:4, base:200 },{ name:"Semillas de chía", kcal:486, p:17, g:31, c:42, base:15 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 }] },
-  { id:"dm_x24", name:"Tostada de hummus y tomate", grupo:"desayuno_merienda", emoji:"🧆", desc:"Tuesta el pan, unta el hummus y cubre con rodajas de tomate y una pizca de sal.",
+  { id:"dm_x23", name:"Bol de kÃ©fir con semillas", grupo:"desayuno_merienda", emoji:"ðŸ¥£", desc:"Pon el kÃ©fir en un bol, aÃ±ade semillas de chÃ­a y fruta troceada. Deja reposar 5 min.",
+    ingredients:[{ name:"KÃ©fir", kcal:55, p:3, g:3, c:4, base:200 },{ name:"Semillas de chÃ­a", kcal:486, p:17, g:31, c:42, base:15 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 }] },
+  { id:"dm_x24", name:"Tostada de hummus y tomate", grupo:"desayuno_merienda", emoji:"ðŸ§†", desc:"Tuesta el pan, unta el hummus y cubre con rodajas de tomate y una pizca de sal.",
     ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:60 },{ name:"Hummus", kcal:177, p:8, g:10, c:14, base:50 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:60 }] },
-  { id:"dm_x25", name:"Macedonia con frutos secos", grupo:"desayuno_merienda", emoji:"🍇", desc:"Trocea varias frutas en un bol y añade un puñado de frutos secos. Fresco y rápido.",
-    ingredients:[{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:100 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:80 },{ name:"Uvas", kcal:69, p:1, g:0, c:18, base:80 },{ name:"Almendras", kcal:579, p:21, g:50, c:22, base:20 }] },
-  { id:"dm_x26", name:"Pudding de chía", grupo:"desayuno_merienda", emoji:"🍮", desc:"Mezcla las semillas de chía con la bebida vegetal y deja reposar en la nevera al menos 2h. Añade fruta al servir.",
-    ingredients:[{ name:"Semillas de chía", kcal:486, p:17, g:31, c:42, base:25 },{ name:"Bebida de almendra", kcal:24, p:1, g:1, c:3, base:200 },{ name:"Arándanos", kcal:57, p:1, g:0, c:14, base:60 }] },
-  { id:"dm_x27", name:"Tostada francesa fit", grupo:"desayuno_merienda", emoji:"🍞", desc:"Empapa el pan en huevo batido con un poco de leche y canela. Dóralo en la sartén vuelta y vuelta.",
+  { id:"dm_x25", name:"Macedonia con frutos secos", grupo:"desayuno_merienda", emoji:"ðŸ‡", desc:"Trocea varias frutas en un bol y aÃ±ade un puÃ±ado de frutos secos. Fresco y rÃ¡pido.",
+    ingredients:[{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:100 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:80 },{ name:"Uvas", kcal:69, p:1, g:0, c:18, base:80 },{ name:"Almendras", kcal:579, p:21, g:50, c:22, base:20 }] },
+  { id:"dm_x26", name:"Pudding de chÃ­a", grupo:"desayuno_merienda", emoji:"ðŸ®", desc:"Mezcla las semillas de chÃ­a con la bebida vegetal y deja reposar en la nevera al menos 2h. AÃ±ade fruta al servir.",
+    ingredients:[{ name:"Semillas de chÃ­a", kcal:486, p:17, g:31, c:42, base:25 },{ name:"Bebida de almendra", kcal:24, p:1, g:1, c:3, base:200 },{ name:"ArÃ¡ndanos", kcal:57, p:1, g:0, c:14, base:60 }] },
+  { id:"dm_x27", name:"Tostada francesa fit", grupo:"desayuno_merienda", emoji:"ðŸž", desc:"Empapa el pan en huevo batido con un poco de leche y canela. DÃ³ralo en la sartÃ©n vuelta y vuelta.",
     ingredients:[{ name:"Pan de molde integral", kcal:248, p:9, g:4, c:42, base:70 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:60 },{ name:"Leche desnatada", kcal:34, p:3, g:0, c:5, base:50 }] },
-  { id:"dm_x28", name:"Queso batido con avena y fruta", grupo:"desayuno_merienda", emoji:"🥛", desc:"Mezcla el queso batido con la avena y deja reposar. Añade fruta troceada antes de comer.",
+  { id:"dm_x28", name:"Queso batido con avena y fruta", grupo:"desayuno_merienda", emoji:"ðŸ¥›", desc:"Mezcla el queso batido con la avena y deja reposar. AÃ±ade fruta troceada antes de comer.",
     ingredients:[{ name:"Queso fresco batido 0%", kcal:47, p:8, g:0, c:4, base:200 },{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:40 },{ name:"Manzana", kcal:52, p:0, g:0, c:14, base:100 }] },
-  { id:"dm_x29", name:"Mini bocadillo de jamón york y queso", grupo:"desayuno_merienda", emoji:"🥪", desc:"Rellena el pan con jamón cocido y queso. Perfecto para media mañana.",
-    ingredients:[{ name:"Pan blanco", kcal:265, p:9, g:3, c:49, base:60 },{ name:"Jamón cocido / york", kcal:107, p:18, g:4, c:1, base:50 },{ name:"Queso en lonchas", kcal:300, p:18, g:24, c:3, base:20 }] },
-  { id:"dm_x30", name:"Avena overnight", grupo:"desayuno_merienda", emoji:"🌙", desc:"Mezcla la avena con el yogur y la leche en un bote y deja en la nevera toda la noche. Añade fruta al día siguiente.",
-    ingredients:[{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:50 },{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:100 },{ name:"Leche desnatada", kcal:34, p:3, g:0, c:5, base:100 },{ name:"Arándanos", kcal:57, p:1, g:0, c:14, base:50 }] },
-  { id:"dm_x31", name:"Tortilla de queso fresco", grupo:"desayuno_merienda", emoji:"🍳", desc:"Bate los huevos, añade el queso fresco en dados y cuaja en la sartén. Alto en proteína.",
+  { id:"dm_x29", name:"Mini bocadillo de jamÃ³n york y queso", grupo:"desayuno_merienda", emoji:"ðŸ¥ª", desc:"Rellena el pan con jamÃ³n cocido y queso. Perfecto para media maÃ±ana.",
+    ingredients:[{ name:"Pan blanco", kcal:265, p:9, g:3, c:49, base:60 },{ name:"JamÃ³n cocido / york", kcal:107, p:18, g:4, c:1, base:50 },{ name:"Queso en lonchas", kcal:300, p:18, g:24, c:3, base:20 }] },
+  { id:"dm_x30", name:"Avena overnight", grupo:"desayuno_merienda", emoji:"ðŸŒ™", desc:"Mezcla la avena con el yogur y la leche en un bote y deja en la nevera toda la noche. AÃ±ade fruta al dÃ­a siguiente.",
+    ingredients:[{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:50 },{ name:"Yogur griego 0%", kcal:57, p:10, g:0, c:4, base:100 },{ name:"Leche desnatada", kcal:34, p:3, g:0, c:5, base:100 },{ name:"ArÃ¡ndanos", kcal:57, p:1, g:0, c:14, base:50 }] },
+  { id:"dm_x31", name:"Tortilla de queso fresco", grupo:"desayuno_merienda", emoji:"ðŸ³", desc:"Bate los huevos, aÃ±ade el queso fresco en dados y cuaja en la sartÃ©n. Alto en proteÃ­na.",
     ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 },{ name:"Queso fresco", kcal:174, p:13, g:13, c:3, base:50 }] },
-  { id:"dm_x32", name:"Crepes de avena dulces", grupo:"desayuno_merienda", emoji:"🥞", desc:"Tritura avena, huevo y leche hasta una masa líquida. Haz crepes finos en sartén y rellénalos de fruta.",
+  { id:"dm_x32", name:"Crepes de avena dulces", grupo:"desayuno_merienda", emoji:"ðŸ¥ž", desc:"Tritura avena, huevo y leche hasta una masa lÃ­quida. Haz crepes finos en sartÃ©n y rellÃ©nalos de fruta.",
     ingredients:[{ name:"Avena en copos", kcal:389, p:17, g:7, c:66, base:40 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:60 },{ name:"Leche desnatada", kcal:34, p:3, g:0, c:5, base:100 },{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:80 }] },
-  { id:"dm_x33", name:"Yogur proteico con cacao y nueces", grupo:"desayuno_merienda", emoji:"🍫", desc:"Mezcla el skyr con cacao puro y añade nueces troceadas. Postre o merienda saciante.",
+  { id:"dm_x33", name:"Yogur proteico con cacao y nueces", grupo:"desayuno_merienda", emoji:"ðŸ«", desc:"Mezcla el skyr con cacao puro y aÃ±ade nueces troceadas. Postre o merienda saciante.",
     ingredients:[{ name:"Yogur proteico (skyr)", kcal:63, p:11, g:0, c:4, base:200 },{ name:"Chocolate negro 85%", kcal:592, p:10, g:46, c:30, base:10 },{ name:"Nueces", kcal:654, p:15, g:65, c:14, base:15 }] },
-  { id:"dm_x34", name:"Tostada de requesón y miel", grupo:"desayuno_merienda", emoji:"🍯", desc:"Tuesta el pan, unta el requesón y añade un hilo de miel por encima.",
-    ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:60 },{ name:"Requesón", kcal:97, p:11, g:4, c:3, base:80 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:15 }] },
-  { id:"dm_x35", name:"Batido proteico de fresa", grupo:"desayuno_merienda", emoji:"🍓", desc:"Tritura las fresas con la leche y la proteína. Refrescante y rápido tras entrenar.",
-    ingredients:[{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:150 },{ name:"Leche desnatada", kcal:34, p:3, g:0, c:5, base:250 },{ name:"Proteína whey", kcal:400, p:80, g:7, c:8, base:30 }] },
-  { id:"dm_x36", name:"Pan de centeno con aguacate y semillas", grupo:"desayuno_merienda", emoji:"🥑", desc:"Tuesta el pan de centeno, extiende el aguacate y espolvorea semillas de calabaza.",
+  { id:"dm_x34", name:"Tostada de requesÃ³n y miel", grupo:"desayuno_merienda", emoji:"ðŸ¯", desc:"Tuesta el pan, unta el requesÃ³n y aÃ±ade un hilo de miel por encima.",
+    ingredients:[{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:60 },{ name:"RequesÃ³n", kcal:97, p:11, g:4, c:3, base:80 },{ name:"Miel", kcal:304, p:0, g:0, c:82, base:15 }] },
+  { id:"dm_x35", name:"Batido proteico de fresa", grupo:"desayuno_merienda", emoji:"ðŸ“", desc:"Tritura las fresas con la leche y la proteÃ­na. Refrescante y rÃ¡pido tras entrenar.",
+    ingredients:[{ name:"Fresas", kcal:32, p:1, g:0, c:8, base:150 },{ name:"Leche desnatada", kcal:34, p:3, g:0, c:5, base:250 },{ name:"ProteÃ­na whey", kcal:400, p:80, g:7, c:8, base:30 }] },
+  { id:"dm_x36", name:"Pan de centeno con aguacate y semillas", grupo:"desayuno_merienda", emoji:"ðŸ¥‘", desc:"Tuesta el pan de centeno, extiende el aguacate y espolvorea semillas de calabaza.",
     ingredients:[{ name:"Pan de centeno", kcal:259, p:9, g:3, c:48, base:60 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:60 },{ name:"Semillas de calabaza", kcal:559, p:30, g:49, c:11, base:10 }] },
-  { id:"dm_x37", name:"Cuenco de queso cottage y piña", grupo:"desayuno_merienda", emoji:"🍍", desc:"Pon el queso cottage en un bol y añade la piña troceada. Combinación dulce y proteica.",
-    ingredients:[{ name:"Queso cottage", kcal:98, p:11, g:4, c:3, base:150 },{ name:"Piña", kcal:50, p:1, g:0, c:13, base:120 }] },
-  { id:"dm_x38", name:"Tortitas de plátano y huevo", grupo:"desayuno_merienda", emoji:"🍌", desc:"Machaca el plátano, mézclalo con el huevo y haz tortitas pequeñas en la sartén. Solo 2 ingredientes.",
-    ingredients:[{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:120 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 }] },
-  { id:"dm_x39", name:"Bol de granola con bebida de soja", grupo:"desayuno_merienda", emoji:"🥣", desc:"Pon la granola en un bol y cubre con bebida de soja. Añade fruta si quieres.",
-    ingredients:[{ name:"Granola", kcal:471, p:10, g:20, c:64, base:50 },{ name:"Bebida de soja", kcal:42, p:3, g:2, c:3, base:200 },{ name:"Plátano", kcal:89, p:1, g:0, c:23, base:80 }] },
-  { id:"dm_x40", name:"Tostada de salmón ahumado y queso crema", grupo:"desayuno_merienda", emoji:"🐟", desc:"Tuesta el pan, unta el queso crema y coloca el salmón ahumado encima. Un desayuno premium.",
-    ingredients:[{ name:"Pan de centeno", kcal:259, p:9, g:3, c:48, base:60 },{ name:"Queso crema (tipo Philadelphia)", kcal:255, p:6, g:25, c:4, base:30 },{ name:"Salmón", kcal:208, p:20, g:13, c:0, base:50 }] },
+  { id:"dm_x37", name:"Cuenco de queso cottage y piÃ±a", grupo:"desayuno_merienda", emoji:"ðŸ", desc:"Pon el queso cottage en un bol y aÃ±ade la piÃ±a troceada. CombinaciÃ³n dulce y proteica.",
+    ingredients:[{ name:"Queso cottage", kcal:98, p:11, g:4, c:3, base:150 },{ name:"PiÃ±a", kcal:50, p:1, g:0, c:13, base:120 }] },
+  { id:"dm_x38", name:"Tortitas de plÃ¡tano y huevo", grupo:"desayuno_merienda", emoji:"ðŸŒ", desc:"Machaca el plÃ¡tano, mÃ©zclalo con el huevo y haz tortitas pequeÃ±as en la sartÃ©n. Solo 2 ingredientes.",
+    ingredients:[{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:120 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 }] },
+  { id:"dm_x39", name:"Bol de granola con bebida de soja", grupo:"desayuno_merienda", emoji:"ðŸ¥£", desc:"Pon la granola en un bol y cubre con bebida de soja. AÃ±ade fruta si quieres.",
+    ingredients:[{ name:"Granola", kcal:471, p:10, g:20, c:64, base:50 },{ name:"Bebida de soja", kcal:42, p:3, g:2, c:3, base:200 },{ name:"PlÃ¡tano", kcal:89, p:1, g:0, c:23, base:80 }] },
+  { id:"dm_x40", name:"Tostada de salmÃ³n ahumado y queso crema", grupo:"desayuno_merienda", emoji:"ðŸŸ", desc:"Tuesta el pan, unta el queso crema y coloca el salmÃ³n ahumado encima. Un desayuno premium.",
+    ingredients:[{ name:"Pan de centeno", kcal:259, p:9, g:3, c:48, base:60 },{ name:"Queso crema (tipo Philadelphia)", kcal:255, p:6, g:25, c:4, base:30 },{ name:"SalmÃ³n", kcal:208, p:20, g:13, c:0, base:50 }] },
 
-  // ═══ AMPLIACIÓN — Almuerzo / Cena ═══
-  { id:"ac_x01", name:"Pollo a la plancha con arroz y verduras", grupo:"almuerzo_cena", emoji:"🍗", desc:"Cocina el arroz. Haz la pechuga a la plancha con sal y pimienta. Saltea las verduras y sirve todo junto con un hilo de aceite.",
-    ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Arroz blanco", kcal:360, p:7, g:1, c:80, base:70 },{ name:"Brócoli", kcal:34, p:3, g:0, c:7, base:150 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x02", name:"Salmón al horno con patata", grupo:"almuerzo_cena", emoji:"🐟", desc:"Hornea el salmón 15 min a 200°C con sal y limón. Acompaña con patata asada y verduras.",
-    ingredients:[{ name:"Salmón", kcal:208, p:20, g:13, c:0, base:150 },{ name:"Patata cocida", kcal:87, p:2, g:0, c:20, base:200 },{ name:"Espárragos", kcal:20, p:2, g:0, c:4, base:100 }] },
-  { id:"ac_x03", name:"Lentejas guisadas con verduras", grupo:"almuerzo_cena", emoji:"🍲", desc:"Sofríe cebolla y zanahoria, añade las lentejas cocidas y un poco de caldo. Guisa 10 min.",
+  // â•â•â• AMPLIACIÃ“N â€” Almuerzo / Cena â•â•â•
+  { id:"ac_x01", name:"Pollo a la plancha con arroz y verduras", grupo:"almuerzo_cena", emoji:"ðŸ—", desc:"Cocina el arroz. Haz la pechuga a la plancha con sal y pimienta. Saltea las verduras y sirve todo junto con un hilo de aceite.",
+    ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Arroz blanco", kcal:360, p:7, g:1, c:80, base:70 },{ name:"BrÃ³coli", kcal:34, p:3, g:0, c:7, base:150 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
+  { id:"ac_x02", name:"SalmÃ³n al horno con patata", grupo:"almuerzo_cena", emoji:"ðŸŸ", desc:"Hornea el salmÃ³n 15 min a 200Â°C con sal y limÃ³n. AcompaÃ±a con patata asada y verduras.",
+    ingredients:[{ name:"SalmÃ³n", kcal:208, p:20, g:13, c:0, base:150 },{ name:"Patata cocida", kcal:87, p:2, g:0, c:20, base:200 },{ name:"EspÃ¡rragos", kcal:20, p:2, g:0, c:4, base:100 }] },
+  { id:"ac_x03", name:"Lentejas guisadas con verduras", grupo:"almuerzo_cena", emoji:"ðŸ²", desc:"SofrÃ­e cebolla y zanahoria, aÃ±ade las lentejas cocidas y un poco de caldo. Guisa 10 min.",
     ingredients:[{ name:"Lentejas (cocidas)", kcal:116, p:9, g:0, c:20, base:250 },{ name:"Zanahoria", kcal:41, p:1, g:0, c:10, base:80 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:60 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x04", name:"Ternera salteada con verduras y arroz", grupo:"almuerzo_cena", emoji:"🥩", desc:"Saltea la ternera en tiras a fuego fuerte. Añade las verduras y sirve con arroz.",
+  { id:"ac_x04", name:"Ternera salteada con verduras y arroz", grupo:"almuerzo_cena", emoji:"ðŸ¥©", desc:"Saltea la ternera en tiras a fuego fuerte. AÃ±ade las verduras y sirve con arroz.",
     ingredients:[{ name:"Ternera magra", kcal:158, p:26, g:6, c:0, base:150 },{ name:"Arroz basmati", kcal:356, p:8, g:1, c:78, base:70 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:100 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:60 }] },
-  { id:"ac_x05", name:"Merluza al horno con verduras", grupo:"almuerzo_cena", emoji:"🐟", desc:"Hornea la merluza con rodajas de patata, cebolla y un chorrito de aceite 20 min a 190°C.",
+  { id:"ac_x05", name:"Merluza al horno con verduras", grupo:"almuerzo_cena", emoji:"ðŸŸ", desc:"Hornea la merluza con rodajas de patata, cebolla y un chorrito de aceite 20 min a 190Â°C.",
     ingredients:[{ name:"Merluza", kcal:90, p:18, g:2, c:0, base:200 },{ name:"Patata cocida", kcal:87, p:2, g:0, c:20, base:180 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:80 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x06", name:"Ensalada de garbanzos y atún", grupo:"almuerzo_cena", emoji:"🥗", desc:"Mezcla los garbanzos con el atún escurrido, tomate, cebolla y un aliño de aceite y vinagre.",
-    ingredients:[{ name:"Garbanzos (cocidos)", kcal:139, p:8, g:3, c:21, base:200 },{ name:"Atún al natural (lata)", kcal:116, p:26, g:1, c:0, base:80 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x07", name:"Pavo con boniato y brócoli", grupo:"almuerzo_cena", emoji:"🦃", desc:"Haz la pechuga de pavo a la plancha. Asa el boniato y cuece el brócoli al vapor.",
-    ingredients:[{ name:"Pechuga de pavo", kcal:135, p:29, g:1, c:0, base:150 },{ name:"Boniato / batata", kcal:86, p:2, g:0, c:20, base:200 },{ name:"Brócoli", kcal:34, p:3, g:0, c:7, base:150 }] },
-  { id:"ac_x08", name:"Pasta con atún y tomate", grupo:"almuerzo_cena", emoji:"🍝", desc:"Cuece la pasta. Calienta el tomate frito con el atún y mezcla con la pasta.",
-    ingredients:[{ name:"Pasta (espaguetis)", kcal:358, p:12, g:1, c:72, base:80 },{ name:"Atún al natural (lata)", kcal:116, p:26, g:1, c:0, base:80 },{ name:"Tomate frito", kcal:82, p:2, g:4, c:9, base:100 }] },
-  { id:"ac_x09", name:"Tortilla de patata ligera", grupo:"almuerzo_cena", emoji:"🥚", desc:"Cuece la patata en dados, mézclala con el huevo batido y cuaja la tortilla en la sartén.",
+  { id:"ac_x06", name:"Ensalada de garbanzos y atÃºn", grupo:"almuerzo_cena", emoji:"ðŸ¥—", desc:"Mezcla los garbanzos con el atÃºn escurrido, tomate, cebolla y un aliÃ±o de aceite y vinagre.",
+    ingredients:[{ name:"Garbanzos (cocidos)", kcal:139, p:8, g:3, c:21, base:200 },{ name:"AtÃºn al natural (lata)", kcal:116, p:26, g:1, c:0, base:80 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
+  { id:"ac_x07", name:"Pavo con boniato y brÃ³coli", grupo:"almuerzo_cena", emoji:"ðŸ¦ƒ", desc:"Haz la pechuga de pavo a la plancha. Asa el boniato y cuece el brÃ³coli al vapor.",
+    ingredients:[{ name:"Pechuga de pavo", kcal:135, p:29, g:1, c:0, base:150 },{ name:"Boniato / batata", kcal:86, p:2, g:0, c:20, base:200 },{ name:"BrÃ³coli", kcal:34, p:3, g:0, c:7, base:150 }] },
+  { id:"ac_x08", name:"Pasta con atÃºn y tomate", grupo:"almuerzo_cena", emoji:"ðŸ", desc:"Cuece la pasta. Calienta el tomate frito con el atÃºn y mezcla con la pasta.",
+    ingredients:[{ name:"Pasta (espaguetis)", kcal:358, p:12, g:1, c:72, base:80 },{ name:"AtÃºn al natural (lata)", kcal:116, p:26, g:1, c:0, base:80 },{ name:"Tomate frito", kcal:82, p:2, g:4, c:9, base:100 }] },
+  { id:"ac_x09", name:"Tortilla de patata ligera", grupo:"almuerzo_cena", emoji:"ðŸ¥š", desc:"Cuece la patata en dados, mÃ©zclala con el huevo batido y cuaja la tortilla en la sartÃ©n.",
     ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:180 },{ name:"Patata cocida", kcal:87, p:2, g:0, c:20, base:200 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x10", name:"Wok de pollo y verduras con noodles", grupo:"almuerzo_cena", emoji:"🥢", desc:"Saltea el pollo en tiras, añade las verduras y los noodles cocidos. Salsa de soja al gusto.",
+  { id:"ac_x10", name:"Wok de pollo y verduras con noodles", grupo:"almuerzo_cena", emoji:"ðŸ¥¢", desc:"Saltea el pollo en tiras, aÃ±ade las verduras y los noodles cocidos. Salsa de soja al gusto.",
     ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Fideos / noodles (secos)", kcal:348, p:11, g:1, c:71, base:70 },{ name:"Pimiento verde", kcal:20, p:1, g:0, c:5, base:80 },{ name:"Zanahoria", kcal:41, p:1, g:0, c:10, base:80 }] },
-  { id:"ac_x11", name:"Dorada a la espalda con ensalada", grupo:"almuerzo_cena", emoji:"🐟", desc:"Haz la dorada a la plancha abierta. Acompaña con una ensalada verde aliñada.",
+  { id:"ac_x11", name:"Dorada a la espalda con ensalada", grupo:"almuerzo_cena", emoji:"ðŸŸ", desc:"Haz la dorada a la plancha abierta. AcompaÃ±a con una ensalada verde aliÃ±ada.",
     ingredients:[{ name:"Dorada", kcal:96, p:20, g:2, c:0, base:200 },{ name:"Lechuga", kcal:15, p:1, g:0, c:3, base:80 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x12", name:"Arroz con pollo y verduras", grupo:"almuerzo_cena", emoji:"🍚", desc:"Sofríe el pollo en dados, añade las verduras y el arroz con caldo. Cocina hasta que el arroz esté listo.",
+  { id:"ac_x12", name:"Arroz con pollo y verduras", grupo:"almuerzo_cena", emoji:"ðŸš", desc:"SofrÃ­e el pollo en dados, aÃ±ade las verduras y el arroz con caldo. Cocina hasta que el arroz estÃ© listo.",
     ingredients:[{ name:"Arroz blanco", kcal:360, p:7, g:1, c:80, base:80 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:130 },{ name:"Guisantes", kcal:81, p:5, g:0, c:14, base:60 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 }] },
-  { id:"ac_x13", name:"Hamburguesa de ternera con ensalada", grupo:"almuerzo_cena", emoji:"🍔", desc:"Forma la hamburguesa con la carne picada y hazla a la plancha. Sirve en pan con verduras.",
+  { id:"ac_x13", name:"Hamburguesa de ternera con ensalada", grupo:"almuerzo_cena", emoji:"ðŸ”", desc:"Forma la hamburguesa con la carne picada y hazla a la plancha. Sirve en pan con verduras.",
     ingredients:[{ name:"Carne picada mixta", kcal:215, p:19, g:15, c:0, base:150 },{ name:"Pan de hamburguesa", kcal:280, p:9, g:5, c:48, base:70 },{ name:"Lechuga", kcal:15, p:1, g:0, c:3, base:40 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:50 }] },
-  { id:"ac_x14", name:"Crema de calabacín con pollo", grupo:"almuerzo_cena", emoji:"🥣", desc:"Cuece el calabacín y la cebolla, tritura con un poco de caldo. Acompaña con dados de pollo a la plancha.",
-    ingredients:[{ name:"Calabacín", kcal:17, p:1, g:0, c:3, base:300 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:60 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:120 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x15", name:"Tacos de pollo", grupo:"almuerzo_cena", emoji:"🌮", desc:"Saltea el pollo con especias. Rellena las tortillas de trigo con pollo, verduras y un poco de salsa.",
+  { id:"ac_x14", name:"Crema de calabacÃ­n con pollo", grupo:"almuerzo_cena", emoji:"ðŸ¥£", desc:"Cuece el calabacÃ­n y la cebolla, tritura con un poco de caldo. AcompaÃ±a con dados de pollo a la plancha.",
+    ingredients:[{ name:"CalabacÃ­n", kcal:17, p:1, g:0, c:3, base:300 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:60 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:120 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
+  { id:"ac_x15", name:"Tacos de pollo", grupo:"almuerzo_cena", emoji:"ðŸŒ®", desc:"Saltea el pollo con especias. Rellena las tortillas de trigo con pollo, verduras y un poco de salsa.",
     ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Tortilla de trigo (wrap)", kcal:287, p:8, g:5, c:55, base:80 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:60 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:40 }] },
-  { id:"ac_x16", name:"Salteado de gambas y verduras", grupo:"almuerzo_cena", emoji:"🦐", desc:"Saltea las gambas con ajo, añade las verduras y sirve con arroz basmati.",
-    ingredients:[{ name:"Gambas / langostinos", kcal:99, p:21, g:1, c:0, base:150 },{ name:"Arroz basmati", kcal:356, p:8, g:1, c:78, base:70 },{ name:"Calabacín", kcal:17, p:1, g:0, c:3, base:100 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 }] },
-  { id:"ac_x17", name:"Bowl de quinoa, pollo y aguacate", grupo:"almuerzo_cena", emoji:"🥗", desc:"Cuece la quinoa. Monta el bowl con pollo a la plancha, aguacate y verduras frescas.",
+  { id:"ac_x16", name:"Salteado de gambas y verduras", grupo:"almuerzo_cena", emoji:"ðŸ¦", desc:"Saltea las gambas con ajo, aÃ±ade las verduras y sirve con arroz basmati.",
+    ingredients:[{ name:"Gambas / langostinos", kcal:99, p:21, g:1, c:0, base:150 },{ name:"Arroz basmati", kcal:356, p:8, g:1, c:78, base:70 },{ name:"CalabacÃ­n", kcal:17, p:1, g:0, c:3, base:100 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:80 }] },
+  { id:"ac_x17", name:"Bowl de quinoa, pollo y aguacate", grupo:"almuerzo_cena", emoji:"ðŸ¥—", desc:"Cuece la quinoa. Monta el bowl con pollo a la plancha, aguacate y verduras frescas.",
     ingredients:[{ name:"Quinoa (seca)", kcal:368, p:14, g:6, c:64, base:60 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:130 },{ name:"Aguacate", kcal:160, p:2, g:15, c:9, base:60 },{ name:"Tomate cherry", kcal:18, p:1, g:0, c:4, base:80 }] },
-  { id:"ac_x18", name:"Revuelto de gambas y espárragos", grupo:"almuerzo_cena", emoji:"🍳", desc:"Saltea los espárragos y las gambas, añade el huevo batido y revuelve hasta cuajar.",
-    ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:150 },{ name:"Gambas / langostinos", kcal:99, p:21, g:1, c:0, base:100 },{ name:"Espárragos", kcal:20, p:2, g:0, c:4, base:120 }] },
-  { id:"ac_x19", name:"Lomo de cerdo con puré de patata", grupo:"almuerzo_cena", emoji:"🥩", desc:"Haz el lomo a la plancha. Acompaña con puré de patata casero y verduras.",
-    ingredients:[{ name:"Lomo de cerdo", kcal:208, p:27, g:11, c:0, base:150 },{ name:"Patata cocida", kcal:87, p:2, g:0, c:20, base:200 },{ name:"Judías verdes", kcal:31, p:2, g:0, c:7, base:120 }] },
-  { id:"ac_x20", name:"Ensalada de pasta con pollo", grupo:"almuerzo_cena", emoji:"🥗", desc:"Cuece la pasta y déjala enfriar. Mezcla con pollo, tomate cherry y un aliño ligero.",
+  { id:"ac_x18", name:"Revuelto de gambas y espÃ¡rragos", grupo:"almuerzo_cena", emoji:"ðŸ³", desc:"Saltea los espÃ¡rragos y las gambas, aÃ±ade el huevo batido y revuelve hasta cuajar.",
+    ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:150 },{ name:"Gambas / langostinos", kcal:99, p:21, g:1, c:0, base:100 },{ name:"EspÃ¡rragos", kcal:20, p:2, g:0, c:4, base:120 }] },
+  { id:"ac_x19", name:"Lomo de cerdo con purÃ© de patata", grupo:"almuerzo_cena", emoji:"ðŸ¥©", desc:"Haz el lomo a la plancha. AcompaÃ±a con purÃ© de patata casero y verduras.",
+    ingredients:[{ name:"Lomo de cerdo", kcal:208, p:27, g:11, c:0, base:150 },{ name:"Patata cocida", kcal:87, p:2, g:0, c:20, base:200 },{ name:"JudÃ­as verdes", kcal:31, p:2, g:0, c:7, base:120 }] },
+  { id:"ac_x20", name:"Ensalada de pasta con pollo", grupo:"almuerzo_cena", emoji:"ðŸ¥—", desc:"Cuece la pasta y dÃ©jala enfriar. Mezcla con pollo, tomate cherry y un aliÃ±o ligero.",
     ingredients:[{ name:"Pasta (espaguetis)", kcal:358, p:12, g:1, c:72, base:70 },{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:120 },{ name:"Tomate cherry", kcal:18, p:1, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x21", name:"Bacalao con garbanzos y espinacas", grupo:"almuerzo_cena", emoji:"🐟", desc:"Saltea las espinacas con los garbanzos cocidos y añade el bacalao desmigado. Guiso rápido y completo.",
+  { id:"ac_x21", name:"Bacalao con garbanzos y espinacas", grupo:"almuerzo_cena", emoji:"ðŸŸ", desc:"Saltea las espinacas con los garbanzos cocidos y aÃ±ade el bacalao desmigado. Guiso rÃ¡pido y completo.",
     ingredients:[{ name:"Bacalao fresco", kcal:82, p:18, g:1, c:0, base:150 },{ name:"Garbanzos (cocidos)", kcal:139, p:8, g:3, c:21, base:150 },{ name:"Espinacas", kcal:23, p:3, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x22", name:"Pollo al curry con arroz", grupo:"almuerzo_cena", emoji:"🍛", desc:"Saltea el pollo, añade curry y un poco de bebida de coco o leche. Sirve con arroz basmati.",
+  { id:"ac_x22", name:"Pollo al curry con arroz", grupo:"almuerzo_cena", emoji:"ðŸ›", desc:"Saltea el pollo, aÃ±ade curry y un poco de bebida de coco o leche. Sirve con arroz basmati.",
     ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Arroz basmati", kcal:356, p:8, g:1, c:78, base:70 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:60 }] },
-  { id:"ac_x23", name:"Tortilla de espinacas y queso", grupo:"almuerzo_cena", emoji:"🍳", desc:"Saltea las espinacas, añade el huevo batido y el queso fresco. Cuaja la tortilla.",
+  { id:"ac_x23", name:"Tortilla de espinacas y queso", grupo:"almuerzo_cena", emoji:"ðŸ³", desc:"Saltea las espinacas, aÃ±ade el huevo batido y el queso fresco. Cuaja la tortilla.",
     ingredients:[{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:150 },{ name:"Espinacas", kcal:23, p:3, g:0, c:4, base:100 },{ name:"Queso fresco", kcal:174, p:13, g:13, c:3, base:50 }] },
-  { id:"ac_x24", name:"Ensalada César con pollo", grupo:"almuerzo_cena", emoji:"🥗", desc:"Mezcla lechuga, pollo a la plancha, picatostes y un poco de queso parmesano con salsa césar ligera.",
+  { id:"ac_x24", name:"Ensalada CÃ©sar con pollo", grupo:"almuerzo_cena", emoji:"ðŸ¥—", desc:"Mezcla lechuga, pollo a la plancha, picatostes y un poco de queso parmesano con salsa cÃ©sar ligera.",
     ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Lechuga", kcal:15, p:1, g:0, c:3, base:100 },{ name:"Pan blanco", kcal:265, p:9, g:3, c:49, base:30 },{ name:"Queso parmesano", kcal:431, p:38, g:29, c:4, base:15 }] },
-  { id:"ac_x25", name:"Albóndigas de pavo con tomate", grupo:"almuerzo_cena", emoji:"🍝", desc:"Forma albóndigas con la carne de pavo, dóralas y cuécelas en salsa de tomate. Sirve con pasta o arroz.",
+  { id:"ac_x25", name:"AlbÃ³ndigas de pavo con tomate", grupo:"almuerzo_cena", emoji:"ðŸ", desc:"Forma albÃ³ndigas con la carne de pavo, dÃ³ralas y cuÃ©celas en salsa de tomate. Sirve con pasta o arroz.",
     ingredients:[{ name:"Pechuga de pavo", kcal:135, p:29, g:1, c:0, base:150 },{ name:"Tomate frito", kcal:82, p:2, g:4, c:9, base:120 },{ name:"Arroz blanco", kcal:360, p:7, g:1, c:80, base:60 }] },
-  { id:"ac_x26", name:"Salmón con quinoa y espárragos", grupo:"almuerzo_cena", emoji:"🐟", desc:"Cuece la quinoa, haz el salmón a la plancha y saltea los espárragos. Plato completo y omega-3.",
-    ingredients:[{ name:"Salmón", kcal:208, p:20, g:13, c:0, base:150 },{ name:"Quinoa (seca)", kcal:368, p:14, g:6, c:64, base:60 },{ name:"Espárragos", kcal:20, p:2, g:0, c:4, base:120 }] },
-  { id:"ac_x27", name:"Pisto con huevo", grupo:"almuerzo_cena", emoji:"🍅", desc:"Sofríe calabacín, pimiento, cebolla y tomate hasta hacer el pisto. Sirve con un huevo a la plancha encima.",
-    ingredients:[{ name:"Calabacín", kcal:17, p:1, g:0, c:3, base:150 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:100 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:150 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 }] },
-  { id:"ac_x28", name:"Wrap de pavo y verduras", grupo:"almuerzo_cena", emoji:"🌯", desc:"Rellena la tortilla de trigo con pavo, lechuga, tomate y un poco de queso. Enrolla y listo.",
+  { id:"ac_x26", name:"SalmÃ³n con quinoa y espÃ¡rragos", grupo:"almuerzo_cena", emoji:"ðŸŸ", desc:"Cuece la quinoa, haz el salmÃ³n a la plancha y saltea los espÃ¡rragos. Plato completo y omega-3.",
+    ingredients:[{ name:"SalmÃ³n", kcal:208, p:20, g:13, c:0, base:150 },{ name:"Quinoa (seca)", kcal:368, p:14, g:6, c:64, base:60 },{ name:"EspÃ¡rragos", kcal:20, p:2, g:0, c:4, base:120 }] },
+  { id:"ac_x27", name:"Pisto con huevo", grupo:"almuerzo_cena", emoji:"ðŸ…", desc:"SofrÃ­e calabacÃ­n, pimiento, cebolla y tomate hasta hacer el pisto. Sirve con un huevo a la plancha encima.",
+    ingredients:[{ name:"CalabacÃ­n", kcal:17, p:1, g:0, c:3, base:150 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:100 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:150 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:120 }] },
+  { id:"ac_x28", name:"Wrap de pavo y verduras", grupo:"almuerzo_cena", emoji:"ðŸŒ¯", desc:"Rellena la tortilla de trigo con pavo, lechuga, tomate y un poco de queso. Enrolla y listo.",
     ingredients:[{ name:"Tortilla de trigo (wrap)", kcal:287, p:8, g:5, c:55, base:80 },{ name:"Pavo en lonchas", kcal:104, p:18, g:3, c:1, base:80 },{ name:"Lechuga", kcal:15, p:1, g:0, c:3, base:40 },{ name:"Queso en lonchas", kcal:300, p:18, g:24, c:3, base:20 }] },
-  { id:"ac_x29", name:"Guiso de alubias con verduras", grupo:"almuerzo_cena", emoji:"🍲", desc:"Sofríe verduras, añade las alubias cocidas y caldo. Guisa 15 min. Reconfortante y proteico.",
-    ingredients:[{ name:"Alubias / judías (cocidas)", kcal:127, p:9, g:1, c:23, base:250 },{ name:"Zanahoria", kcal:41, p:1, g:0, c:10, base:80 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:60 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x30", name:"Pechuga rellena de queso y pavo", grupo:"almuerzo_cena", emoji:"🍗", desc:"Abre la pechuga, rellena con queso y pavo, ciérrala y hazla al horno o plancha. Sirve con ensalada.",
+  { id:"ac_x29", name:"Guiso de alubias con verduras", grupo:"almuerzo_cena", emoji:"ðŸ²", desc:"SofrÃ­e verduras, aÃ±ade las alubias cocidas y caldo. Guisa 15 min. Reconfortante y proteico.",
+    ingredients:[{ name:"Alubias / judÃ­as (cocidas)", kcal:127, p:9, g:1, c:23, base:250 },{ name:"Zanahoria", kcal:41, p:1, g:0, c:10, base:80 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:60 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
+  { id:"ac_x30", name:"Pechuga rellena de queso y pavo", grupo:"almuerzo_cena", emoji:"ðŸ—", desc:"Abre la pechuga, rellena con queso y pavo, ciÃ©rrala y hazla al horno o plancha. Sirve con ensalada.",
     ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:180 },{ name:"Queso en lonchas", kcal:300, p:18, g:24, c:3, base:20 },{ name:"Pavo en lonchas", kcal:104, p:18, g:3, c:1, base:30 },{ name:"Lechuga", kcal:15, p:1, g:0, c:3, base:80 }] },
-  { id:"ac_x31", name:"Calamares a la plancha con ensalada", grupo:"almuerzo_cena", emoji:"🦑", desc:"Haz los calamares a la plancha con ajo y perejil. Acompaña con ensalada verde.",
+  { id:"ac_x31", name:"Calamares a la plancha con ensalada", grupo:"almuerzo_cena", emoji:"ðŸ¦‘", desc:"Haz los calamares a la plancha con ajo y perejil. AcompaÃ±a con ensalada verde.",
     ingredients:[{ name:"Calamar", kcal:92, p:16, g:1, c:3, base:200 },{ name:"Lechuga", kcal:15, p:1, g:0, c:3, base:80 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:100 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x32", name:"Macarrones con carne picada", grupo:"almuerzo_cena", emoji:"🍝", desc:"Cuece los macarrones. Sofríe la carne picada con tomate y mézclalo todo. Clásico saciante.",
+  { id:"ac_x32", name:"Macarrones con carne picada", grupo:"almuerzo_cena", emoji:"ðŸ", desc:"Cuece los macarrones. SofrÃ­e la carne picada con tomate y mÃ©zclalo todo. ClÃ¡sico saciante.",
     ingredients:[{ name:"Macarrones", kcal:358, p:12, g:1, c:72, base:80 },{ name:"Carne picada mixta", kcal:215, p:19, g:15, c:0, base:120 },{ name:"Tomate frito", kcal:82, p:2, g:4, c:9, base:100 }] },
-  { id:"ac_x33", name:"Trucha al horno con patata", grupo:"almuerzo_cena", emoji:"🐟", desc:"Hornea la trucha con limón y hierbas 18 min. Acompaña con patata asada.",
+  { id:"ac_x33", name:"Trucha al horno con patata", grupo:"almuerzo_cena", emoji:"ðŸŸ", desc:"Hornea la trucha con limÃ³n y hierbas 18 min. AcompaÃ±a con patata asada.",
     ingredients:[{ name:"Trucha", kcal:119, p:20, g:4, c:0, base:200 },{ name:"Patata cocida", kcal:87, p:2, g:0, c:20, base:180 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x34", name:"Ensalada de lentejas y huevo", grupo:"almuerzo_cena", emoji:"🥗", desc:"Mezcla las lentejas cocidas frías con tomate, cebolla y huevo duro. Aliña al gusto.",
+  { id:"ac_x34", name:"Ensalada de lentejas y huevo", grupo:"almuerzo_cena", emoji:"ðŸ¥—", desc:"Mezcla las lentejas cocidas frÃ­as con tomate, cebolla y huevo duro. AliÃ±a al gusto.",
     ingredients:[{ name:"Lentejas (cocidas)", kcal:116, p:9, g:0, c:20, base:200 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:60 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:100 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:40 }] },
-  { id:"ac_x35", name:"Pollo teriyaki con arroz", grupo:"almuerzo_cena", emoji:"🍱", desc:"Saltea el pollo en dados con salsa teriyaki hasta caramelizar. Sirve sobre arroz blanco.",
+  { id:"ac_x35", name:"Pollo teriyaki con arroz", grupo:"almuerzo_cena", emoji:"ðŸ±", desc:"Saltea el pollo en dados con salsa teriyaki hasta caramelizar. Sirve sobre arroz blanco.",
     ingredients:[{ name:"Pechuga de pollo", kcal:165, p:31, g:4, c:0, base:150 },{ name:"Arroz blanco", kcal:360, p:7, g:1, c:80, base:75 },{ name:"Cebolla", kcal:40, p:1, g:0, c:9, base:40 }] },
-  { id:"ac_x36", name:"Crema de verduras con picatostes", grupo:"almuerzo_cena", emoji:"🥣", desc:"Cuece varias verduras y tritura con caldo. Sirve con picatostes de pan tostado.",
+  { id:"ac_x36", name:"Crema de verduras con picatostes", grupo:"almuerzo_cena", emoji:"ðŸ¥£", desc:"Cuece varias verduras y tritura con caldo. Sirve con picatostes de pan tostado.",
     ingredients:[{ name:"Calabaza", kcal:26, p:1, g:0, c:7, base:200 },{ name:"Zanahoria", kcal:41, p:1, g:0, c:10, base:100 },{ name:"Puerro", kcal:61, p:1, g:0, c:14, base:80 },{ name:"Pan integral", kcal:247, p:9, g:3, c:46, base:30 }] },
-  { id:"ac_x37", name:"Bistec de ternera con verduras al horno", grupo:"almuerzo_cena", emoji:"🥩", desc:"Haz el bistec a la plancha al punto que te guste. Acompaña con verduras asadas al horno.",
+  { id:"ac_x37", name:"Bistec de ternera con verduras al horno", grupo:"almuerzo_cena", emoji:"ðŸ¥©", desc:"Haz el bistec a la plancha al punto que te guste. AcompaÃ±a con verduras asadas al horno.",
     ingredients:[{ name:"Ternera magra", kcal:158, p:26, g:6, c:0, base:180 },{ name:"Berenjena", kcal:25, p:1, g:0, c:6, base:120 },{ name:"Pimiento rojo", kcal:31, p:1, g:0, c:6, base:100 },{ name:"Aceite de oliva", kcal:899, p:0, g:100, c:0, base:10 }] },
-  { id:"ac_x38", name:"Tofu salteado con verduras y arroz", grupo:"almuerzo_cena", emoji:"🌱", desc:"Saltea el tofu en dados hasta dorar, añade verduras y salsa de soja. Sirve con arroz. Opción vegana.",
-    ingredients:[{ name:"Tofu", kcal:76, p:8, g:5, c:2, base:200 },{ name:"Arroz integral", kcal:340, p:8, g:2, c:72, base:70 },{ name:"Brócoli", kcal:34, p:3, g:0, c:7, base:120 },{ name:"Zanahoria", kcal:41, p:1, g:0, c:10, base:80 }] },
-  { id:"ac_x39", name:"Mejillones al vapor con ensalada", grupo:"almuerzo_cena", emoji:"🦪", desc:"Abre los mejillones al vapor con un poco de limón. Acompaña con una ensalada fresca.",
+  { id:"ac_x38", name:"Tofu salteado con verduras y arroz", grupo:"almuerzo_cena", emoji:"ðŸŒ±", desc:"Saltea el tofu en dados hasta dorar, aÃ±ade verduras y salsa de soja. Sirve con arroz. OpciÃ³n vegana.",
+    ingredients:[{ name:"Tofu", kcal:76, p:8, g:5, c:2, base:200 },{ name:"Arroz integral", kcal:340, p:8, g:2, c:72, base:70 },{ name:"BrÃ³coli", kcal:34, p:3, g:0, c:7, base:120 },{ name:"Zanahoria", kcal:41, p:1, g:0, c:10, base:80 }] },
+  { id:"ac_x39", name:"Mejillones al vapor con ensalada", grupo:"almuerzo_cena", emoji:"ðŸ¦ª", desc:"Abre los mejillones al vapor con un poco de limÃ³n. AcompaÃ±a con una ensalada fresca.",
     ingredients:[{ name:"Mejillones", kcal:86, p:12, g:2, c:4, base:250 },{ name:"Lechuga", kcal:15, p:1, g:0, c:3, base:80 },{ name:"Tomate", kcal:18, p:1, g:0, c:4, base:100 }] },
-  { id:"ac_x40", name:"Arroz integral con verduras y huevo", grupo:"almuerzo_cena", emoji:"🍚", desc:"Saltea el arroz integral cocido con verduras variadas y añade un huevo revuelto. Tipo arroz tres delicias fit.",
+  { id:"ac_x40", name:"Arroz integral con verduras y huevo", grupo:"almuerzo_cena", emoji:"ðŸš", desc:"Saltea el arroz integral cocido con verduras variadas y aÃ±ade un huevo revuelto. Tipo arroz tres delicias fit.",
     ingredients:[{ name:"Arroz integral", kcal:340, p:8, g:2, c:72, base:80 },{ name:"Guisantes", kcal:81, p:5, g:0, c:14, base:60 },{ name:"Zanahoria", kcal:41, p:1, g:0, c:10, base:60 },{ name:"Huevo entero", kcal:155, p:13, g:11, c:1, base:60 }] },
 ];
 
 
 const DAILY_TIPS = [
-  "Bebe un vaso de agua nada más despertar: activa tu metabolismo y mejora la digestión.",
-  "Prioriza la proteína en cada comida: te sacia más y protege tu masa muscular.",
+  "Bebe un vaso de agua nada mÃ¡s despertar: activa tu metabolismo y mejora la digestiÃ³n.",
+  "Prioriza la proteÃ­na en cada comida: te sacia mÃ¡s y protege tu masa muscular.",
   "Duerme 7-8h: el descanso es cuando tu cuerpo realmente se recupera y crece.",
-  "Camina al menos 8.000 pasos al día. El movimiento constante quema más que una sesión puntual.",
+  "Camina al menos 8.000 pasos al dÃ­a. El movimiento constante quema mÃ¡s que una sesiÃ³n puntual.",
   "Mastica despacio: tu cerebro tarda 20 min en registrar la saciedad.",
-  "No bebas tus calorías. Un refresco puede tener las mismas kcal que un plato entero.",
-  "Entrena con sobrecarga progresiva: añade peso o reps poco a poco cada semana.",
-  "Las verduras llenan el plato con muy pocas calorías. Úsalas a tu favor.",
-  "El déficit calórico manda en la pérdida de grasa, pero la proteína decide si pierdes grasa o músculo.",
-  "Prepara tus comidas con antelación: lo que no planificas, lo improvisas mal.",
-  "Un mal día no arruina tu progreso. La constancia semanal es lo que cuenta.",
-  "El café antes de entrenar mejora el rendimiento y la concentración.",
-  "Pésate siempre en las mismas condiciones: mañana, en ayunas y tras ir al baño.",
-  "La fuerza es la base: más músculo significa más calorías quemadas en reposo.",
-  "No le tengas miedo a los carbohidratos: son tu principal fuente de energía para entrenar.",
-  "Estírate y calienta antes de entrenar para prevenir lesiones.",
-  "El alcohol frena la quema de grasa y arruina la recuperación. Modéralo.",
+  "No bebas tus calorÃ­as. Un refresco puede tener las mismas kcal que un plato entero.",
+  "Entrena con sobrecarga progresiva: aÃ±ade peso o reps poco a poco cada semana.",
+  "Las verduras llenan el plato con muy pocas calorÃ­as. Ãšsalas a tu favor.",
+  "El dÃ©ficit calÃ³rico manda en la pÃ©rdida de grasa, pero la proteÃ­na decide si pierdes grasa o mÃºsculo.",
+  "Prepara tus comidas con antelaciÃ³n: lo que no planificas, lo improvisas mal.",
+  "Un mal dÃ­a no arruina tu progreso. La constancia semanal es lo que cuenta.",
+  "El cafÃ© antes de entrenar mejora el rendimiento y la concentraciÃ³n.",
+  "PÃ©sate siempre en las mismas condiciones: maÃ±ana, en ayunas y tras ir al baÃ±o.",
+  "La fuerza es la base: mÃ¡s mÃºsculo significa mÃ¡s calorÃ­as quemadas en reposo.",
+  "No le tengas miedo a los carbohidratos: son tu principal fuente de energÃ­a para entrenar.",
+  "EstÃ­rate y calienta antes de entrenar para prevenir lesiones.",
+  "El alcohol frena la quema de grasa y arruina la recuperaciÃ³n. ModÃ©ralo.",
   "Come fuentes de grasa saludable: aguacate, frutos secos, aceite de oliva y pescado azul.",
-  "La motivación se acaba, la disciplina permanece. Cumple aunque no tengas ganas.",
-  "Mide tu progreso con fotos y medidas, no solo con la báscula. El músculo pesa.",
+  "La motivaciÃ³n se acaba, la disciplina permanece. Cumple aunque no tengas ganas.",
+  "Mide tu progreso con fotos y medidas, no solo con la bÃ¡scula. El mÃºsculo pesa.",
   "Descansa entre 48-72h cada grupo muscular para que se recupere bien.",
-  "Si tienes hambre entre horas, tira de proteína y fibra antes que de azúcar.",
+  "Si tienes hambre entre horas, tira de proteÃ­na y fibra antes que de azÃºcar.",
   "Tu cuerpo se construye en la cocina y se define en el gimnasio.",
-  "Pequeños cambios sostenibles superan a las dietas extremas que no aguantas.",
-  "Bebe entre 2 y 3 litros de agua al día; más si entrenas fuerte o hace calor.",
+  "PequeÃ±os cambios sostenibles superan a las dietas extremas que no aguantas.",
+  "Bebe entre 2 y 3 litros de agua al dÃ­a; mÃ¡s si entrenas fuerte o hace calor.",
   "Apunta lo que comes: lo que se mide, se mejora.",
-  "La fibra te sacia y cuida tu digestión. Apuesta por verdura, fruta y legumbre.",
-  "Entrena las piernas: es el grupo muscular que más hormonas de crecimiento libera.",
-  "No te saltes el desayuno si eso te lleva a atracarte después.",
+  "La fibra te sacia y cuida tu digestiÃ³n. Apuesta por verdura, fruta y legumbre.",
+  "Entrena las piernas: es el grupo muscular que mÃ¡s hormonas de crecimiento libera.",
+  "No te saltes el desayuno si eso te lleva a atracarte despuÃ©s.",
   "El ayuno intermitente funciona si te ayuda a comer menos, no por magia.",
-  "Cuece o asa en vez de freír: ahorras muchísimas calorías de grasa.",
-  "Los días de descanso también construyen músculo. No los desprecies.",
-  "Tómate fotos cada 2 semanas: el espejo engaña, las fotos no.",
-  "La báscula sube y baja por agua, sal y glucógeno. Mira la tendencia, no el día.",
-  "Come despacio y sin pantallas: comerás menos y disfrutarás más.",
-  "El huevo entero es una de las proteínas más completas y baratas que existen.",
-  "Si entrenas por la mañana, deja la ropa preparada la noche antes.",
-  "La constancia imperfecta gana siempre a la perfección que abandonas.",
-  "Llena medio plato de verdura, un cuarto de proteína y un cuarto de carbohidrato.",
-  "Reduce el azúcar añadido: es el que más fácil te saca del déficit sin enterarte.",
-  "Camina después de comer: ayuda a controlar el azúcar en sangre.",
-  "Entrena con buena técnica antes de subir peso. La forma es la base.",
-  "El estrés crónico sube el cortisol y dificulta perder grasa. Aprende a desconectar.",
-  "Dormir poco aumenta el hambre y los antojos al día siguiente.",
-  "Planifica una comida libre, no un día libre. La diferencia es enorme.",
-  "Las proteínas en polvo son cómodas, pero la comida real siempre es prioridad.",
+  "Cuece o asa en vez de freÃ­r: ahorras muchÃ­simas calorÃ­as de grasa.",
+  "Los dÃ­as de descanso tambiÃ©n construyen mÃºsculo. No los desprecies.",
+  "TÃ³mate fotos cada 2 semanas: el espejo engaÃ±a, las fotos no.",
+  "La bÃ¡scula sube y baja por agua, sal y glucÃ³geno. Mira la tendencia, no el dÃ­a.",
+  "Come despacio y sin pantallas: comerÃ¡s menos y disfrutarÃ¡s mÃ¡s.",
+  "El huevo entero es una de las proteÃ­nas mÃ¡s completas y baratas que existen.",
+  "Si entrenas por la maÃ±ana, deja la ropa preparada la noche antes.",
+  "La constancia imperfecta gana siempre a la perfecciÃ³n que abandonas.",
+  "Llena medio plato de verdura, un cuarto de proteÃ­na y un cuarto de carbohidrato.",
+  "Reduce el azÃºcar aÃ±adido: es el que mÃ¡s fÃ¡cil te saca del dÃ©ficit sin enterarte.",
+  "Camina despuÃ©s de comer: ayuda a controlar el azÃºcar en sangre.",
+  "Entrena con buena tÃ©cnica antes de subir peso. La forma es la base.",
+  "El estrÃ©s crÃ³nico sube el cortisol y dificulta perder grasa. Aprende a desconectar.",
+  "Dormir poco aumenta el hambre y los antojos al dÃ­a siguiente.",
+  "Planifica una comida libre, no un dÃ­a libre. La diferencia es enorme.",
+  "Las proteÃ­nas en polvo son cÃ³modas, pero la comida real siempre es prioridad.",
   "Bebe agua antes de cada comida: ayuda a comer la cantidad justa.",
-  "Más repeticiones con buena técnica supera a más peso con mala forma.",
-  "El progreso no es lineal. Habrá semanas planas; sigue adelante.",
-  "Cocina con especias en vez de salsas: sabor sin calorías de más.",
-  "El plátano antes de entrenar te da energía rápida y potasio.",
+  "MÃ¡s repeticiones con buena tÃ©cnica supera a mÃ¡s peso con mala forma.",
+  "El progreso no es lineal. HabrÃ¡ semanas planas; sigue adelante.",
+  "Cocina con especias en vez de salsas: sabor sin calorÃ­as de mÃ¡s.",
+  "El plÃ¡tano antes de entrenar te da energÃ­a rÃ¡pida y potasio.",
   "Si te aburres de la dieta, cambia alimentos por otros similares, no la abandones.",
   "Entrena el core: te protege la espalda y mejora todos tus levantamientos.",
-  "Un buen calentamiento mejora el rendimiento de toda la sesión.",
+  "Un buen calentamiento mejora el rendimiento de toda la sesiÃ³n.",
   "La avena es un carbohidrato de calidad que te mantiene saciado horas.",
   "No compares tu progreso con el de otros. Compite contigo mismo.",
-  "Las legumbres dan proteína vegetal, fibra y energía a muy bajo coste.",
-  "Deja el móvil fuera del dormitorio: dormirás mejor y más profundo.",
+  "Las legumbres dan proteÃ­na vegetal, fibra y energÃ­a a muy bajo coste.",
+  "Deja el mÃ³vil fuera del dormitorio: dormirÃ¡s mejor y mÃ¡s profundo.",
   "Tener hambre puntual no es malo. No tienes que picar a todas horas.",
-  "El pescado azul (salmón, sardina, caballa) cuida tu corazón y tus articulaciones.",
+  "El pescado azul (salmÃ³n, sardina, caballa) cuida tu corazÃ³n y tus articulaciones.",
   "Entrena aunque sea 20 minutos: hecho es mejor que perfecto.",
-  "El agua con gas y limón puede calmar las ganas de refresco.",
+  "El agua con gas y limÃ³n puede calmar las ganas de refresco.",
   "Cambia el ascensor por las escaleras siempre que puedas.",
-  "La cafeína en exceso por la tarde te roba sueño por la noche.",
-  "Prepara tuppers el domingo: tu yo de entre semana te lo agradecerá.",
-  "Come fruta entera en vez de zumo: más fibra y menos azúcar de golpe.",
-  "Respeta tus horas de sueño igual que respetas tus entrenos.",
-  "El descanso entre series importa: ajusta según tu objetivo de fuerza o resistencia.",
-  "Una buena postura todo el día también es entrenamiento para tu espalda.",
+  "La cafeÃ­na en exceso por la tarde te roba sueÃ±o por la noche.",
+  "Prepara tuppers el domingo: tu yo de entre semana te lo agradecerÃ¡.",
+  "Come fruta entera en vez de zumo: mÃ¡s fibra y menos azÃºcar de golpe.",
+  "Respeta tus horas de sueÃ±o igual que respetas tus entrenos.",
+  "El descanso entre series importa: ajusta segÃºn tu objetivo de fuerza o resistencia.",
+  "Una buena postura todo el dÃ­a tambiÃ©n es entrenamiento para tu espalda.",
   "Cuando comas fuera, decide el plato antes de tener hambre extrema.",
-  "El yogur griego natural es una bomba de proteína para postres y desayunos.",
-  "No elimines grupos de alimentos sin motivo: el equilibrio es más sostenible.",
-  "Empieza el plato por la verdura y la proteína; los hidratos al final.",
-  "Beber suficiente agua mejora tu fuerza y tu concentración en el gym.",
+  "El yogur griego natural es una bomba de proteÃ­na para postres y desayunos.",
+  "No elimines grupos de alimentos sin motivo: el equilibrio es mÃ¡s sostenible.",
+  "Empieza el plato por la verdura y la proteÃ­na; los hidratos al final.",
+  "Beber suficiente agua mejora tu fuerza y tu concentraciÃ³n en el gym.",
   "Si fallas una comida, la siguiente vuelve al plan. No tires la toalla.",
-  "Las nueces y almendras sacian, pero son calóricas: controla la cantidad.",
-  "Trabaja tanto los músculos que ves como los que no (espalda, glúteo, femoral).",
-  "El boniato es una gran alternativa a la patata, con más fibra.",
+  "Las nueces y almendras sacian, pero son calÃ³ricas: controla la cantidad.",
+  "Trabaja tanto los mÃºsculos que ves como los que no (espalda, glÃºteo, femoral).",
+  "El boniato es una gran alternativa a la patata, con mÃ¡s fibra.",
   "Dormir bien regula las hormonas del hambre (leptina y grelina).",
-  "Tu primera serie debe costarte poco; reserva el esfuerzo para las últimas.",
-  "Un puñado de frutos secos es mejor snack que cualquier ultraprocesado.",
-  "Define tu porqué: cuando sepas para qué lo haces, cuesta menos cumplir.",
-  "La proteína también ayuda a recuperar mejor tras el entrenamiento.",
-  "Cocina de más a propósito: tienes la siguiente comida lista sin esfuerzo.",
-  "Reduce ultraprocesados: cuanto más natural el alimento, mejor.",
+  "Tu primera serie debe costarte poco; reserva el esfuerzo para las Ãºltimas.",
+  "Un puÃ±ado de frutos secos es mejor snack que cualquier ultraprocesado.",
+  "Define tu porquÃ©: cuando sepas para quÃ© lo haces, cuesta menos cumplir.",
+  "La proteÃ­na tambiÃ©n ayuda a recuperar mejor tras el entrenamiento.",
+  "Cocina de mÃ¡s a propÃ³sito: tienes la siguiente comida lista sin esfuerzo.",
+  "Reduce ultraprocesados: cuanto mÃ¡s natural el alimento, mejor.",
   "Estira al acabar de entrenar para mejorar tu movilidad a largo plazo.",
   "Bebe agua durante el entrenamiento, no solo al terminar.",
-  "El arroz y la pasta integrales sacian más por su fibra.",
-  "Acuéstate y levántate a la misma hora, también el fin de semana.",
-  "La verdura congelada conserva sus nutrientes y te salva en días sin tiempo.",
-  "No te peses cada día si te obsesiona. Una o dos veces por semana basta.",
-  "Comer proteína en el desayuno reduce los antojos del resto del día.",
-  "Aprende a leer etiquetas: mira las kcal y los azúcares por 100g.",
-  "Entrenar con un compañero aumenta tu constancia y tu intensidad.",
+  "El arroz y la pasta integrales sacian mÃ¡s por su fibra.",
+  "AcuÃ©state y levÃ¡ntate a la misma hora, tambiÃ©n el fin de semana.",
+  "La verdura congelada conserva sus nutrientes y te salva en dÃ­as sin tiempo.",
+  "No te peses cada dÃ­a si te obsesiona. Una o dos veces por semana basta.",
+  "Comer proteÃ­na en el desayuno reduce los antojos del resto del dÃ­a.",
+  "Aprende a leer etiquetas: mira las kcal y los azÃºcares por 100g.",
+  "Entrenar con un compaÃ±ero aumenta tu constancia y tu intensidad.",
   "El cuerpo se adapta: cambia tu rutina cada 6-8 semanas para seguir progresando.",
-  "La sal esconde calorías líquidas: retiene agua y altera la báscula.",
+  "La sal esconde calorÃ­as lÃ­quidas: retiene agua y altera la bÃ¡scula.",
   "Si vas a picar, ten siempre opciones sanas a mano y las malas lejos.",
   "Calienta las articulaciones antes de cargar peso, sobre todo hombros y rodillas.",
-  "El pollo, el pavo y el pescado blanco son proteínas magras ideales en déficit.",
-  "Respira profundo entre series: oxigenas el músculo y rindes mejor.",
+  "El pollo, el pavo y el pescado blanco son proteÃ­nas magras ideales en dÃ©ficit.",
+  "Respira profundo entre series: oxigenas el mÃºsculo y rindes mejor.",
   "Tener un objetivo claro y medible te mantiene enfocado.",
-  "La constancia de meses pesa más que la intensidad de un solo día.",
-  "Un batido de proteína con fruta es un buen recuperador post-entreno.",
-  "No castigues una comida copiosa saltándote la siguiente. Solo retoma el plan.",
-  "El té verde aporta antioxidantes y un pequeño extra de energía.",
+  "La constancia de meses pesa mÃ¡s que la intensidad de un solo dÃ­a.",
+  "Un batido de proteÃ­na con fruta es un buen recuperador post-entreno.",
+  "No castigues una comida copiosa saltÃ¡ndote la siguiente. Solo retoma el plan.",
+  "El tÃ© verde aporta antioxidantes y un pequeÃ±o extra de energÃ­a.",
   "Entrena con rango completo de movimiento para ganar fuerza real.",
-  "Comer suficiente proteína protege tu músculo cuando pierdes peso.",
-  "Apaga pantallas una hora antes de dormir: tu descanso lo notará.",
-  "La cantidad importa: incluso lo sano engorda si te pasas de calorías.",
-  "Si no tienes tiempo de cocinar, ten básicos sanos congelados y en conserva.",
-  "Las claras de huevo son proteína casi pura, sin apenas grasa.",
+  "Comer suficiente proteÃ­na protege tu mÃºsculo cuando pierdes peso.",
+  "Apaga pantallas una hora antes de dormir: tu descanso lo notarÃ¡.",
+  "La cantidad importa: incluso lo sano engorda si te pasas de calorÃ­as.",
+  "Si no tienes tiempo de cocinar, ten bÃ¡sicos sanos congelados y en conserva.",
+  "Las claras de huevo son proteÃ­na casi pura, sin apenas grasa.",
   "El progreso del espejo es lento pero real. Ten paciencia.",
-  "Caminar en ayunas no quema más grasa por arte de magia: lo que cuenta es el total.",
-  "El queso fresco batido y el requesón son grandes aliados proteicos.",
-  "Entrena la respiración y la postura: pequeños detalles, grandes resultados.",
-  "Hidrátate bien: la deshidratación se confunde a menudo con hambre.",
+  "Caminar en ayunas no quema mÃ¡s grasa por arte de magia: lo que cuenta es el total.",
+  "El queso fresco batido y el requesÃ³n son grandes aliados proteicos.",
+  "Entrena la respiraciÃ³n y la postura: pequeÃ±os detalles, grandes resultados.",
+  "HidrÃ¡tate bien: la deshidrataciÃ³n se confunde a menudo con hambre.",
   "Si comes fuera, pide salsas aparte y prioriza plancha o horno.",
-  "Tu peso fluctúa hasta 1-2 kg en un día. No te asustes, mira la media semanal.",
+  "Tu peso fluctÃºa hasta 1-2 kg en un dÃ­a. No te asustes, mira la media semanal.",
   "El descanso activo (paseo, estiramientos) ayuda a recuperar mejor.",
-  "Cuanto más coloridos tus platos de verdura, más variedad de nutrientes.",
-  "La fuerza que ganas hoy es el músculo que defines mañana.",
-  "Come consciente: pregúntate si tienes hambre real o solo aburrimiento.",
-  "El aceite de oliva es grasa sana, pero muy calórico: mídelo con cuchara.",
+  "Cuanto mÃ¡s coloridos tus platos de verdura, mÃ¡s variedad de nutrientes.",
+  "La fuerza que ganas hoy es el mÃºsculo que defines maÃ±ana.",
+  "Come consciente: pregÃºntate si tienes hambre real o solo aburrimiento.",
+  "El aceite de oliva es grasa sana, pero muy calÃ³rico: mÃ­delo con cuchara.",
   "Cumplir tu plan el 90% del tiempo ya te da resultados excelentes.",
-  "La motivación te arranca, el hábito te mantiene.",
-  "Varía tus fuentes de proteína para no aburrirte: carne, pescado, huevo, lácteos.",
-  "Dormir mal una noche no arruina nada; dormir mal siempre, sí.",
-  "Entrena hoy pensando en cómo quieres verte y sentirte en 6 meses.",
-  "Los lácteos desnatados te dan proteína y calcio con menos grasa.",
-  "Bebe agua en lugar de zumos azucarados: ahorras calorías sin esfuerzo.",
-  "Registrar tus comidas unos días te abre los ojos sobre lo que comes de verdad.",
+  "La motivaciÃ³n te arranca, el hÃ¡bito te mantiene.",
+  "VarÃ­a tus fuentes de proteÃ­na para no aburrirte: carne, pescado, huevo, lÃ¡cteos.",
+  "Dormir mal una noche no arruina nada; dormir mal siempre, sÃ­.",
+  "Entrena hoy pensando en cÃ³mo quieres verte y sentirte en 6 meses.",
+  "Los lÃ¡cteos desnatados te dan proteÃ­na y calcio con menos grasa.",
+  "Bebe agua en lugar de zumos azucarados: ahorras calorÃ­as sin esfuerzo.",
+  "Registrar tus comidas unos dÃ­as te abre los ojos sobre lo que comes de verdad.",
   "El descanso es parte del entreno, no lo contrario.",
-  "Si tu objetivo es ganar músculo, necesitas comer un poco por encima de mantenimiento.",
-  "Cada entrenamiento cuenta, aunque no sea tu mejor día.",
-  "La proteína vegetal también suma: tofu, soja, legumbres y seitán.",
-  "No te fíes de los productos light: a veces tienen más azúcar que el normal.",
-  "Cuida tus rodillas y espalda con técnica; la salud va antes que el ego.",
-  "Comer despacio y sentado te ayuda a no comer de más.",
-  "Sé paciente: perder medio kilo de grasa real a la semana ya es un gran ritmo.",
-  "La cena no engorda más por ser de noche; lo que cuenta son las calorías del día.",
-  "Un buen plan de comidas reduce la tentación de improvisar mal.",
-  "Mueve el cuerpo cada día aunque no toque gym: la actividad diaria suma mucho.",
+  "Si tu objetivo es ganar mÃºsculo, necesitas comer un poco por encima de mantenimiento.",
+  "Cada entrenamiento cuenta, aunque no sea tu mejor dÃ­a.",
+  "La proteÃ­na vegetal tambiÃ©n suma: tofu, soja, legumbres y seitÃ¡n.",
+  "No te fÃ­es de los productos light: a veces tienen mÃ¡s azÃºcar que el normal.",
+  "Cuida tus rodillas y espalda con tÃ©cnica; la salud va antes que el ego.",
+  "Comer despacio y sentado te ayuda a no comer de mÃ¡s.",
+  "SÃ© paciente: perder medio kilo de grasa real a la semana ya es un gran ritmo.",
+  "La cena no engorda mÃ¡s por ser de noche; lo que cuenta son las calorÃ­as del dÃ­a.",
+  "Un buen plan de comidas reduce la tentaciÃ³n de improvisar mal.",
+  "Mueve el cuerpo cada dÃ­a aunque no toque gym: la actividad diaria suma mucho.",
   "Si entrenas duro, mereces dormir bien. Prioriza tu descanso.",
-  "Confía en el proceso: los resultados llegan a quien es constante.",
+  "ConfÃ­a en el proceso: los resultados llegan a quien es constante.",
 ];
 
 function getRandomTip() {
@@ -816,182 +817,182 @@ function scaleMealIdea(idea, targetKcal) {
   return { scaled, totals:{ kcal:Math.round(totalK), p:Math.round(totalP), g:Math.round(totalG), c:Math.round(totalC) } };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ENTRENAMIENTO
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 // Objetivos de entrenamiento
 const TRAINING_GOALS = [
-  { id:"running", label:"Running", emoji:"🏃", desc:"Carrera: rodajes, series y ritmo" },
-  { id:"cardio", label:"Cardio / HIIT", emoji:"🔥", desc:"Quema intensa sin salir a correr" },
-  { id:"calistenia", label:"Calistenia", emoji:"🤸", desc:"Domina tu propio peso corporal" },
-  { id:"movilidad", label:"Movilidad", emoji:"🧘", desc:"Flexibilidad y rango de movimiento" },
-  { id:"casa", label:"Entreno en casa", emoji:"🏠", desc:"Con el material que tengas" },
-  { id:"fuerza", label:"Fuerza / Hipertrofia", emoji:"💪", desc:"Gana músculo y fuerza en el gym" },
+  { id:"running", label:"Running", emoji:"ðŸƒ", desc:"Carrera: rodajes, series y ritmo" },
+  { id:"cardio", label:"Cardio / HIIT", emoji:"ðŸ”¥", desc:"Quema intensa sin salir a correr" },
+  { id:"calistenia", label:"Calistenia", emoji:"ðŸ¤¸", desc:"Domina tu propio peso corporal" },
+  { id:"movilidad", label:"Movilidad", emoji:"ðŸ§˜", desc:"Flexibilidad y rango de movimiento" },
+  { id:"casa", label:"Entreno en casa", emoji:"ðŸ ", desc:"Con el material que tengas" },
+  { id:"fuerza", label:"Fuerza / Hipertrofia", emoji:"ðŸ’ª", desc:"Gana mÃºsculo y fuerza en el gym" },
 ];
 
 // Ejercicios de carrera (running puro) vs cardio/HIIT (sin correr)
-const CARDIO_HIIT_NAMES = ["Burpees (cardio)","Jumping jacks","Mountain climbers","Skipping (rodillas altas)","Talones al glúteo","Caminata rápida","Subir escaleras","HIIT carrera"];
-const RUNNING_NAMES = ["Trote continuo suave","Rodaje largo","Series de 400m","Series de 800m","Series de 1000m","Fartlek (cambios de ritmo)","Series en cuesta","Tempo run (ritmo umbral)","Carrera progresiva","Carrera progresiva","Zancadas de carrera","Multisaltos","Plancha para corredor","Puente de glúteo","Elevación de gemelos","Sentadillas (fuerza para correr)","Zancadas","Movilidad de tobillo","Estiramiento isquiotibiales","Estiramiento de gemelo"];
+const CARDIO_HIIT_NAMES = ["Burpees (cardio)","Jumping jacks","Mountain climbers","Skipping (rodillas altas)","Talones al glÃºteo","Caminata rÃ¡pida","Subir escaleras","HIIT carrera"];
+const RUNNING_NAMES = ["Trote continuo suave","Rodaje largo","Series de 400m","Series de 800m","Series de 1000m","Fartlek (cambios de ritmo)","Series en cuesta","Tempo run (ritmo umbral)","Carrera progresiva","Carrera progresiva","Zancadas de carrera","Multisaltos","Plancha para corredor","Puente de glÃºteo","ElevaciÃ³n de gemelos","Sentadillas (fuerza para correr)","Zancadas","Movilidad de tobillo","Estiramiento isquiotibiales","Estiramiento de gemelo"];
 
 // Material disponible (para "en casa")
 const EQUIPMENT = [
-  { id:"peso_corporal", label:"Solo mi peso", emoji:"🧍" },
-  { id:"esterilla", label:"Esterilla", emoji:"🟦" },
-  { id:"bandas", label:"Bandas elásticas", emoji:"➰" },
-  { id:"mancuernas", label:"Mancuernas", emoji:"🏋️" },
-  { id:"kettlebell", label:"Kettlebell", emoji:"🔔" },
-  { id:"dominadas", label:"Barra dominadas", emoji:"🚪" },
-  { id:"banco_barra", label:"Banco + barra", emoji:"🛋️" },
+  { id:"peso_corporal", label:"Solo mi peso", emoji:"ðŸ§" },
+  { id:"esterilla", label:"Esterilla", emoji:"ðŸŸ¦" },
+  { id:"bandas", label:"Bandas elÃ¡sticas", emoji:"âž°" },
+  { id:"mancuernas", label:"Mancuernas", emoji:"ðŸ‹ï¸" },
+  { id:"kettlebell", label:"Kettlebell", emoji:"ðŸ””" },
+  { id:"dominadas", label:"Barra dominadas", emoji:"ðŸšª" },
+  { id:"banco_barra", label:"Banco + barra", emoji:"ðŸ›‹ï¸" },
 ];
 
-// Banco de ejercicios. anim = tipo de animación SVG. equip = material necesario.
+// Banco de ejercicios. anim = tipo de animaciÃ³n SVG. equip = material necesario.
 // group = grupo muscular para sustituciones. metric = tipo de registro.
 
 const EXERCISES = [
-  { id:"press_banca", name:"Press de banca", group:"pecho", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 × 8", rir:"2" },
-  { id:"press_inclinado", name:"Press inclinado con mancuernas", group:"pecho", goals:["fuerza","casa"], equip:["mancuernas","banco_barra"], metric:"peso", series:"4 × 10", rir:"2" },
-  { id:"aperturas", name:"Aperturas con mancuernas", group:"pecho", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"3 × 12", rir:"2" },
-  { id:"sentadilla_barra", name:"Sentadilla con barra", group:"pierna", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 × 8", rir:"2" },
-  { id:"peso_muerto", name:"Peso muerto", group:"espalda", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 × 6", rir:"3" },
-  { id:"prensa", name:"Prensa de piernas", group:"pierna", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"hip_thrust", name:"Hip thrust", group:"pierna", goals:["fuerza","casa"], equip:["banco_barra","mancuernas"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"zancada_mancuerna", name:"Zancadas con mancuernas", group:"pierna", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"3 × 12", rir:"2" },
-  { id:"curl_femoral", name:"Curl femoral", group:"pierna", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"extension_cuadriceps", name:"Extensión de cuádriceps", group:"pierna", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"gemelo_pie", name:"Elevación de gemelos", group:"pierna", goals:["fuerza","casa"], equip:["peso_corporal","mancuernas"], metric:"reps", series:"4 × 20", rir:"2" },
-  { id:"press_militar", name:"Press militar", group:"hombro", goals:["fuerza","casa"], equip:["mancuernas","banco_barra"], metric:"peso", series:"4 × 10", rir:"2" },
-  { id:"elevaciones_laterales", name:"Elevaciones laterales", group:"hombro", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"4 × 15", rir:"2" },
-  { id:"pajaro", name:"Pájaro (deltoides posterior)", group:"hombro", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"3 × 15", rir:"2" },
-  { id:"curl_biceps", name:"Curl de bíceps", group:"brazo", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"curl_martillo", name:"Curl martillo", group:"brazo", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"3 × 12", rir:"2" },
-  { id:"extension_triceps", name:"Extensión de tríceps", group:"brazo", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"press_frances", name:"Press francés", group:"brazo", goals:["fuerza"], equip:["banco_barra","mancuernas"], metric:"peso", series:"3 × 12", rir:"2" },
-  { id:"remo_barra", name:"Remo con barra", group:"espalda", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 × 10", rir:"2" },
-  { id:"remo_mancuerna", name:"Remo con mancuerna", group:"espalda", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"jalon", name:"Jalón al pecho", group:"espalda", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"dominada", name:"Dominadas", group:"espalda", goals:["fuerza","calistenia"], equip:["dominadas"], metric:"reps", series:"4 × 8", rir:"2" },
-  { id:"encogimientos", name:"Encogimientos (trapecio)", group:"espalda", goals:["fuerza"], equip:["mancuernas","banco_barra"], metric:"peso", series:"4 × 15", rir:"2" },
-  { id:"fondos_paralelas", name:"Fondos en paralelas", group:"pecho", goals:["fuerza","calistenia"], equip:["dominadas"], metric:"reps", series:"4 × 10", rir:"2" },
-  { id:"sentadilla_goblet", name:"Sentadilla goblet", group:"pierna", goals:["fuerza","casa"], equip:["mancuernas","kettlebell"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"swing_kb", name:"Kettlebell swing", group:"fullbody", goals:["fuerza","casa"], equip:["kettlebell"], metric:"peso", series:"4 × 15", rir:"2" },
-  { id:"peso_muerto_rumano", name:"Peso muerto rumano", group:"pierna", goals:["fuerza","casa"], equip:["mancuernas","banco_barra"], metric:"peso", series:"4 × 10", rir:"2" },
-  { id:"face_pull", name:"Face pull con banda", group:"hombro", goals:["fuerza","casa"], equip:["bandas"], metric:"reps", series:"3 × 15", rir:"2" },
-  { id:"plancha_lastrada", name:"Plancha", group:"core", goals:["fuerza","calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 60s", rir:"-" },
-  { id:"crunch_abdominal", name:"Abdominales (crunch)", group:"core", goals:["fuerza","calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 × 20", rir:"2" },
-  { id:"flexion", name:"Flexiones", group:"pecho", goals:["calistenia","casa","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 × 12", rir:"2" },
-  { id:"flexion_diamante", name:"Flexiones diamante", group:"brazo", goals:["calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 × 10", rir:"2" },
-  { id:"flexion_inclinada", name:"Flexiones inclinadas", group:"pecho", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"4 × 15", rir:"2" },
-  { id:"flexion_declinada", name:"Flexiones declinadas", group:"pecho", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"4 × 12", rir:"2" },
-  { id:"pino_pared", name:"Pino contra la pared", group:"hombro", goals:["calistenia"], equip:["peso_corporal"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"flexion_pino", name:"Flexiones en pino", group:"hombro", goals:["calistenia"], equip:["peso_corporal"], metric:"reps", series:"3 × 6", rir:"3" },
-  { id:"sentadilla", name:"Sentadilla libre", group:"pierna", goals:["calistenia","casa","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 × 20", rir:"2" },
-  { id:"sentadilla_bulgara", name:"Sentadilla búlgara", group:"pierna", goals:["calistenia","casa","fuerza"], equip:["peso_corporal"], metric:"reps", series:"3 × 12", rir:"2" },
-  { id:"sentadilla_pistol", name:"Sentadilla pistol", group:"pierna", goals:["calistenia"], equip:["peso_corporal"], metric:"reps", series:"3 × 6", rir:"3" },
-  { id:"zancada", name:"Zancadas", group:"pierna", goals:["calistenia","casa","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 12", rir:"2" },
-  { id:"puente_gluteo", name:"Puente de glúteo", group:"pierna", goals:["calistenia","casa","movilidad","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 15", rir:"2" },
-  { id:"dominada_c", name:"Dominadas", group:"espalda", goals:["calistenia","fuerza"], equip:["dominadas"], metric:"reps", series:"4 × 8", rir:"2" },
-  { id:"dominada_supina", name:"Dominadas supinas", group:"espalda", goals:["calistenia","fuerza"], equip:["dominadas"], metric:"reps", series:"4 × 8", rir:"2" },
-  { id:"remo_australiano", name:"Remo australiano", group:"espalda", goals:["calistenia","casa"], equip:["dominadas"], metric:"reps", series:"4 × 12", rir:"2" },
-  { id:"fondos_silla", name:"Fondos en silla/banco", group:"brazo", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"4 × 12", rir:"2" },
-  { id:"fondos_paralelas_c", name:"Fondos en paralelas", group:"pecho", goals:["calistenia","fuerza"], equip:["dominadas"], metric:"reps", series:"4 × 10", rir:"2" },
-  { id:"plancha", name:"Plancha", group:"core", goals:["calistenia","casa","movilidad","fuerza"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 45s", rir:"-" },
-  { id:"plancha_lateral", name:"Plancha lateral", group:"core", goals:["calistenia","casa","movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s/lado", rir:"-" },
-  { id:"hollow", name:"Hollow hold", group:"core", goals:["calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"elevacion_piernas", name:"Elevación de piernas", group:"core", goals:["calistenia","casa"], equip:["peso_corporal","esterilla","dominadas"], metric:"reps", series:"4 × 12", rir:"2" },
-  { id:"crunch", name:"Abdominales (crunch)", group:"core", goals:["calistenia","casa","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 × 20", rir:"2" },
-  { id:"bicicleta", name:"Abdominal bicicleta", group:"core", goals:["calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 20", rir:"2" },
-  { id:"mountain", name:"Mountain climbers", group:"core", goals:["calistenia","casa","running"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 40s", rir:"-" },
-  { id:"burpee", name:"Burpees", group:"fullbody", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"4 × 10", rir:"1" },
-  { id:"subida_cajon", name:"Subidas a cajón/escalón", group:"pierna", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"3 × 12/pierna", rir:"2" },
-  { id:"superman", name:"Superman (lumbar)", group:"espalda", goals:["calistenia","casa","movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 15", rir:"2" },
-  { id:"escalador_archer", name:"Flexión arquero", group:"pecho", goals:["calistenia"], equip:["peso_corporal"], metric:"reps", series:"3 × 8/lado", rir:"2" },
-  { id:"l_sit", name:"L-sit", group:"core", goals:["calistenia"], equip:["peso_corporal","dominadas"], metric:"tiempo", series:"3 × 15s", rir:"-" },
-  { id:"flexion_casa", name:"Flexiones", group:"pecho", goals:["casa","calistenia"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 × 12", rir:"2" },
-  { id:"sentadilla_casa", name:"Sentadilla libre", group:"pierna", goals:["casa","calistenia"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 × 20", rir:"2" },
-  { id:"zancada_casa", name:"Zancadas", group:"pierna", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 12/pierna", rir:"2" },
-  { id:"puente_casa", name:"Puente de glúteo", group:"pierna", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 15", rir:"2" },
-  { id:"plancha_casa", name:"Plancha", group:"core", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 45s", rir:"-" },
-  { id:"burpee_casa", name:"Burpees", group:"fullbody", goals:["casa"], equip:["peso_corporal"], metric:"reps", series:"4 × 10", rir:"1" },
-  { id:"mountain_casa", name:"Mountain climbers", group:"core", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 40s", rir:"-" },
-  { id:"jumping", name:"Jumping jacks", group:"fullbody", goals:["casa"], equip:["peso_corporal"], metric:"tiempo", series:"3 × 45s", rir:"-" },
-  { id:"curl_banda", name:"Curl de bíceps con banda", group:"brazo", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 × 15", rir:"2" },
-  { id:"press_banda", name:"Press con banda", group:"pecho", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 × 15", rir:"2" },
-  { id:"remo_banda", name:"Remo con banda", group:"espalda", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 × 15", rir:"2" },
-  { id:"sentadilla_banda", name:"Sentadilla con banda", group:"pierna", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 × 15", rir:"2" },
-  { id:"abduccion_banda", name:"Abducción de cadera con banda", group:"pierna", goals:["casa"], equip:["bandas"], metric:"reps", series:"3 × 20", rir:"2" },
-  { id:"press_hombro_banda", name:"Press de hombro con banda", group:"hombro", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 × 15", rir:"2" },
-  { id:"curl_mancuerna_casa", name:"Curl de bíceps", group:"brazo", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"press_mancuerna_casa", name:"Press de pecho con mancuernas", group:"pecho", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"remo_mancuerna_casa", name:"Remo con mancuerna", group:"espalda", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"sentadilla_goblet_casa", name:"Sentadilla goblet", group:"pierna", goals:["casa","fuerza"], equip:["mancuernas","kettlebell"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"zancada_mancuerna_casa", name:"Zancadas con mancuernas", group:"pierna", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"3 × 12/pierna", rir:"2" },
-  { id:"elevaciones_casa", name:"Elevaciones laterales", group:"hombro", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"4 × 15", rir:"2" },
-  { id:"swing_casa", name:"Kettlebell swing", group:"fullbody", goals:["casa","fuerza"], equip:["kettlebell"], metric:"peso", series:"4 × 15", rir:"2" },
-  { id:"goblet_kb_casa", name:"Sentadilla goblet con kettlebell", group:"pierna", goals:["casa"], equip:["kettlebell"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"press_kb_casa", name:"Press de hombro con kettlebell", group:"hombro", goals:["casa"], equip:["kettlebell"], metric:"peso", series:"4 × 10", rir:"2" },
-  { id:"remo_kb_casa", name:"Remo con kettlebell", group:"espalda", goals:["casa"], equip:["kettlebell"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"peso_muerto_kb", name:"Peso muerto con kettlebell", group:"pierna", goals:["casa"], equip:["kettlebell","mancuernas"], metric:"peso", series:"4 × 12", rir:"2" },
-  { id:"dominada_casa", name:"Dominadas", group:"espalda", goals:["casa","calistenia"], equip:["dominadas"], metric:"reps", series:"4 × 8", rir:"2" },
-  { id:"press_banca_casa", name:"Press de banca", group:"pecho", goals:["casa","fuerza"], equip:["banco_barra"], metric:"peso", series:"4 × 8", rir:"2" },
-  { id:"subida_cajon_casa", name:"Subidas a escalón", group:"pierna", goals:["casa"], equip:["peso_corporal"], metric:"reps", series:"3 × 15/pierna", rir:"2" },
-  { id:"crunch_casa", name:"Abdominales", group:"core", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 × 20", rir:"2" },
-  { id:"superman_casa", name:"Superman (lumbar)", group:"espalda", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 15", rir:"2" },
+  { id:"press_banca", name:"Press de banca", group:"pecho", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 Ã— 8", rir:"2" },
+  { id:"press_inclinado", name:"Press inclinado con mancuernas", group:"pecho", goals:["fuerza","casa"], equip:["mancuernas","banco_barra"], metric:"peso", series:"4 Ã— 10", rir:"2" },
+  { id:"aperturas", name:"Aperturas con mancuernas", group:"pecho", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"3 Ã— 12", rir:"2" },
+  { id:"sentadilla_barra", name:"Sentadilla con barra", group:"pierna", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 Ã— 8", rir:"2" },
+  { id:"peso_muerto", name:"Peso muerto", group:"espalda", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 Ã— 6", rir:"3" },
+  { id:"prensa", name:"Prensa de piernas", group:"pierna", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"hip_thrust", name:"Hip thrust", group:"pierna", goals:["fuerza","casa"], equip:["banco_barra","mancuernas"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"zancada_mancuerna", name:"Zancadas con mancuernas", group:"pierna", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"3 Ã— 12", rir:"2" },
+  { id:"curl_femoral", name:"Curl femoral", group:"pierna", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"extension_cuadriceps", name:"ExtensiÃ³n de cuÃ¡driceps", group:"pierna", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"gemelo_pie", name:"ElevaciÃ³n de gemelos", group:"pierna", goals:["fuerza","casa"], equip:["peso_corporal","mancuernas"], metric:"reps", series:"4 Ã— 20", rir:"2" },
+  { id:"press_militar", name:"Press militar", group:"hombro", goals:["fuerza","casa"], equip:["mancuernas","banco_barra"], metric:"peso", series:"4 Ã— 10", rir:"2" },
+  { id:"elevaciones_laterales", name:"Elevaciones laterales", group:"hombro", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"4 Ã— 15", rir:"2" },
+  { id:"pajaro", name:"PÃ¡jaro (deltoides posterior)", group:"hombro", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"3 Ã— 15", rir:"2" },
+  { id:"curl_biceps", name:"Curl de bÃ­ceps", group:"brazo", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"curl_martillo", name:"Curl martillo", group:"brazo", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"3 Ã— 12", rir:"2" },
+  { id:"extension_triceps", name:"ExtensiÃ³n de trÃ­ceps", group:"brazo", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"press_frances", name:"Press francÃ©s", group:"brazo", goals:["fuerza"], equip:["banco_barra","mancuernas"], metric:"peso", series:"3 Ã— 12", rir:"2" },
+  { id:"remo_barra", name:"Remo con barra", group:"espalda", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 Ã— 10", rir:"2" },
+  { id:"remo_mancuerna", name:"Remo con mancuerna", group:"espalda", goals:["fuerza","casa"], equip:["mancuernas"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"jalon", name:"JalÃ³n al pecho", group:"espalda", goals:["fuerza"], equip:["banco_barra"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"dominada", name:"Dominadas", group:"espalda", goals:["fuerza","calistenia"], equip:["dominadas"], metric:"reps", series:"4 Ã— 8", rir:"2" },
+  { id:"encogimientos", name:"Encogimientos (trapecio)", group:"espalda", goals:["fuerza"], equip:["mancuernas","banco_barra"], metric:"peso", series:"4 Ã— 15", rir:"2" },
+  { id:"fondos_paralelas", name:"Fondos en paralelas", group:"pecho", goals:["fuerza","calistenia"], equip:["dominadas"], metric:"reps", series:"4 Ã— 10", rir:"2" },
+  { id:"sentadilla_goblet", name:"Sentadilla goblet", group:"pierna", goals:["fuerza","casa"], equip:["mancuernas","kettlebell"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"swing_kb", name:"Kettlebell swing", group:"fullbody", goals:["fuerza","casa"], equip:["kettlebell"], metric:"peso", series:"4 Ã— 15", rir:"2" },
+  { id:"peso_muerto_rumano", name:"Peso muerto rumano", group:"pierna", goals:["fuerza","casa"], equip:["mancuernas","banco_barra"], metric:"peso", series:"4 Ã— 10", rir:"2" },
+  { id:"face_pull", name:"Face pull con banda", group:"hombro", goals:["fuerza","casa"], equip:["bandas"], metric:"reps", series:"3 Ã— 15", rir:"2" },
+  { id:"plancha_lastrada", name:"Plancha", group:"core", goals:["fuerza","calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 60s", rir:"-" },
+  { id:"crunch_abdominal", name:"Abdominales (crunch)", group:"core", goals:["fuerza","calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 Ã— 20", rir:"2" },
+  { id:"flexion", name:"Flexiones", group:"pecho", goals:["calistenia","casa","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 Ã— 12", rir:"2" },
+  { id:"flexion_diamante", name:"Flexiones diamante", group:"brazo", goals:["calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 Ã— 10", rir:"2" },
+  { id:"flexion_inclinada", name:"Flexiones inclinadas", group:"pecho", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"4 Ã— 15", rir:"2" },
+  { id:"flexion_declinada", name:"Flexiones declinadas", group:"pecho", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"4 Ã— 12", rir:"2" },
+  { id:"pino_pared", name:"Pino contra la pared", group:"hombro", goals:["calistenia"], equip:["peso_corporal"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"flexion_pino", name:"Flexiones en pino", group:"hombro", goals:["calistenia"], equip:["peso_corporal"], metric:"reps", series:"3 Ã— 6", rir:"3" },
+  { id:"sentadilla", name:"Sentadilla libre", group:"pierna", goals:["calistenia","casa","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 Ã— 20", rir:"2" },
+  { id:"sentadilla_bulgara", name:"Sentadilla bÃºlgara", group:"pierna", goals:["calistenia","casa","fuerza"], equip:["peso_corporal"], metric:"reps", series:"3 Ã— 12", rir:"2" },
+  { id:"sentadilla_pistol", name:"Sentadilla pistol", group:"pierna", goals:["calistenia"], equip:["peso_corporal"], metric:"reps", series:"3 Ã— 6", rir:"3" },
+  { id:"zancada", name:"Zancadas", group:"pierna", goals:["calistenia","casa","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 12", rir:"2" },
+  { id:"puente_gluteo", name:"Puente de glÃºteo", group:"pierna", goals:["calistenia","casa","movilidad","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 15", rir:"2" },
+  { id:"dominada_c", name:"Dominadas", group:"espalda", goals:["calistenia","fuerza"], equip:["dominadas"], metric:"reps", series:"4 Ã— 8", rir:"2" },
+  { id:"dominada_supina", name:"Dominadas supinas", group:"espalda", goals:["calistenia","fuerza"], equip:["dominadas"], metric:"reps", series:"4 Ã— 8", rir:"2" },
+  { id:"remo_australiano", name:"Remo australiano", group:"espalda", goals:["calistenia","casa"], equip:["dominadas"], metric:"reps", series:"4 Ã— 12", rir:"2" },
+  { id:"fondos_silla", name:"Fondos en silla/banco", group:"brazo", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"4 Ã— 12", rir:"2" },
+  { id:"fondos_paralelas_c", name:"Fondos en paralelas", group:"pecho", goals:["calistenia","fuerza"], equip:["dominadas"], metric:"reps", series:"4 Ã— 10", rir:"2" },
+  { id:"plancha", name:"Plancha", group:"core", goals:["calistenia","casa","movilidad","fuerza"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 45s", rir:"-" },
+  { id:"plancha_lateral", name:"Plancha lateral", group:"core", goals:["calistenia","casa","movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s/lado", rir:"-" },
+  { id:"hollow", name:"Hollow hold", group:"core", goals:["calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"elevacion_piernas", name:"ElevaciÃ³n de piernas", group:"core", goals:["calistenia","casa"], equip:["peso_corporal","esterilla","dominadas"], metric:"reps", series:"4 Ã— 12", rir:"2" },
+  { id:"crunch", name:"Abdominales (crunch)", group:"core", goals:["calistenia","casa","fuerza"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 Ã— 20", rir:"2" },
+  { id:"bicicleta", name:"Abdominal bicicleta", group:"core", goals:["calistenia","casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 20", rir:"2" },
+  { id:"mountain", name:"Mountain climbers", group:"core", goals:["calistenia","casa","running"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 40s", rir:"-" },
+  { id:"burpee", name:"Burpees", group:"fullbody", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"4 Ã— 10", rir:"1" },
+  { id:"subida_cajon", name:"Subidas a cajÃ³n/escalÃ³n", group:"pierna", goals:["calistenia","casa"], equip:["peso_corporal"], metric:"reps", series:"3 Ã— 12/pierna", rir:"2" },
+  { id:"superman", name:"Superman (lumbar)", group:"espalda", goals:["calistenia","casa","movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 15", rir:"2" },
+  { id:"escalador_archer", name:"FlexiÃ³n arquero", group:"pecho", goals:["calistenia"], equip:["peso_corporal"], metric:"reps", series:"3 Ã— 8/lado", rir:"2" },
+  { id:"l_sit", name:"L-sit", group:"core", goals:["calistenia"], equip:["peso_corporal","dominadas"], metric:"tiempo", series:"3 Ã— 15s", rir:"-" },
+  { id:"flexion_casa", name:"Flexiones", group:"pecho", goals:["casa","calistenia"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 Ã— 12", rir:"2" },
+  { id:"sentadilla_casa", name:"Sentadilla libre", group:"pierna", goals:["casa","calistenia"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 Ã— 20", rir:"2" },
+  { id:"zancada_casa", name:"Zancadas", group:"pierna", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 12/pierna", rir:"2" },
+  { id:"puente_casa", name:"Puente de glÃºteo", group:"pierna", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 15", rir:"2" },
+  { id:"plancha_casa", name:"Plancha", group:"core", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 45s", rir:"-" },
+  { id:"burpee_casa", name:"Burpees", group:"fullbody", goals:["casa"], equip:["peso_corporal"], metric:"reps", series:"4 Ã— 10", rir:"1" },
+  { id:"mountain_casa", name:"Mountain climbers", group:"core", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 40s", rir:"-" },
+  { id:"jumping", name:"Jumping jacks", group:"fullbody", goals:["casa"], equip:["peso_corporal"], metric:"tiempo", series:"3 Ã— 45s", rir:"-" },
+  { id:"curl_banda", name:"Curl de bÃ­ceps con banda", group:"brazo", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 Ã— 15", rir:"2" },
+  { id:"press_banda", name:"Press con banda", group:"pecho", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 Ã— 15", rir:"2" },
+  { id:"remo_banda", name:"Remo con banda", group:"espalda", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 Ã— 15", rir:"2" },
+  { id:"sentadilla_banda", name:"Sentadilla con banda", group:"pierna", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 Ã— 15", rir:"2" },
+  { id:"abduccion_banda", name:"AbducciÃ³n de cadera con banda", group:"pierna", goals:["casa"], equip:["bandas"], metric:"reps", series:"3 Ã— 20", rir:"2" },
+  { id:"press_hombro_banda", name:"Press de hombro con banda", group:"hombro", goals:["casa"], equip:["bandas"], metric:"reps", series:"4 Ã— 15", rir:"2" },
+  { id:"curl_mancuerna_casa", name:"Curl de bÃ­ceps", group:"brazo", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"press_mancuerna_casa", name:"Press de pecho con mancuernas", group:"pecho", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"remo_mancuerna_casa", name:"Remo con mancuerna", group:"espalda", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"sentadilla_goblet_casa", name:"Sentadilla goblet", group:"pierna", goals:["casa","fuerza"], equip:["mancuernas","kettlebell"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"zancada_mancuerna_casa", name:"Zancadas con mancuernas", group:"pierna", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"3 Ã— 12/pierna", rir:"2" },
+  { id:"elevaciones_casa", name:"Elevaciones laterales", group:"hombro", goals:["casa","fuerza"], equip:["mancuernas"], metric:"peso", series:"4 Ã— 15", rir:"2" },
+  { id:"swing_casa", name:"Kettlebell swing", group:"fullbody", goals:["casa","fuerza"], equip:["kettlebell"], metric:"peso", series:"4 Ã— 15", rir:"2" },
+  { id:"goblet_kb_casa", name:"Sentadilla goblet con kettlebell", group:"pierna", goals:["casa"], equip:["kettlebell"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"press_kb_casa", name:"Press de hombro con kettlebell", group:"hombro", goals:["casa"], equip:["kettlebell"], metric:"peso", series:"4 Ã— 10", rir:"2" },
+  { id:"remo_kb_casa", name:"Remo con kettlebell", group:"espalda", goals:["casa"], equip:["kettlebell"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"peso_muerto_kb", name:"Peso muerto con kettlebell", group:"pierna", goals:["casa"], equip:["kettlebell","mancuernas"], metric:"peso", series:"4 Ã— 12", rir:"2" },
+  { id:"dominada_casa", name:"Dominadas", group:"espalda", goals:["casa","calistenia"], equip:["dominadas"], metric:"reps", series:"4 Ã— 8", rir:"2" },
+  { id:"press_banca_casa", name:"Press de banca", group:"pecho", goals:["casa","fuerza"], equip:["banco_barra"], metric:"peso", series:"4 Ã— 8", rir:"2" },
+  { id:"subida_cajon_casa", name:"Subidas a escalÃ³n", group:"pierna", goals:["casa"], equip:["peso_corporal"], metric:"reps", series:"3 Ã— 15/pierna", rir:"2" },
+  { id:"crunch_casa", name:"Abdominales", group:"core", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"4 Ã— 20", rir:"2" },
+  { id:"superman_casa", name:"Superman (lumbar)", group:"espalda", goals:["casa"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 15", rir:"2" },
   { id:"trote", name:"Trote continuo suave", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"25-35 min", rir:"-" },
   { id:"rodaje_largo", name:"Rodaje largo", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"45-60 min", rir:"-" },
-  { id:"series_400", name:"Series de 400m", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"6 × 400m", rir:"-" },
-  { id:"series_800", name:"Series de 800m", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"5 × 800m", rir:"-" },
-  { id:"series_1000", name:"Series de 1000m", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"4 × 1000m", rir:"-" },
+  { id:"series_400", name:"Series de 400m", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"6 Ã— 400m", rir:"-" },
+  { id:"series_800", name:"Series de 800m", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"5 Ã— 800m", rir:"-" },
+  { id:"series_1000", name:"Series de 1000m", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"4 Ã— 1000m", rir:"-" },
   { id:"fartlek", name:"Fartlek (cambios de ritmo)", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"30 min", rir:"-" },
-  { id:"cuestas", name:"Series en cuesta", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"8 × 30s", rir:"-" },
+  { id:"cuestas", name:"Series en cuesta", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"8 Ã— 30s", rir:"-" },
   { id:"tempo_run", name:"Tempo run (ritmo umbral)", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"20 min", rir:"-" },
   { id:"progresivo", name:"Carrera progresiva", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"30 min", rir:"-" },
-  { id:"hiit_run", name:"HIIT carrera", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"10 × 30/30", rir:"-" },
-  { id:"skipping_run", name:"Skipping (rodillas altas)", group:"cardio", goals:["running","casa"], equip:["peso_corporal"], metric:"tiempo", series:"4 × 30s", rir:"-" },
-  { id:"talones", name:"Talones al glúteo", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"4 × 30s", rir:"-" },
-  { id:"zancada_run", name:"Zancadas de carrera", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"4 × 20m", rir:"-" },
-  { id:"multisaltos", name:"Multisaltos", group:"pierna", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"4 × 10", rir:"-" },
-  { id:"core_runner", name:"Plancha para corredor", group:"core", goals:["running"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 45s", rir:"-" },
-  { id:"gluteo_runner", name:"Puente de glúteo", group:"pierna", goals:["running"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 15", rir:"2" },
-  { id:"gemelos_runner", name:"Elevación de gemelos", group:"pierna", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"4 × 20", rir:"2" },
-  { id:"sentadilla_runner", name:"Sentadillas (fuerza para correr)", group:"pierna", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"3 × 20", rir:"2" },
-  { id:"zancada_runner", name:"Zancadas", group:"pierna", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"3 × 12/pierna", rir:"2" },
-  { id:"movilidad_tobillo", name:"Movilidad de tobillo", group:"movilidad", goals:["running","movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 × 10/lado", rir:"-" },
-  { id:"estiramiento_isquio", name:"Estiramiento isquiotibiales", group:"movilidad", goals:["running","movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"estiramiento_gemelo", name:"Estiramiento de gemelo", group:"movilidad", goals:["running","movilidad"], equip:["peso_corporal"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"caminata_rapida", name:"Caminata rápida", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"40 min", rir:"-" },
+  { id:"hiit_run", name:"HIIT carrera", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"10 Ã— 30/30", rir:"-" },
+  { id:"skipping_run", name:"Skipping (rodillas altas)", group:"cardio", goals:["running","casa"], equip:["peso_corporal"], metric:"tiempo", series:"4 Ã— 30s", rir:"-" },
+  { id:"talones", name:"Talones al glÃºteo", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"4 Ã— 30s", rir:"-" },
+  { id:"zancada_run", name:"Zancadas de carrera", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"4 Ã— 20m", rir:"-" },
+  { id:"multisaltos", name:"Multisaltos", group:"pierna", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"4 Ã— 10", rir:"-" },
+  { id:"core_runner", name:"Plancha para corredor", group:"core", goals:["running"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 45s", rir:"-" },
+  { id:"gluteo_runner", name:"Puente de glÃºteo", group:"pierna", goals:["running"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 15", rir:"2" },
+  { id:"gemelos_runner", name:"ElevaciÃ³n de gemelos", group:"pierna", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"4 Ã— 20", rir:"2" },
+  { id:"sentadilla_runner", name:"Sentadillas (fuerza para correr)", group:"pierna", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"3 Ã— 20", rir:"2" },
+  { id:"zancada_runner", name:"Zancadas", group:"pierna", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"3 Ã— 12/pierna", rir:"2" },
+  { id:"movilidad_tobillo", name:"Movilidad de tobillo", group:"movilidad", goals:["running","movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 Ã— 10/lado", rir:"-" },
+  { id:"estiramiento_isquio", name:"Estiramiento isquiotibiales", group:"movilidad", goals:["running","movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"estiramiento_gemelo", name:"Estiramiento de gemelo", group:"movilidad", goals:["running","movilidad"], equip:["peso_corporal"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"caminata_rapida", name:"Caminata rÃ¡pida", group:"cardio", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"40 min", rir:"-" },
   { id:"subida_escaleras", name:"Subir escaleras", group:"cardio", goals:["running","casa"], equip:["peso_corporal"], metric:"tiempo", series:"10 min", rir:"-" },
-  { id:"burpee_run", name:"Burpees (cardio)", group:"fullbody", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"4 × 12", rir:"1" },
-  { id:"jumping_run", name:"Jumping jacks", group:"fullbody", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"4 × 45s", rir:"-" },
-  { id:"gato_camello", name:"Gato-camello", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 10", rir:"-" },
-  { id:"cobra", name:"Cobra (estiramiento)", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"nino", name:"Postura del niño", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 40s", rir:"-" },
-  { id:"perro_abajo", name:"Perro boca abajo", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"mundo", name:"Estiramiento del mundo", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"2 × 8/lado", rir:"-" },
-  { id:"rotacion_toracica", name:"Rotación torácica", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"2 × 10/lado", rir:"-" },
-  { id:"circulos_cadera", name:"Círculos de cadera", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 × 10/lado", rir:"-" },
-  { id:"circulos_hombro", name:"Círculos de hombro", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 × 15", rir:"-" },
-  { id:"movilidad_cuello", name:"Movilidad de cuello", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 × 10", rir:"-" },
-  { id:"estiramiento_isquio_m", name:"Estiramiento isquiotibiales", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"estiramiento_cuadriceps", name:"Estiramiento de cuádriceps", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"tiempo", series:"3 × 30s/lado", rir:"-" },
-  { id:"estiramiento_gluteo", name:"Estiramiento de glúteo", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s/lado", rir:"-" },
-  { id:"estiramiento_psoas", name:"Estiramiento de psoas", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s/lado", rir:"-" },
-  { id:"estiramiento_aductores", name:"Estiramiento de aductores", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"estiramiento_pectoral", name:"Estiramiento de pectoral", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"estiramiento_espalda", name:"Estiramiento de espalda", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"mariposa", name:"Estiramiento mariposa", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 40s", rir:"-" },
-  { id:"torsion_espinal", name:"Torsión espinal tumbado", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s/lado", rir:"-" },
-  { id:"cuadrupedia", name:"Movilidad en cuadrupedia", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"2 × 10", rir:"-" },
-  { id:"sentadilla_profunda", name:"Sentadilla profunda (movilidad)", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"puente_movilidad", name:"Puente de glúteo", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 12", rir:"-" },
-  { id:"plancha_movilidad", name:"Plancha", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 × 30s", rir:"-" },
-  { id:"superman_movilidad", name:"Superman (lumbar)", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 × 12", rir:"-" },
-  { id:"movilidad_muneca", name:"Movilidad de muñeca", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 × 10", rir:"-" },
-  { id:"balanceo_pierna", name:"Balanceo de pierna", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 × 12/lado", rir:"-" },
-  { id:"rotacion_cadera_90", name:"Rotaciones de cadera 90/90", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"2 × 8/lado", rir:"-" },
+  { id:"burpee_run", name:"Burpees (cardio)", group:"fullbody", goals:["running"], equip:["peso_corporal"], metric:"reps", series:"4 Ã— 12", rir:"1" },
+  { id:"jumping_run", name:"Jumping jacks", group:"fullbody", goals:["running"], equip:["peso_corporal"], metric:"tiempo", series:"4 Ã— 45s", rir:"-" },
+  { id:"gato_camello", name:"Gato-camello", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 10", rir:"-" },
+  { id:"cobra", name:"Cobra (estiramiento)", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"nino", name:"Postura del niÃ±o", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 40s", rir:"-" },
+  { id:"perro_abajo", name:"Perro boca abajo", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"mundo", name:"Estiramiento del mundo", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"2 Ã— 8/lado", rir:"-" },
+  { id:"rotacion_toracica", name:"RotaciÃ³n torÃ¡cica", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"2 Ã— 10/lado", rir:"-" },
+  { id:"circulos_cadera", name:"CÃ­rculos de cadera", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 Ã— 10/lado", rir:"-" },
+  { id:"circulos_hombro", name:"CÃ­rculos de hombro", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 Ã— 15", rir:"-" },
+  { id:"movilidad_cuello", name:"Movilidad de cuello", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 Ã— 10", rir:"-" },
+  { id:"estiramiento_isquio_m", name:"Estiramiento isquiotibiales", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"estiramiento_cuadriceps", name:"Estiramiento de cuÃ¡driceps", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"tiempo", series:"3 Ã— 30s/lado", rir:"-" },
+  { id:"estiramiento_gluteo", name:"Estiramiento de glÃºteo", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s/lado", rir:"-" },
+  { id:"estiramiento_psoas", name:"Estiramiento de psoas", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s/lado", rir:"-" },
+  { id:"estiramiento_aductores", name:"Estiramiento de aductores", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"estiramiento_pectoral", name:"Estiramiento de pectoral", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"estiramiento_espalda", name:"Estiramiento de espalda", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"mariposa", name:"Estiramiento mariposa", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 40s", rir:"-" },
+  { id:"torsion_espinal", name:"TorsiÃ³n espinal tumbado", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s/lado", rir:"-" },
+  { id:"cuadrupedia", name:"Movilidad en cuadrupedia", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"2 Ã— 10", rir:"-" },
+  { id:"sentadilla_profunda", name:"Sentadilla profunda (movilidad)", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"puente_movilidad", name:"Puente de glÃºteo", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 12", rir:"-" },
+  { id:"plancha_movilidad", name:"Plancha", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"tiempo", series:"3 Ã— 30s", rir:"-" },
+  { id:"superman_movilidad", name:"Superman (lumbar)", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"3 Ã— 12", rir:"-" },
+  { id:"movilidad_muneca", name:"Movilidad de muÃ±eca", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 Ã— 10", rir:"-" },
+  { id:"balanceo_pierna", name:"Balanceo de pierna", group:"movilidad", goals:["movilidad"], equip:["peso_corporal"], metric:"reps", series:"2 Ã— 12/lado", rir:"-" },
+  { id:"rotacion_cadera_90", name:"Rotaciones de cadera 90/90", group:"movilidad", goals:["movilidad"], equip:["peso_corporal","esterilla"], metric:"reps", series:"2 Ã— 8/lado", rir:"-" },
 ];
 
-// Genera una rutina según objetivo y material
+// Genera una rutina segÃºn objetivo y material
 function generateWorkout(goal, equipment, seed = 0, muscleGroups = null) {
   let pool;
   if (goal === "cardio") {
@@ -1034,9 +1035,9 @@ function getAlternatives(exercise, goal, equipment) {
   );
 }
 
-// Clasifica un alimento según el macro que más calorías aporta
+// Clasifica un alimento segÃºn el macro que mÃ¡s calorÃ­as aporta
 function classifyFood({ p, g, c }) {
-  const kcalP = (p||0) * 4;   // proteína: 4 kcal/g
+  const kcalP = (p||0) * 4;   // proteÃ­na: 4 kcal/g
   const kcalG = (g||0) * 9;   // grasa: 9 kcal/g
   const kcalC = (c||0) * 4;   // hidratos: 4 kcal/g
   const max = Math.max(kcalP, kcalG, kcalC);
@@ -1046,8 +1047,8 @@ function classifyFood({ p, g, c }) {
   return "hidrato";
 }
 
-// Calcula el objetivo de agua diario (ml) según peso, objetivo y actividad.
-// Coge el ml/kg más exigente entre el de actividad y el de objetivo.
+// Calcula el objetivo de agua diario (ml) segÃºn peso, objetivo y actividad.
+// Coge el ml/kg mÃ¡s exigente entre el de actividad y el de objetivo.
 function calcWaterGoal(u) {
   const weight = parseFloat(u.weight) || 70;
   // ml/kg por actividad
@@ -1078,7 +1079,7 @@ function calcMacros(u) {
   return { tdee, targetKcal, recommendedKcal, adjust, protein, fat, carbs };
 }
 
-// ── FECHAS ────────────────────────────────────────────────────────────────────
+// â”€â”€ FECHAS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function dateKey(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth()+1).padStart(2,"0");
@@ -1086,7 +1087,7 @@ function dateKey(d) {
   return `${y}-${m}-${day}`;
 }
 function formatDateLong(d) {
-  const dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+  const dias = ["Domingo","Lunes","Martes","MiÃ©rcoles","Jueves","Viernes","SÃ¡bado"];
   const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
   return `${dias[d.getDay()]}, ${d.getDate()} ${meses[d.getMonth()]}`;
 }
@@ -1123,15 +1124,15 @@ function initMealState(num) {
   const meals = getMeals(num);
   const state = {};
   meals.forEach((m, idx) => {
-    // El postre va en la última comida del día
+    // El postre va en la Ãºltima comida del dÃ­a
     const isLast = idx === meals.length - 1;
     state[m.id] = emptyMeal(isLast);
   });
   return state;
 }
 
-// ── LOGROS ──────────────────────────────────────────────────────────────────
-// Calcula racha de días consecutivos con registro (peso o nutrición)
+// â”€â”€ LOGROS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Calcula racha de dÃ­as consecutivos con registro (peso o nutriciÃ³n)
 function calcStreak(datesSet, today) {
   let streak = 0;
   let d = new Date(today);
@@ -1143,9 +1144,9 @@ function calcStreak(datesSet, today) {
   return streak;
 }
 
-// Progresión de hitos (en días): 3d, 1sem, 2sem, 3sem, 1-12 meses, 1 año, luego mensual hasta 2 años
+// ProgresiÃ³n de hitos (en dÃ­as): 3d, 1sem, 2sem, 3sem, 1-12 meses, 1 aÃ±o, luego mensual hasta 2 aÃ±os
 const MILESTONES = [
-  { days:3, label:"3 días" },
+  { days:3, label:"3 dÃ­as" },
   { days:7, label:"1 semana" },
   { days:14, label:"2 semanas" },
   { days:21, label:"3 semanas" },
@@ -1160,23 +1161,23 @@ const MILESTONES = [
   { days:270, label:"9 meses" },
   { days:300, label:"10 meses" },
   { days:330, label:"11 meses" },
-  { days:365, label:"1 año", special:true },
-  { days:395, label:"1 año y 1 mes" },
-  { days:425, label:"1 año y 2 meses" },
-  { days:455, label:"1 año y 3 meses" },
-  { days:485, label:"1 año y 4 meses" },
-  { days:515, label:"1 año y 5 meses" },
-  { days:545, label:"1 año y 6 meses" },
+  { days:365, label:"1 aÃ±o", special:true },
+  { days:395, label:"1 aÃ±o y 1 mes" },
+  { days:425, label:"1 aÃ±o y 2 meses" },
+  { days:455, label:"1 aÃ±o y 3 meses" },
+  { days:485, label:"1 aÃ±o y 4 meses" },
+  { days:515, label:"1 aÃ±o y 5 meses" },
+  { days:545, label:"1 aÃ±o y 6 meses" },
 ];
 
 // Emojis por nivel de progreso
 function milestoneEmoji(idx, special, unlocked, prefix) {
-  if (special) return "👑";
-  const tiers = ["🔥","⚡","💪","💎","🌟","🚀","🏅","🥇","🎖️"];
+  if (special) return "ðŸ‘‘";
+  const tiers = ["ðŸ”¥","âš¡","ðŸ’ª","ðŸ’Ž","ðŸŒŸ","ðŸš€","ðŸ…","ðŸ¥‡","ðŸŽ–ï¸"];
   return tiers[Math.min(idx, tiers.length-1)];
 }
 
-// Genera logros para una categoría (dieta/hidratación = días seguidos; entreno = total)
+// Genera logros para una categorÃ­a (dieta/hidrataciÃ³n = dÃ­as seguidos; entreno = total)
 function getMilestoneAchievements(prefix, value, label, unitWord) {
   return MILESTONES.map((m, idx) => ({
     id:`${prefix}_${m.days}`,
@@ -1189,24 +1190,24 @@ function getMilestoneAchievements(prefix, value, label, unitWord) {
   }));
 }
 
-// Logros de entrenamiento por número total de entrenos
+// Logros de entrenamiento por nÃºmero total de entrenos
 const WORKOUT_MILESTONES = [3,7,14,21,30,50,75,100,150,200,300,365,500];
 function getWorkoutAchievements(total) {
-  const tiers = ["🔥","⚡","💪","💎","🌟","🚀","🏅","🥇","🎖️","🏆"];
+  const tiers = ["ðŸ”¥","âš¡","ðŸ’ª","ðŸ’Ž","ðŸŒŸ","ðŸš€","ðŸ…","ðŸ¥‡","ðŸŽ–ï¸","ðŸ†"];
   return WORKOUT_MILESTONES.map((n, idx) => ({
     id:`entreno_${n}`,
     title:`${n} entrenos`,
     desc:`${n} entrenamientos completados`,
     threshold:n,
     special: n>=365,
-    emoji: n>=365?"👑":tiers[Math.min(idx, tiers.length-1)],
+    emoji: n>=365?"ðŸ‘‘":tiers[Math.min(idx, tiers.length-1)],
     unlocked: total >= n,
   }));
 }
 
 
 
-// ── STORAGE HOOK ──────────────────────────────────────────────────────────────
+// â”€â”€ STORAGE HOOK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function useLS(key, def) {
   const [val, setVal] = useState(() => {
     try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : def; } catch { return def; }
@@ -1219,7 +1220,33 @@ function useLS(key, def) {
   return [val, set];
 }
 
-// ── COMPONENTES BÁSICOS ───────────────────────────────────────────────────────
+async function saveProfileToSupabase(profile) {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    console.error("No se pudo obtener el usuario para guardar el perfil:", userError);
+    return;
+  }
+
+  const { error } = await supabase.from("profiles").upsert({
+    id: user.id,
+    email: user.email,
+    name: profile.name || null,
+    weight: profile.weight ?? null,
+    height: profile.height ?? null,
+    age: profile.age ?? null,
+    sex: profile.sex || null,
+    activity: profile.activity || null,
+    goal: profile.goal || null,
+    num_meals: profile.numMeals || DEFAULT_NUM_MEALS,
+    kcal_adjust: profile.kcalAdjust || 0,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "id" });
+
+  if (error) console.error("Error guardando perfil en Supabase:", error);
+  else console.log("Perfil guardado en Supabase");
+}
+
+// â”€â”€ COMPONENTES BÃSICOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function MacroCircle({ label, value, target, color }) {
   const pct = Math.min(100, target > 0 ? (value/target)*100 : 0);
   const r = 24; const circ = 2*Math.PI*r;
@@ -1237,16 +1264,16 @@ function MacroCircle({ label, value, target, color }) {
   );
 }
 
-// Gráfica de líneas simple SVG
+// GrÃ¡fica de lÃ­neas simple SVG
 function LineChart({ data, color = "#4caf50", height = 160, unit = "kg", goal }) {
   if (!data || data.length === 0) {
-    return <div style={{ height, display:"flex", alignItems:"center", justifyContent:"center", color:"#444", fontSize:13 }}>Sin datos aún</div>;
+    return <div style={{ height, display:"flex", alignItems:"center", justifyContent:"center", color:"#444", fontSize:13 }}>Sin datos aÃºn</div>;
   }
   if (data.length === 1) {
     return (
       <div style={{ height, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8 }}>
         <div style={{ fontSize:36, fontWeight:900, color }}>{data[0].value}<span style={{ fontSize:16, color:"#666" }}>{unit}</span></div>
-        <div style={{ color:"#555", fontSize:12 }}>Registra más días para ver tu evolución</div>
+        <div style={{ color:"#555", fontSize:12 }}>Registra mÃ¡s dÃ­as para ver tu evoluciÃ³n</div>
       </div>
     );
   }
@@ -1293,7 +1320,7 @@ function LineChart({ data, color = "#4caf50", height = 160, unit = "kg", goal })
 }
 
 // SPLASH
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function SplashScreen() {
   return (
     <div style={{ minHeight:"100vh", background:"radial-gradient(ellipse at center, #14160F 0%, #0A0B07 70%)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", animation:"splashFade 0.5s ease", position:"relative" }}>
@@ -1314,7 +1341,7 @@ function SplashScreen() {
               <stop offset="100%" stopColor="#5FBF00" />
             </linearGradient>
           </defs>
-          {/* Círculo limpio */}
+          {/* CÃ­rculo limpio */}
           <circle cx="50" cy="50" r="44" stroke="url(#smGrad)" strokeWidth="3.5" fill="rgba(168,255,61,0.05)" />
           {/* S grande y elegante */}
           <path d="M70 32 C70 24 60 21 50 21 C39 21 31 27 31 37 C31 46 41 49 50 52 C59 55 69 58 69 68 C69 78 60 81 50 81 C39 81 30 77 30 68"
@@ -1326,14 +1353,14 @@ function SplashScreen() {
         <div style={{ animation:"textRise 0.7s ease 0.5s both", fontFamily:"'Montserrat',sans-serif", fontWeight:700, fontSize:15, letterSpacing:18, marginTop:8, marginLeft:18, color:"#A8FF60" }}>FIT</div>
         <div style={{ height:2, background:"linear-gradient(90deg, transparent, #A8FF60, transparent)", borderRadius:2, margin:"22px auto 0", animation:"lineGrow 1s ease 0.7s both" }} />
       </div>
-      <div style={{ position:"absolute", bottom:46, color:"#4A5240", fontSize:11, letterSpacing:4, textTransform:"uppercase", fontWeight:600, zIndex:2, animation:"textRise 0.7s ease 0.9s both" }}>Entrena · Come · Progresa</div>
+      <div style={{ position:"absolute", bottom:46, color:"#4A5240", fontSize:11, letterSpacing:4, textTransform:"uppercase", fontWeight:600, zIndex:2, animation:"textRise 0.7s ease 0.9s both" }}>Entrena Â· Come Â· Progresa</div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // PERFIL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function ProfileScreen({ initial, onSave }) {
   const [form, setForm] = useState(initial ? { numMeals:3, kcalAdjust:0, ...initial } : { name:"", weight:"", height:"", age:"", sex:"", activity:"", goal:"", numMeals:3, kcalAdjust:0 });
   const [showAdjustWarn, setShowAdjustWarn] = useState(false);
@@ -1342,14 +1369,14 @@ function ProfileScreen({ initial, onSave }) {
   const inp = { width:"100%", padding:"12px 14px", borderRadius:12, border:"2px solid #2a2a3a", background:"#1a1a24", color:"white", fontSize:15, outline:"none", boxSizing:"border-box" };
   const lbl = { fontSize:12, color:"#888", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:6, display:"block" };
 
-  // Calcular calorías recomendadas en vivo (si hay datos suficientes)
+  // Calcular calorÃ­as recomendadas en vivo (si hay datos suficientes)
   const canCalc = form.weight && form.height && form.age && form.sex && form.activity && form.goal;
   const liveMacros = canCalc ? calcMacros({ ...form, weight:parseFloat(form.weight), height:parseFloat(form.height), age:parseFloat(form.age), kcalAdjust:0 }) : null;
 
   return (
     <div style={{ minHeight:"100vh", background:"#0f0f14", padding:"30px 18px 60px" }}>
       <div style={{ fontWeight:900, fontSize:28, color:"white", marginBottom:4 }}>Completa tu perfil</div>
-      <div style={{ color:"#666", fontSize:13, marginBottom:28 }}>Cuéntanos un poco sobre ti para personalizar tus entrenos y tu nutrición</div>
+      <div style={{ color:"#666", fontSize:13, marginBottom:28 }}>CuÃ©ntanos un poco sobre ti para personalizar tus entrenos y tu nutriciÃ³n</div>
 
       <div style={{ marginBottom:14 }}><label style={lbl}>Nombre</label><input style={inp} type="text" placeholder="Tu nombre" value={form.name} onChange={e=>set("name",e.target.value)} /></div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:14 }}>
@@ -1362,13 +1389,13 @@ function ProfileScreen({ initial, onSave }) {
         <label style={lbl}>Sexo</label>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
           {["hombre","mujer"].map(s => (
-            <button key={s} onClick={()=>set("sex",s)} style={{ padding:"12px", borderRadius:12, border:`2px solid ${form.sex===s?"#4caf50":"#2a2a3a"}`, background:form.sex===s?"#1a3a1a":"#1a1a24", color:form.sex===s?"#4caf50":"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>{s==="hombre"?"👨 Hombre":"👩 Mujer"}</button>
+            <button key={s} onClick={()=>set("sex",s)} style={{ padding:"12px", borderRadius:12, border:`2px solid ${form.sex===s?"#4caf50":"#2a2a3a"}`, background:form.sex===s?"#1a3a1a":"#1a1a24", color:form.sex===s?"#4caf50":"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>{s==="hombre"?"ðŸ‘¨ Hombre":"ðŸ‘© Mujer"}</button>
           ))}
         </div>
       </div>
 
       <div style={{ marginBottom:14 }}>
-        <label style={lbl}>Actividad física</label>
+        <label style={lbl}>Actividad fÃ­sica</label>
         {ACTIVITY_LEVELS.map(a => (
           <button key={a.id} onClick={()=>set("activity",a.id)} style={{ width:"100%", marginBottom:8, padding:"12px 14px", borderRadius:12, border:`2px solid ${form.activity===a.id?"#ff9800":"#2a2a3a"}`, background:form.activity===a.id?"#1e1400":"#1a1a24", color:"white", cursor:"pointer", textAlign:"left", display:"flex", justifyContent:"space-between" }}>
             <span style={{ fontWeight:700, color:form.activity===a.id?"#ff9800":"#ccc" }}>{a.label}</span>
@@ -1385,21 +1412,21 @@ function ProfileScreen({ initial, onSave }) {
       </div>
 
       <div style={{ marginBottom:28 }}>
-        <label style={lbl}>Número de comidas al día</label>
+        <label style={lbl}>NÃºmero de comidas al dÃ­a</label>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5, 1fr)", gap:8 }}>
           {[2,3,4,5,6].map(n => (
             <button key={n} onClick={()=>set("numMeals",n)} style={{ padding:"14px 0", borderRadius:12, border:`2px solid ${form.numMeals===n?"#4caf50":"#2a2a3a"}`, background:form.numMeals===n?"#1a3a1a":"#1a1a24", color:form.numMeals===n?"#4caf50":"#888", fontWeight:900, fontSize:18, cursor:"pointer" }}>{n}</button>
           ))}
         </div>
         <div style={{ color:"#666", fontSize:11.5, marginTop:8, lineHeight:1.4 }}>
-          {getMeals(form.numMeals).map(m=>m.label).join(" · ")}
+          {getMeals(form.numMeals).map(m=>m.label).join(" Â· ")}
         </div>
       </div>
 
-      {/* Ajuste manual de calorías */}
+      {/* Ajuste manual de calorÃ­as */}
       {liveMacros && (
         <div style={{ marginBottom:28 }}>
-          <label style={lbl}>Calorías diarias</label>
+          <label style={lbl}>CalorÃ­as diarias</label>
           <div style={{ background:"#1a1a24", borderRadius:14, padding:"16px", border:"1px solid #2a2a3a" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:4 }}>
               <span style={{ color:"#4caf50", fontWeight:900, fontSize:26 }}>{liveMacros.recommendedKcal + (form.kcalAdjust||0)} kcal</span>
@@ -1412,27 +1439,27 @@ function ProfileScreen({ initial, onSave }) {
               onChange={e=>{ const v=parseInt(e.target.value); if(v!==0 && (form.kcalAdjust||0)===0){ setShowAdjustWarn(true); } set("kcalAdjust", v); }}
               style={{ width:"100%", accentColor:"#4caf50" }} />
             <div style={{ display:"flex", justifyContent:"space-between", color:"#555", fontSize:10, marginTop:2 }}>
-              <span>−500</span><span>0</span><span>+500</span>
+              <span>âˆ’500</span><span>0</span><span>+500</span>
             </div>
             {(form.kcalAdjust||0)!==0 && (
-              <button onClick={()=>set("kcalAdjust",0)} style={{ marginTop:10, width:"100%", padding:"8px", borderRadius:10, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontSize:12, fontWeight:600, cursor:"pointer" }}>↺ Volver al valor recomendado</button>
+              <button onClick={()=>set("kcalAdjust",0)} style={{ marginTop:10, width:"100%", padding:"8px", borderRadius:10, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontSize:12, fontWeight:600, cursor:"pointer" }}>â†º Volver al valor recomendado</button>
             )}
           </div>
         </div>
       )}
 
-      <button onClick={()=>valid&&onSave(form)} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:valid?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:valid?"white":"#555", fontWeight:900, fontSize:16, cursor:valid?"pointer":"default" }}>{valid?"Guardar y continuar →":"Rellena todos los campos"}</button>
-      <button onClick={async()=>{ const {supabase:sb} = await import('./supabase.js'); await sb.auth.signOut(); window.location.reload(); }} style={{ width:"100%", marginTop:12, padding:"13px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#666", fontWeight:600, fontSize:14, cursor:"pointer" }}>Cerrar sesión</button>
+      <button onClick={()=>valid&&onSave(form)} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:valid?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:valid?"white":"#555", fontWeight:900, fontSize:16, cursor:valid?"pointer":"default" }}>{valid?"Guardar y continuar â†’":"Rellena todos los campos"}</button>
+      <button onClick={async()=>{ const {supabase:sb} = await import('./supabase.js'); await sb.auth.signOut(); window.location.reload(); }} style={{ width:"100%", marginTop:12, padding:"13px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#666", fontWeight:600, fontSize:14, cursor:"pointer" }}>Cerrar sesiÃ³n</button>
 
-      {/* Aviso al ajustar calorías */}
+      {/* Aviso al ajustar calorÃ­as */}
       {showAdjustWarn && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
           <div style={{ background:"#1a1a24", borderRadius:20, padding:"26px 22px", maxWidth:380, width:"100%", border:"1px solid #ff9800" }}>
-            <div style={{ fontSize:36, textAlign:"center", marginBottom:12 }}>⚠️</div>
-            <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>¿Seguro que quieres cambiarlo?</div>
-            <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:22 }}>El valor calculado es el más adecuado para tu peso, altura, actividad y objetivo. Solo cámbialo si sabes lo que haces (por indicación de un profesional o experiencia propia).</div>
+            <div style={{ fontSize:36, textAlign:"center", marginBottom:12 }}>âš ï¸</div>
+            <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>Â¿Seguro que quieres cambiarlo?</div>
+            <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:22 }}>El valor calculado es el mÃ¡s adecuado para tu peso, altura, actividad y objetivo. Solo cÃ¡mbialo si sabes lo que haces (por indicaciÃ³n de un profesional o experiencia propia).</div>
             <button onClick={()=>setShowAdjustWarn(false)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Lo entiendo, continuar</button>
-            <button onClick={()=>{ set("kcalAdjust",0); setShowAdjustWarn(false); }} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Mejor déjalo recomendado</button>
+            <button onClick={()=>{ set("kcalAdjust",0); setShowAdjustWarn(false); }} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Mejor dÃ©jalo recomendado</button>
           </div>
         </div>
       )}
@@ -1440,20 +1467,20 @@ function ProfileScreen({ initial, onSave }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // BUSCADOR DE ALIMENTOS
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function SearchScreen({ block, existingIds, customFoods, onAdd, onCreateFood, onDeleteFood, onUpdateFoodCat, onBack }) {
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [nf, setNf] = useState({ name:"", kcal:"", p:"", g:"", c:"" });
 
-  // Alimentos propios de esta categoría
+  // Alimentos propios de esta categorÃ­a
   const myFoods = (customFoods||[]).filter(f => f.cat === block.id);
   const all = [...FOOD_DB.filter(f => f.cat === block.id), ...myFoods];
   const results = query.length < 2 ? all : all.filter(f => f.name.toLowerCase().includes(query.toLowerCase()));
 
-  // Previsualización de categoría automática mientras crea
+  // PrevisualizaciÃ³n de categorÃ­a automÃ¡tica mientras crea
   const previewCat = (nf.p||nf.g||nf.c) ? classifyFood({ p:parseFloat(nf.p)||0, g:parseFloat(nf.g)||0, c:parseFloat(nf.c)||0 }) : null;
   const previewBlock = previewCat ? [...BLOCKS, POSTRE_BLOCK].find(b=>b.id===previewCat) : null;
   const canCreate = nf.name.trim() && nf.kcal && (nf.p!==""||nf.g!==""||nf.c!=="");
@@ -1465,23 +1492,23 @@ function SearchScreen({ block, existingIds, customFoods, onAdd, onCreateFood, on
     return (
       <div style={{ minHeight:"100vh", background:"#0f0f14", paddingBottom:60 }}>
         <div style={{ padding:"20px 16px 14px", borderBottom:"1px solid #1e1e28" }}>
-          <button onClick={()=>setCreating(false)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+          <button onClick={()=>setCreating(false)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
           <div style={{ fontWeight:800, fontSize:18, color:"white" }}>Crear alimento</div>
           <div style={{ color:"#666", fontSize:12, marginTop:4 }}>Copia los valores de la etiqueta (por 100g)</div>
         </div>
         <div style={{ padding:"16px" }}>
-          <div style={{ marginBottom:14 }}><label style={lbl}>Nombre del producto</label><input style={inp} value={nf.name} onChange={e=>setNf({...nf,name:e.target.value})} placeholder="Ej: Atún Calvo en aceite" /></div>
-          <div style={{ marginBottom:14 }}><label style={lbl}>Calorías (kcal por 100g)</label><input style={inp} type="number" inputMode="decimal" value={nf.kcal} onChange={e=>setNf({...nf,kcal:e.target.value})} placeholder="Ej: 200" /></div>
+          <div style={{ marginBottom:14 }}><label style={lbl}>Nombre del producto</label><input style={inp} value={nf.name} onChange={e=>setNf({...nf,name:e.target.value})} placeholder="Ej: AtÃºn Calvo en aceite" /></div>
+          <div style={{ marginBottom:14 }}><label style={lbl}>CalorÃ­as (kcal por 100g)</label><input style={inp} type="number" inputMode="decimal" value={nf.kcal} onChange={e=>setNf({...nf,kcal:e.target.value})} placeholder="Ej: 200" /></div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:18 }}>
-            <div><label style={lbl}>Proteína (g)</label><input style={inp} type="number" inputMode="decimal" value={nf.p} onChange={e=>setNf({...nf,p:e.target.value})} placeholder="0" /></div>
+            <div><label style={lbl}>ProteÃ­na (g)</label><input style={inp} type="number" inputMode="decimal" value={nf.p} onChange={e=>setNf({...nf,p:e.target.value})} placeholder="0" /></div>
             <div><label style={lbl}>Grasa (g)</label><input style={inp} type="number" inputMode="decimal" value={nf.g} onChange={e=>setNf({...nf,g:e.target.value})} placeholder="0" /></div>
             <div><label style={lbl}>Hidratos (g)</label><input style={inp} type="number" inputMode="decimal" value={nf.c} onChange={e=>setNf({...nf,c:e.target.value})} placeholder="0" /></div>
           </div>
           {previewBlock && (
             <div style={{ background:"#15201a", border:`1px solid ${previewBlock.color.border}`, borderRadius:12, padding:"12px 14px", marginBottom:18 }}>
-              <div style={{ color:"#888", fontSize:11, marginBottom:3 }}>Se clasificará automáticamente como:</div>
+              <div style={{ color:"#888", fontSize:11, marginBottom:3 }}>Se clasificarÃ¡ automÃ¡ticamente como:</div>
               <div style={{ color:previewBlock.color.border, fontWeight:800, fontSize:15 }}>{previewBlock.emoji} {previewBlock.label}</div>
-              <div style={{ color:"#666", fontSize:11, marginTop:4 }}>Podrás cambiarlo después si quieres</div>
+              <div style={{ color:"#666", fontSize:11, marginTop:4 }}>PodrÃ¡s cambiarlo despuÃ©s si quieres</div>
             </div>
           )}
           <button onClick={()=>{
@@ -1500,12 +1527,12 @@ function SearchScreen({ block, existingIds, customFoods, onAdd, onCreateFood, on
   return (
     <div style={{ minHeight:"100vh", background:"#0f0f14", paddingBottom:60 }}>
       <div style={{ padding:"20px 16px 14px", borderBottom:"1px solid #1e1e28" }}>
-        <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-        <div style={{ fontWeight:800, fontSize:18, color:"white", marginBottom:12 }}>{block.emoji} Añadir {block.label}</div>
+        <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+        <div style={{ fontWeight:800, fontSize:18, color:"white", marginBottom:12 }}>{block.emoji} AÃ±adir {block.label}</div>
         <input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder={`Filtrar ${block.label.toLowerCase()}...`} style={{ width:"100%", padding:"14px", borderRadius:12, border:`2px solid ${block.color.border}`, background:"#1a1a24", color:"white", fontSize:15, outline:"none", boxSizing:"border-box" }} />
       </div>
       <div style={{ padding:"12px 16px" }}>
-        <button onClick={()=>setCreating(true)} style={{ width:"100%", background:"transparent", border:"2px dashed #4caf50", borderRadius:12, padding:"14px", marginBottom:14, cursor:"pointer", color:"#4caf50", fontWeight:800, fontSize:14 }}>➕ Crear alimento nuevo</button>
+        <button onClick={()=>setCreating(true)} style={{ width:"100%", background:"transparent", border:"2px dashed #4caf50", borderRadius:12, padding:"14px", marginBottom:14, cursor:"pointer", color:"#4caf50", fontWeight:800, fontSize:14 }}>âž• Crear alimento nuevo</button>
         {results.map(item => {
           const already = existingIds.includes(item.id);
           const isCustom = item.custom;
@@ -1513,12 +1540,12 @@ function SearchScreen({ block, existingIds, customFoods, onAdd, onCreateFood, on
             <div key={item.id} style={{ width:"100%", background:already?"#1e2a1e":"#1a1a24", border:`1px solid ${already?block.color.border:"#2a2a3a"}`, borderRadius:12, padding:"12px 14px", marginBottom:8, display:"flex", justifyContent:"space-between", alignItems:"center", opacity:already?0.7:1 }}>
               <button onClick={()=>{ if(!already){ onAdd(item); onBack(); } }} style={{ flex:1, minWidth:0, marginRight:10, background:"none", border:"none", textAlign:"left", cursor:already?"default":"pointer", padding:0 }}>
                 <div style={{ color:"white", fontWeight:600, fontSize:14, display:"flex", alignItems:"center", gap:6 }}>{item.name} {isCustom && <span style={{ fontSize:9, background:"#2e7d32", color:"white", borderRadius:6, padding:"1px 6px", fontWeight:700, letterSpacing:0.5 }}>PERSONALIZADO</span>}</div>
-                <div style={{ color:"#888", fontSize:11, marginTop:3 }}>P:{item.p}g · HC:{item.c}g · G:{item.g}g por 100g</div>
+                <div style={{ color:"#888", fontSize:11, marginTop:3 }}>P:{item.p}g Â· HC:{item.c}g Â· G:{item.g}g por 100g</div>
               </button>
               <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4 }}>
                 <div style={{ background:block.color.accent, color:"white", borderRadius:20, padding:"4px 10px", fontSize:12, fontWeight:800 }}>{item.kcal} kcal</div>
-                {already && <span style={{ fontSize:10, color:block.color.border }}>✓ Añadido</span>}
-                {isCustom && !already && <button onClick={()=>onDeleteFood(item.id)} style={{ background:"none", border:"none", color:"#a44", fontSize:11, cursor:"pointer", padding:0 }}>🗑 Borrar</button>}
+                {already && <span style={{ fontSize:10, color:block.color.border }}>âœ“ AÃ±adido</span>}
+                {isCustom && !already && <button onClick={()=>onDeleteFood(item.id)} style={{ background:"none", border:"none", color:"#a44", fontSize:11, cursor:"pointer", padding:0 }}>ðŸ—‘ Borrar</button>}
               </div>
             </div>
           );
@@ -1528,9 +1555,9 @@ function SearchScreen({ block, existingIds, customFoods, onAdd, onCreateFood, on
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MODAL REPARTO
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function MealDistModal({ dist, meals, numMeals, onChange, onClose }) {
   const handleChange = (mealId, newPct) => {
     const others = meals.filter(m => m.id !== mealId);
@@ -1546,10 +1573,10 @@ function MealDistModal({ dist, meals, numMeals, onChange, onClose }) {
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.7)", zIndex:200, display:"flex", alignItems:"flex-end", justifyContent:"center" }} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{ background:"#1a1a24", borderTopLeftRadius:24, borderTopRightRadius:24, padding:"24px 20px 32px", width:"100%", maxWidth:500, maxHeight:"80vh", overflowY:"auto" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
-          <div style={{ fontWeight:900, fontSize:18, color:"white" }}>📊 Reparto de calorías</div>
-          <button onClick={onClose} style={{ background:"none", border:"none", color:"#666", fontSize:22, cursor:"pointer" }}>✕</button>
+          <div style={{ fontWeight:900, fontSize:18, color:"white" }}>ðŸ“Š Reparto de calorÃ­as</div>
+          <button onClick={onClose} style={{ background:"none", border:"none", color:"#666", fontSize:22, cursor:"pointer" }}>âœ•</button>
         </div>
-        <div style={{ color:"#666", fontSize:12, marginBottom:20 }}>Ajusta cuántas kcal van a cada comida</div>
+        <div style={{ color:"#666", fontSize:12, marginBottom:20 }}>Ajusta cuÃ¡ntas kcal van a cada comida</div>
         {meals.map(m => (
           <div key={m.id} style={{ marginBottom:18 }}>
             <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
@@ -1559,16 +1586,16 @@ function MealDistModal({ dist, meals, numMeals, onChange, onClose }) {
             <input type="range" min={5} max={70} value={dist[m.id]||0} onChange={e=>handleChange(m.id, parseInt(e.target.value))} style={{ width:"100%", accentColor:"#4caf50" }} />
           </div>
         ))}
-        <button onClick={()=>onChange(getDefaultDist(numMeals))} style={{ width:"100%", padding:"12px", marginTop:8, marginBottom:8, borderRadius:12, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontSize:13, fontWeight:600, cursor:"pointer" }}>↺ Repartir por igual</button>
+        <button onClick={()=>onChange(getDefaultDist(numMeals))} style={{ width:"100%", padding:"12px", marginTop:8, marginBottom:8, borderRadius:12, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontSize:13, fontWeight:600, cursor:"pointer" }}>â†º Repartir por igual</button>
         <button onClick={onClose} style={{ width:"100%", padding:"14px", borderRadius:12, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontSize:15, fontWeight:800, cursor:"pointer" }}>Listo</button>
       </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // IDEAS DE COMIDAS (ajustadas a macros)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
   const [filter, setFilter] = useState("todas");
   const [openInfo, setOpenInfo] = useState(null);
@@ -1578,9 +1605,9 @@ function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
 
   useEffect(() => { window.scrollTo(0, 0); }, [openInfo]);
 
-  // kcal objetivo según el grupo de la receta (usa el reparto del usuario)
+  // kcal objetivo segÃºn el grupo de la receta (usa el reparto del usuario)
   const kcalForGroup = (grupo) => {
-    // desayuno_merienda → toma el % del desayuno; almuerzo_cena → el de la cena (o almuerzo)
+    // desayuno_merienda â†’ toma el % del desayuno; almuerzo_cena â†’ el de la cena (o almuerzo)
     const mealId = grupo==="desayuno_merienda" ? "desayuno" : "cena";
     let pct = mealDist[mealId];
     if (!pct) {
@@ -1592,8 +1619,8 @@ function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
 
   const tipos = [
     { id:"todas", label:"Todas" },
-    { id:"desayuno_merienda", label:"🌅 Desayuno / Merienda" },
-    { id:"almuerzo_cena", label:"🍽️ Almuerzo / Cena" },
+    { id:"desayuno_merienda", label:"ðŸŒ… Desayuno / Merienda" },
+    { id:"almuerzo_cena", label:"ðŸ½ï¸ Almuerzo / Cena" },
   ];
 
   const ideas = filter==="todas" ? MEAL_IDEAS : MEAL_IDEAS.filter(i=>i.grupo===filter);
@@ -1601,7 +1628,7 @@ function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
   return (
     <div style={{ minHeight:"100vh", background:"#0f0f14", paddingBottom:40 }}>
       <div style={{ padding:"20px 16px 14px", borderBottom:"1px solid #1e1e28" }}>
-        <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
         <div style={{ fontWeight:900, fontSize:20, color:"white" }}>Recetas para tus macros</div>
         <div style={{ color:"#666", fontSize:12, marginTop:4 }}>Cantidades ajustadas a tus macros. Si cambias tus datos, se recalculan solas.</div>
       </div>
@@ -1625,12 +1652,12 @@ function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
                     <span>{idea.emoji} {idea.name}</span>
                     <button onClick={()=>setOpenInfo(openInfo===idea.id?null:idea.id)} style={{ width:20, height:20, borderRadius:"50%", border:`1px solid ${openInfo===idea.id?"#4caf50":"#444"}`, background:openInfo===idea.id?"#1a3a1a":"transparent", color:openInfo===idea.id?"#4caf50":"#888", fontSize:12, fontWeight:800, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, flexShrink:0, fontStyle:"italic", fontFamily:"Georgia, serif" }}>i</button>
                   </div>
-                  <div style={{ color:"#666", fontSize:11, marginTop:2 }}>{tipoLabel} · ~{totals.kcal} kcal</div>
+                  <div style={{ color:"#666", fontSize:11, marginTop:2 }}>{tipoLabel} Â· ~{totals.kcal} kcal</div>
                 </div>
               </div>
               {openInfo===idea.id && (
                 <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:12, padding:"12px 14px", marginBottom:12 }}>
-                  <div style={{ color:"#8bc34a", fontSize:11, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>👨‍🍳 Cómo prepararla</div>
+                  <div style={{ color:"#8bc34a", fontSize:11, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>ðŸ‘¨â€ðŸ³ CÃ³mo prepararla</div>
                   <div style={{ color:"#cde", fontSize:12.5, lineHeight:1.5 }}>{idea.desc}</div>
                 </div>
               )}
@@ -1643,11 +1670,11 @@ function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
                 ))}
               </div>
               <div style={{ display:"flex", justifyContent:"space-around", background:"#0f0f14", borderRadius:10, padding:"8px 0", marginBottom:12 }}>
-                <div style={{ textAlign:"center" }}><div style={{ color:"#4caf50", fontWeight:800, fontSize:14 }}>{totals.p}g</div><div style={{ color:"#666", fontSize:10 }}>Proteína</div></div>
+                <div style={{ textAlign:"center" }}><div style={{ color:"#4caf50", fontWeight:800, fontSize:14 }}>{totals.p}g</div><div style={{ color:"#666", fontSize:10 }}>ProteÃ­na</div></div>
                 <div style={{ textAlign:"center" }}><div style={{ color:"#e91e63", fontWeight:800, fontSize:14 }}>{totals.g}g</div><div style={{ color:"#666", fontSize:10 }}>Grasa</div></div>
                 <div style={{ textAlign:"center" }}><div style={{ color:"#ff9800", fontWeight:800, fontSize:14 }}>{totals.c}g</div><div style={{ color:"#666", fontSize:10 }}>Hidratos</div></div>
               </div>
-              <button onClick={()=>setSelectingMeal({ idea, scaled, totals })} style={{ width:"100%", padding:"12px", borderRadius:12, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:14, cursor:"pointer" }}>➕ Añadir a una comida</button>
+              <button onClick={()=>setSelectingMeal({ idea, scaled, totals })} style={{ width:"100%", padding:"12px", borderRadius:12, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:14, cursor:"pointer" }}>âž• AÃ±adir a una comida</button>
             </div>
           );
         })}
@@ -1658,10 +1685,10 @@ function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.7)", backdropFilter:"blur(3px)", WebkitBackdropFilter:"blur(3px)", zIndex:250, display:"flex", alignItems:"flex-end", justifyContent:"center", animation:"fade-in 0.2s ease" }} onClick={()=>setSelectingMeal(null)}>
           <div onClick={e=>e.stopPropagation()} style={{ background:"#1a1a24", borderTopLeftRadius:24, borderTopRightRadius:24, padding:"24px 20px 32px", width:"100%", maxWidth:500, animation:"rise-up 0.3s ease" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
-              <div style={{ fontWeight:900, fontSize:17, color:"white" }}>¿En qué comida?</div>
-              <button onClick={()=>setSelectingMeal(null)} style={{ background:"none", border:"none", color:"#666", fontSize:22, cursor:"pointer" }}>✕</button>
+              <div style={{ fontWeight:900, fontSize:17, color:"white" }}>Â¿En quÃ© comida?</div>
+              <button onClick={()=>setSelectingMeal(null)} style={{ background:"none", border:"none", color:"#666", fontSize:22, cursor:"pointer" }}>âœ•</button>
             </div>
-            <div style={{ color:"#666", fontSize:12, marginBottom:18 }}>{selectingMeal.idea.name} · ~{selectingMeal.totals.kcal} kcal</div>
+            <div style={{ color:"#666", fontSize:12, marginBottom:18 }}>{selectingMeal.idea.name} Â· ~{selectingMeal.totals.kcal} kcal</div>
             {mealList.map(m => (
               <button key={m.id} onClick={()=>{ setConfirmAdd({ idea:selectingMeal.idea, scaled:selectingMeal.scaled, totals:selectingMeal.totals, mealId:m.id, mealLabel:m.label }); setSelectingMeal(null); }} style={{ width:"100%", marginBottom:10, padding:"15px", borderRadius:14, border:"1px solid #2a2a3a", background:"#15151c", cursor:"pointer", display:"flex", alignItems:"center", gap:12, textAlign:"left" }}>
                 <span style={{ color:"white", fontWeight:700, fontSize:15 }}>{m.label}</span>
@@ -1671,19 +1698,19 @@ function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
         </div>
       )}
 
-      {/* Pop-up confirmar añadir receta */}
+      {/* Pop-up confirmar aÃ±adir receta */}
       {confirmAdd && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.78)", backdropFilter:"blur(4px)", WebkitBackdropFilter:"blur(4px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", animation:"fade-in 0.25s ease" }}>
           <div style={{ background:"#1a1a24", borderRadius:20, padding:"28px 22px", maxWidth:360, width:"100%", border:"1px solid #2a2a3a", animation:"scale-fade 0.3s ease" }}>
-            <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>¿Añadir esta receta a {confirmAdd.mealLabel}?</div>
-            <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>{confirmAdd.idea.name} · ~{confirmAdd.totals.kcal} kcal. Sus ingredientes se añadirán a tu {confirmAdd.mealLabel.toLowerCase()}.</div>
-            <button onClick={()=>{ onAddRecipe(confirmAdd.idea, confirmAdd.scaled, confirmAdd.mealId); const lbl=confirmAdd.mealLabel; setConfirmAdd(null); setCelebrateAdd(lbl); setTimeout(()=>{ setCelebrateAdd(null); onBack(); }, 2200); }} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Sí, añadir</button>
+            <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>Â¿AÃ±adir esta receta a {confirmAdd.mealLabel}?</div>
+            <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>{confirmAdd.idea.name} Â· ~{confirmAdd.totals.kcal} kcal. Sus ingredientes se aÃ±adirÃ¡n a tu {confirmAdd.mealLabel.toLowerCase()}.</div>
+            <button onClick={()=>{ onAddRecipe(confirmAdd.idea, confirmAdd.scaled, confirmAdd.mealId); const lbl=confirmAdd.mealLabel; setConfirmAdd(null); setCelebrateAdd(lbl); setTimeout(()=>{ setCelebrateAdd(null); onBack(); }, 2200); }} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>SÃ­, aÃ±adir</button>
             <button onClick={()=>setConfirmAdd(null)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Cancelar</button>
           </div>
         </div>
       )}
 
-      {/* Animación de receta añadida (estilo entreno) */}
+      {/* AnimaciÃ³n de receta aÃ±adida (estilo entreno) */}
       {celebrateAdd && (
         <div style={{ position:"fixed", inset:0, background:"radial-gradient(circle at center, #16201a 0%, #0a0d0a 100%)", zIndex:400, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", animation:"fade-in 0.3s ease", padding:"24px" }}>
           <div style={{ position:"relative", width:120, height:120, marginBottom:28, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", animation:"glow-pulse 1.6s ease-out 0.4s" }}>
@@ -1697,7 +1724,7 @@ function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
                 style={{ strokeDasharray:1, strokeDashoffset:1, animation:"draw-line 0.4s ease-out 0.85s forwards" }} />
             </svg>
           </div>
-          <div style={{ color:"white", fontWeight:900, fontSize:24, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.8s both" }}>Receta añadida</div>
+          <div style={{ color:"white", fontWeight:900, fontSize:24, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.8s both" }}>Receta aÃ±adida</div>
           <div style={{ color:"#4caf50", fontSize:14, marginTop:8, fontWeight:600, letterSpacing:2, textTransform:"uppercase", animation:"rise-up 0.5s ease 1s both" }}>{celebrateAdd}</div>
         </div>
       )}
@@ -1705,9 +1732,9 @@ function MealIdeasScreen({ macros, mealDist, mealList, onAddRecipe, onBack }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PESTAÑA: NUTRICIÓN
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PESTAÃ‘A: NUTRICIÃ“N
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMealDist, currentDate, setCurrentDate, customFoods, onCreateFood, onDeleteFood, onGoProfile }) {
   const mealList = getMeals(numMeals);
   const lastMealId = mealList[mealList.length - 1].id;
@@ -1724,7 +1751,7 @@ function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMeal
   const today = new Date();
   const isToday = isSameDay(currentDate, today);
 
-  // Si la pestaña activa ya no existe (cambió el nº de comidas), volver a la primera
+  // Si la pestaÃ±a activa ya no existe (cambiÃ³ el nÂº de comidas), volver a la primera
   if (!mealList.find(m => m.id === activeTab)) {
     // se corrige en render: usamos la primera
   }
@@ -1750,7 +1777,7 @@ function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMeal
     return nm;
   });
 
-  // Añadir una receta a una comida: mete cada ingrediente en su bloque con gramos FIJOS
+  // AÃ±adir una receta a una comida: mete cada ingrediente en su bloque con gramos FIJOS
   const handleAddRecipe = (idea, scaled, mealId) => {
     updateMeal(mealId, m => {
       const nm = JSON.parse(JSON.stringify(m));
@@ -1760,7 +1787,7 @@ function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMeal
       scaled.forEach((ing, idx) => {
         const meta = macroByName[ing.name] || {};
         // Las verduras van siempre al bloque de verduras (aunque su macro dominante sea hidrato)
-        const VERDURAS = ["Brócoli","Tomate","Tomate natural","Lechuga","Espinacas","Calabacín","Pimiento rojo","Espárragos","Zanahoria","Cebolla","Maíz dulce"];
+        const VERDURAS = ["BrÃ³coli","Tomate","Tomate natural","Lechuga","Espinacas","CalabacÃ­n","Pimiento rojo","EspÃ¡rragos","Zanahoria","Cebolla","MaÃ­z dulce"];
         const cat = VERDURAS.includes(ing.name) ? "verdura" : classifyFood({ p:meta.p||0, g:meta.g||0, c:meta.c||0 });
         const food = {
           id: `recipe_${idea.id}_${idx}_${Date.now()}`,
@@ -1841,33 +1868,33 @@ function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMeal
           <div style={{ width:`${Math.min(100,(overallKcal/macros.targetKcal)*100)}%`, height:"100%", background:barColor, borderRadius:8, transition:"all 0.4s" }} />
         </div>
         <div style={{ display:"flex", justifyContent:"space-around", marginBottom:12 }}>
-          <MacroCircle label="Proteína" value={overallP} target={macros.protein} color="#4caf50" />
+          <MacroCircle label="ProteÃ­na" value={overallP} target={macros.protein} color="#4caf50" />
           <MacroCircle label="Grasa" value={overallG} target={macros.fat} color="#e91e63" />
           <MacroCircle label="Hidratos" value={overallC} target={macros.carbs} color="#ff9800" />
         </div>
         <div style={{ display:"flex", gap:8, marginBottom:10 }}>
           <button onClick={()=>setShowDistModal(true)} style={{ flex:1, background:"linear-gradient(135deg,#1a1a24,#1f1f2e)", border:"1px solid #2a2a3a", borderRadius:12, padding:"10px 14px", cursor:"pointer", color:"#ccc", fontSize:12, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-            <span>📊 Reparto por comida</span>
-            <span style={{ color:"#888", fontSize:11 }}>{numMeals} comidas →</span>
+            <span>ðŸ“Š Reparto por comida</span>
+            <span style={{ color:"#888", fontSize:11 }}>{numMeals} comidas â†’</span>
           </button>
           <button onClick={()=>setShowMealInfo(!showMealInfo)} style={{ width:42, borderRadius:12, border:`1px solid ${showMealInfo?"#4caf50":"#2a2a3a"}`, background:showMealInfo?"#1a3a1a":"linear-gradient(135deg,#1a1a24,#1f1f2e)", color:showMealInfo?"#4caf50":"#888", fontSize:15, fontWeight:800, cursor:"pointer", fontStyle:"italic", fontFamily:"Georgia, serif" }}>i</button>
         </div>
         {showMealInfo && (
           <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:12, padding:"12px 14px", marginBottom:10 }}>
-            <div style={{ color:"#cde", fontSize:12.5, lineHeight:1.5 }}>Tienes <b style={{color:"#4caf50"}}>{numMeals} comidas</b> al día. Puedes cambiar el número de comidas cuando quieras desde el icono de perfil de arriba a la derecha. Tus datos registrados no se borran.</div>
+            <div style={{ color:"#cde", fontSize:12.5, lineHeight:1.5 }}>Tienes <b style={{color:"#4caf50"}}>{numMeals} comidas</b> al dÃ­a. Puedes cambiar el nÃºmero de comidas cuando quieras desde el icono de perfil de arriba a la derecha. Tus datos registrados no se borran.</div>
           </div>
         )}
         <button onClick={()=>setShowIdeas(true)} style={{ width:"100%", background:"linear-gradient(135deg,#0d2818,#15201a)", border:"1px solid #2e7d32", borderRadius:12, padding:"11px 14px", cursor:"pointer", color:"#8bc34a", fontSize:13, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
           <span>Recetas para tus macros</span>
-          <span style={{ fontSize:15 }}>→</span>
+          <span style={{ fontSize:15 }}>â†’</span>
         </button>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:"#1a1a24", border:"1px solid #2a2a3a", borderRadius:12, padding:"8px 6px" }}>
-          <button onClick={()=>setCurrentDate(addDays(currentDate,-1))} style={{ background:"none", border:"none", color:"#4caf50", fontSize:20, cursor:"pointer", padding:"4px 14px" }}>‹</button>
+          <button onClick={()=>setCurrentDate(addDays(currentDate,-1))} style={{ background:"none", border:"none", color:"#4caf50", fontSize:20, cursor:"pointer", padding:"4px 14px" }}>â€¹</button>
           <div style={{ textAlign:"center", flex:1 }}>
-            <div style={{ color:"white", fontWeight:700, fontSize:14 }}>{isToday?"📍 Hoy":formatDateLong(currentDate)}</div>
+            <div style={{ color:"white", fontWeight:700, fontSize:14 }}>{isToday?"ðŸ“ Hoy":formatDateLong(currentDate)}</div>
             {!isToday && <div onClick={()=>setCurrentDate(new Date())} style={{ color:"#4caf50", fontSize:11, cursor:"pointer", marginTop:1 }}>Volver a hoy</div>}
           </div>
-          <button onClick={()=>!isToday && setCurrentDate(addDays(currentDate,1))} disabled={isToday} style={{ background:"none", border:"none", color:isToday?"#333":"#4caf50", fontSize:20, cursor:isToday?"default":"pointer", padding:"4px 14px" }}>›</button>
+          <button onClick={()=>!isToday && setCurrentDate(addDays(currentDate,1))} disabled={isToday} style={{ background:"none", border:"none", color:isToday?"#333":"#4caf50", fontSize:20, cursor:isToday?"default":"pointer", padding:"4px 14px" }}>â€º</button>
         </div>
       </div>
 
@@ -1875,7 +1902,7 @@ function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMeal
         {mealList.map(m => (
           <button key={m.id} onClick={()=>setActiveTab(m.id)} style={{ flex:mealList.length<=4?1:"none", minWidth:mealList.length>4?72:0, padding:"12px 8px", border:"none", background:"none", borderBottom:`3px solid ${safeActiveTab===m.id?"#4caf50":"transparent"}`, color:safeActiveTab===m.id?"#4caf50":"#555", fontWeight:700, fontSize:12, cursor:"pointer", whiteSpace:"nowrap" }}>
             {m.emoji} {m.label}
-            <div style={{ fontSize:10, color:safeActiveTab===m.id?"#4caf50":"#444", marginTop:2 }}>{Math.round(getMealKcal(m.id))}kcal · {mealDist[m.id]||0}%</div>
+            <div style={{ fontSize:10, color:safeActiveTab===m.id?"#4caf50":"#444", marginTop:2 }}>{Math.round(getMealKcal(m.id))}kcal Â· {mealDist[m.id]||0}%</div>
           </button>
         ))}
       </div>
@@ -1901,12 +1928,12 @@ function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMeal
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 14px", borderBottom:isPostre?"1px solid #4a2050":"1px solid #2a2a3a" }}>
                     <div>
                       <div style={{ fontWeight:800, fontSize:15, color:block.color.border }}>{block.emoji} {block.label}</div>
-                      {isPostre && <div style={{ fontSize:10, color:"#777", marginTop:2 }}>Opcional · si no añades, las kcal van a otros bloques</div>}
+                      {isPostre && <div style={{ fontSize:10, color:"#777", marginTop:2 }}>Opcional Â· si no aÃ±ades, las kcal van a otros bloques</div>}
                     </div>
-                    <button onClick={()=>setSearching({ mealId:meal.id, blockId:block.id })} style={{ background:block.color.accent, color:"white", border:"none", borderRadius:20, padding:"7px 16px", fontSize:13, fontWeight:700, cursor:"pointer" }}>+ Añadir</button>
+                    <button onClick={()=>setSearching({ mealId:meal.id, blockId:block.id })} style={{ background:block.color.accent, color:"white", border:"none", borderRadius:20, padding:"7px 16px", fontSize:13, fontWeight:700, cursor:"pointer" }}>+ AÃ±adir</button>
                   </div>
                   <div style={{ padding:"10px 14px" }}>
-                    {foods.length===0 && <div style={{ color:"#444", fontSize:13, textAlign:"center", padding:"10px 0" }}>Pulsa "+ Añadir"</div>}
+                    {foods.length===0 && <div style={{ color:"#444", fontSize:13, textAlign:"center", padding:"10px 0" }}>Pulsa "+ AÃ±adir"</div>}
                     {foods.map(food => {
                       const isSel = selIds.includes(food.id);
                       const pct = mealData.pct[block.id]?.[food.id] || 0;
@@ -1924,13 +1951,13 @@ function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMeal
                       }
                       return (
                         <div key={food.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 0", borderBottom:"1px solid #1e1e28" }}>
-                          <button onClick={()=>toggleSelect(meal.id,block.id,food.id)} style={{ width:28, height:28, borderRadius:8, border:`2px solid ${isSel?block.color.border:"#3a3a4a"}`, background:isSel?block.color.accent:"transparent", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{isSel && <span style={{ color:"white", fontSize:16, fontWeight:900 }}>✓</span>}</button>
+                          <button onClick={()=>toggleSelect(meal.id,block.id,food.id)} style={{ width:28, height:28, borderRadius:8, border:`2px solid ${isSel?block.color.border:"#3a3a4a"}`, background:isSel?block.color.accent:"transparent", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{isSel && <span style={{ color:"white", fontSize:16, fontWeight:900 }}>âœ“</span>}</button>
                           <div style={{ flex:1, minWidth:0 }}>
                             <div style={{ color:isSel?"white":"#888", fontWeight:600, fontSize:13, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{food.name} {food.fg && <span style={{ fontSize:9, background:"#2e7d32", color:"white", borderRadius:6, padding:"1px 5px", fontWeight:700 }}>RECETA</span>}</div>
-                            <div style={{ color:"#555", fontSize:11 }}>{food.kcal}kcal/100g · P:{food.p} HC:{food.c} G:{food.g}</div>
-                            {isSel&&gr>0 && <div style={{ color:block.color.border, fontSize:12, fontWeight:700, marginTop:2 }}>→ {gr}g · {kcalShown}kcal{food.fg?" (fijo)":` (${pct}%)`}</div>}
+                            <div style={{ color:"#555", fontSize:11 }}>{food.kcal}kcal/100g Â· P:{food.p} HC:{food.c} G:{food.g}</div>
+                            {isSel&&gr>0 && <div style={{ color:block.color.border, fontSize:12, fontWeight:700, marginTop:2 }}>â†’ {gr}g Â· {kcalShown}kcal{food.fg?" (fijo)":` (${pct}%)`}</div>}
                           </div>
-                          <button onClick={()=>removeFood(meal.id,block.id,food.id)} style={{ background:"none", border:"none", color:"#444", fontSize:20, cursor:"pointer", padding:"4px 8px", flexShrink:0 }}>✕</button>
+                          <button onClick={()=>removeFood(meal.id,block.id,food.id)} style={{ background:"none", border:"none", color:"#444", fontSize:20, cursor:"pointer", padding:"4px 8px", flexShrink:0 }}>âœ•</button>
                         </div>
                       );
                     })}
@@ -1938,7 +1965,7 @@ function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMeal
                       <div style={{ marginTop:10 }}>
                         <div style={{ display:"flex", gap:8, marginBottom:8 }}>
                           {["igual","manual"].map(mode => (
-                            <button key={mode} onClick={()=>setSplitMode(meal.id,block.id,mode)} style={{ padding:"6px 14px", borderRadius:20, border:`1px solid ${splitMode===mode?block.color.border:"#3a3a4a"}`, background:"transparent", color:splitMode===mode?block.color.border:"#666", fontSize:12, fontWeight:700, cursor:"pointer" }}>{mode==="igual"?"⚖️ Igual":"🎚️ Manual"}</button>
+                            <button key={mode} onClick={()=>setSplitMode(meal.id,block.id,mode)} style={{ padding:"6px 14px", borderRadius:20, border:`1px solid ${splitMode===mode?block.color.border:"#3a3a4a"}`, background:"transparent", color:splitMode===mode?block.color.border:"#666", fontSize:12, fontWeight:700, cursor:"pointer" }}>{mode==="igual"?"âš–ï¸ Igual":"ðŸŽšï¸ Manual"}</button>
                           ))}
                         </div>
                         {splitMode==="manual" && sliderItems.map(item => (
@@ -1972,9 +1999,9 @@ function NutritionTab({ macros, numMeals, history, setHistory, mealDist, setMeal
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PESTAÑA: PESO Y MEDIDAS
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PESTAÃ‘A: PESO Y MEDIDAS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function MeasuresTab({ measureLog, setMeasureLog }) {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -1988,7 +2015,7 @@ function MeasuresTab({ measureLog, setMeasureLog }) {
     setMeasureLog(prev => ({ ...prev, [dKey]: { ...(prev[dKey]||{}), [measureId]: value } }));
   };
 
-  // Datos para la gráfica de la medida activa
+  // Datos para la grÃ¡fica de la medida activa
   const chartData = Object.keys(measureLog).sort().filter(k => measureLog[k][activeMeasure] != null && measureLog[k][activeMeasure] !== "").map(k => ({ label: formatDateShort(parseKey(k)), value: parseFloat(measureLog[k][activeMeasure]) }));
   const activeMeasureObj = MEASURES.find(m=>m.id===activeMeasure);
 
@@ -1997,19 +2024,19 @@ function MeasuresTab({ measureLog, setMeasureLog }) {
       <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Peso y medidas</div>
       <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>Registra tu progreso corporal</div>
 
-      {/* Navegación fecha */}
+      {/* NavegaciÃ³n fecha */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:"#1a1a24", border:"1px solid #2a2a3a", borderRadius:12, padding:"8px 6px", marginBottom:18 }}>
-        <button onClick={()=>setCurrentDate(addDays(currentDate,-1))} style={{ background:"none", border:"none", color:"#4caf50", fontSize:20, cursor:"pointer", padding:"4px 14px" }}>‹</button>
+        <button onClick={()=>setCurrentDate(addDays(currentDate,-1))} style={{ background:"none", border:"none", color:"#4caf50", fontSize:20, cursor:"pointer", padding:"4px 14px" }}>â€¹</button>
         <div style={{ textAlign:"center", flex:1 }}>
-          <div style={{ color:"white", fontWeight:700, fontSize:14 }}>{isToday?"📍 Hoy":formatDateLong(currentDate)}</div>
+          <div style={{ color:"white", fontWeight:700, fontSize:14 }}>{isToday?"ðŸ“ Hoy":formatDateLong(currentDate)}</div>
           {!isToday && <div onClick={()=>setCurrentDate(new Date())} style={{ color:"#4caf50", fontSize:11, cursor:"pointer" }}>Volver a hoy</div>}
         </div>
-        <button onClick={()=>!isToday && setCurrentDate(addDays(currentDate,1))} disabled={isToday} style={{ background:"none", border:"none", color:isToday?"#333":"#4caf50", fontSize:20, cursor:isToday?"default":"pointer", padding:"4px 14px" }}>›</button>
+        <button onClick={()=>!isToday && setCurrentDate(addDays(currentDate,1))} disabled={isToday} style={{ background:"none", border:"none", color:isToday?"#333":"#4caf50", fontSize:20, cursor:isToday?"default":"pointer", padding:"4px 14px" }}>â€º</button>
       </div>
 
       {/* Inputs de medidas */}
       <div style={{ background:"#1a1a24", borderRadius:16, padding:"16px", marginBottom:18, border:"1px solid #2a2a3a" }}>
-        <div style={{ fontSize:13, color:"#888", fontWeight:700, marginBottom:14, textTransform:"uppercase", letterSpacing:1 }}>Registro del día</div>
+        <div style={{ fontSize:13, color:"#888", fontWeight:700, marginBottom:14, textTransform:"uppercase", letterSpacing:1 }}>Registro del dÃ­a</div>
         {MEASURES.map(m => (
           <div key={m.id} style={{ marginBottom:12 }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
@@ -2018,7 +2045,7 @@ function MeasuresTab({ measureLog, setMeasureLog }) {
                 <button onClick={()=>setTipOpen(tipOpen===m.id?null:m.id)} style={{ width:18, height:18, borderRadius:"50%", border:`1px solid ${tipOpen===m.id?"#4caf50":"#444"}`, background:tipOpen===m.id?"#1a3a1a":"transparent", color:tipOpen===m.id?"#4caf50":"#666", fontSize:11, fontWeight:800, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, lineHeight:1, fontStyle:"italic", fontFamily:"Georgia, serif" }}>i</button>
               </div>
               <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                <input type="number" inputMode="decimal" placeholder="—" value={dayData[m.id]||""} onChange={e=>setMeasure(m.id, e.target.value)} style={{ width:80, padding:"8px 10px", borderRadius:10, border:`2px solid ${m.primary?"#4caf50":"#2a2a3a"}`, background:"#0f0f14", color:"white", fontSize:15, textAlign:"right", outline:"none" }} />
+                <input type="number" inputMode="decimal" placeholder="â€”" value={dayData[m.id]||""} onChange={e=>setMeasure(m.id, e.target.value)} style={{ width:80, padding:"8px 10px", borderRadius:10, border:`2px solid ${m.primary?"#4caf50":"#2a2a3a"}`, background:"#0f0f14", color:"white", fontSize:15, textAlign:"right", outline:"none" }} />
                 <span style={{ color:"#666", fontSize:13, width:24 }}>{m.unit}</span>
               </div>
             </div>
@@ -2026,7 +2053,7 @@ function MeasuresTab({ measureLog, setMeasureLog }) {
               <div style={{ position:"relative", marginTop:8, marginBottom:4 }}>
                 <div style={{ position:"absolute", top:-6, left:24, width:12, height:12, background:"#0d2818", borderLeft:"1px solid #2e7d32", borderTop:"1px solid #2e7d32", transform:"rotate(45deg)" }} />
                 <div style={{ background:"#0d2818", border:"1px solid #2e7d32", borderRadius:12, padding:"12px 14px", position:"relative" }}>
-                  <div style={{ color:"#8bc34a", fontSize:11, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>📐 Cómo medir</div>
+                  <div style={{ color:"#8bc34a", fontSize:11, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>ðŸ“ CÃ³mo medir</div>
                   <div style={{ color:"#cde", fontSize:12.5, lineHeight:1.5 }}>{m.tip}</div>
                 </div>
               </div>
@@ -2035,8 +2062,8 @@ function MeasuresTab({ measureLog, setMeasureLog }) {
         ))}
       </div>
 
-      {/* Selector de medida para gráfica */}
-      <div style={{ fontSize:13, color:"#888", fontWeight:700, marginBottom:10, textTransform:"uppercase", letterSpacing:1 }}>Evolución</div>
+      {/* Selector de medida para grÃ¡fica */}
+      <div style={{ fontSize:13, color:"#888", fontWeight:700, marginBottom:10, textTransform:"uppercase", letterSpacing:1 }}>EvoluciÃ³n</div>
       <div style={{ display:"flex", gap:8, overflowX:"auto", marginBottom:14, paddingBottom:4 }}>
         {MEASURES.map(m => (
           <button key={m.id} onClick={()=>setActiveMeasure(m.id)} style={{ flexShrink:0, padding:"7px 14px", borderRadius:20, border:`1px solid ${activeMeasure===m.id?"#4caf50":"#2a2a3a"}`, background:activeMeasure===m.id?"#1a3a1a":"transparent", color:activeMeasure===m.id?"#4caf50":"#888", fontSize:12, fontWeight:700, cursor:"pointer", whiteSpace:"nowrap" }}>{m.emoji} {m.label}</button>
@@ -2051,31 +2078,31 @@ function MeasuresTab({ measureLog, setMeasureLog }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PESTAÑA: LOGROS
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PESTAÃ‘A: LOGROS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function AchievementsTab({ measureLog, history, workoutLog, waterLog, userData, onBack }) {
   const [showInfo, setShowInfo] = useState(false);
   const today = new Date();
 
-  // ── DIETA: días seguidos registrando comida ──
+  // â”€â”€ DIETA: dÃ­as seguidos registrando comida â”€â”€
   const nutritionDays = Object.keys(history).filter(k => {
     const d = history[k];
     return ALL_MEALS.some(m => BLOCKS.some(b => (d[m.id]?.selected?.[b.id]||[]).length > 0));
   });
   const dietStreak = calcStreak(new Set(nutritionDays), today);
 
-  // ── HIDRATACIÓN: días seguidos cumpliendo el objetivo de agua ──
+  // â”€â”€ HIDRATACIÃ“N: dÃ­as seguidos cumpliendo el objetivo de agua â”€â”€
   const waterGoal = calcWaterGoal(userData);
   const waterDays = Object.keys(waterLog).filter(k => (waterLog[k]||0) >= waterGoal);
   const waterStreak = calcStreak(new Set(waterDays), today);
 
-  // ── ENTRENO: número total de entrenos ──
+  // â”€â”€ ENTRENO: nÃºmero total de entrenos â”€â”€
   const totalWorkouts = Object.keys(workoutLog).length;
 
-  // Generar logros de cada categoría
-  const dietAch = getMilestoneAchievements("dieta", dietStreak, "cuidando tu alimentación");
-  const waterAch = getMilestoneAchievements("agua", waterStreak, "cumpliendo tu hidratación");
+  // Generar logros de cada categorÃ­a
+  const dietAch = getMilestoneAchievements("dieta", dietStreak, "cuidando tu alimentaciÃ³n");
+  const waterAch = getMilestoneAchievements("agua", waterStreak, "cumpliendo tu hidrataciÃ³n");
   const workoutAch = getWorkoutAchievements(totalWorkouts);
 
   const allAch = [...dietAch, ...workoutAch, ...waterAch];
@@ -2090,7 +2117,7 @@ function AchievementsTab({ measureLog, history, workoutLog, waterLog, userData, 
             <div style={{ fontSize:32, marginBottom:6, filter:a.unlocked?"none":"grayscale(1)" }}>{a.emoji}</div>
             <div style={{ color:a.unlocked?(a.special?"#ffd700":"white"):"#666", fontWeight:800, fontSize:13, marginBottom:3 }}>{a.title}</div>
             <div style={{ color:"#666", fontSize:10.5, lineHeight:1.3 }}>{a.desc}</div>
-            {a.unlocked && <div style={{ position:"absolute", top:8, right:8, color:a.special?"#ffd700":"#4caf50", fontSize:14 }}>✓</div>}
+            {a.unlocked && <div style={{ position:"absolute", top:8, right:8, color:a.special?"#ffd700":"#4caf50", fontSize:14 }}>âœ“</div>}
           </div>
         ))}
       </div>
@@ -2099,24 +2126,24 @@ function AchievementsTab({ measureLog, history, workoutLog, waterLog, userData, 
 
   return (
     <div style={{ padding:"16px 16px 30px" }}>
-      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
       <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Logros</div>
       <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>{unlockedCount} de {allAch.length} desbloqueados</div>
 
       {/* Rachas actuales */}
       <div style={{ display:"flex", gap:10, marginBottom: showInfo?12:24 }}>
         <div style={{ flex:1, background:"linear-gradient(135deg,#2a1a00,#1a1a24)", borderRadius:14, padding:"14px", border:"1px solid #ff9800", textAlign:"center" }}>
-          <div style={{ fontSize:24 }}>🔥</div>
+          <div style={{ fontSize:24 }}>ðŸ”¥</div>
           <div style={{ color:"#ff9800", fontWeight:900, fontSize:20, lineHeight:1, marginTop:4 }}>{dietStreak}</div>
-          <div style={{ color:"#aaa", fontSize:10, marginTop:3 }}>días dieta</div>
+          <div style={{ color:"#aaa", fontSize:10, marginTop:3 }}>dÃ­as dieta</div>
         </div>
         <div style={{ flex:1, background:"linear-gradient(135deg,#001a2a,#1a1a24)", borderRadius:14, padding:"14px", border:"1px solid #4fc3f7", textAlign:"center" }}>
-          <div style={{ fontSize:24 }}>💧</div>
+          <div style={{ fontSize:24 }}>ðŸ’§</div>
           <div style={{ color:"#4fc3f7", fontWeight:900, fontSize:20, lineHeight:1, marginTop:4 }}>{waterStreak}</div>
-          <div style={{ color:"#aaa", fontSize:10, marginTop:3 }}>días agua</div>
+          <div style={{ color:"#aaa", fontSize:10, marginTop:3 }}>dÃ­as agua</div>
         </div>
         <div style={{ flex:1, background:"linear-gradient(135deg,#1a2e1a,#1a1a24)", borderRadius:14, padding:"14px", border:"1px solid #8bc34a", textAlign:"center", position:"relative" }}>
-          <div style={{ fontSize:24 }}>🏋️</div>
+          <div style={{ fontSize:24 }}>ðŸ‹ï¸</div>
           <div style={{ color:"#8bc34a", fontWeight:900, fontSize:20, lineHeight:1, marginTop:4 }}>{totalWorkouts}</div>
           <div style={{ color:"#aaa", fontSize:10, marginTop:3 }}>entrenos</div>
           <button onClick={()=>setShowInfo(!showInfo)} style={{ position:"absolute", top:6, right:6, width:20, height:20, borderRadius:"50%", border:"none", background:"transparent", color:"#888", fontSize:12, fontWeight:800, cursor:"pointer", fontStyle:"italic", fontFamily:"Georgia, serif" }}>i</button>
@@ -2125,25 +2152,25 @@ function AchievementsTab({ measureLog, history, workoutLog, waterLog, userData, 
 
       {showInfo && (
         <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:16, padding:"16px 18px", marginBottom:24 }}>
-          <div style={{ color:"#8bc34a", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>¿Cómo conseguir logros?</div>
+          <div style={{ color:"#8bc34a", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>Â¿CÃ³mo conseguir logros?</div>
           <div style={{ color:"#cde", fontSize:13, lineHeight:1.6 }}>
-            <div style={{ marginBottom:8 }}><b style={{ color:"#ff9800" }}>🔥 Dieta:</b> registra tu comida cada día sin saltarte ninguno. Si fallas un día, la racha vuelve a empezar.</div>
-            <div style={{ marginBottom:8 }}><b style={{ color:"#4fc3f7" }}>💧 Hidratación:</b> cumple tu objetivo de agua diario varios días seguidos.</div>
-            <div><b style={{ color:"#8bc34a" }}>🏋️ Entrenamiento:</b> aquí cuenta el número total de entrenos que completas, no días seguidos.</div>
+            <div style={{ marginBottom:8 }}><b style={{ color:"#ff9800" }}>ðŸ”¥ Dieta:</b> registra tu comida cada dÃ­a sin saltarte ninguno. Si fallas un dÃ­a, la racha vuelve a empezar.</div>
+            <div style={{ marginBottom:8 }}><b style={{ color:"#4fc3f7" }}>ðŸ’§ HidrataciÃ³n:</b> cumple tu objetivo de agua diario varios dÃ­as seguidos.</div>
+            <div><b style={{ color:"#8bc34a" }}>ðŸ‹ï¸ Entrenamiento:</b> aquÃ­ cuenta el nÃºmero total de entrenos que completas, no dÃ­as seguidos.</div>
           </div>
         </div>
       )}
 
-      <Section title="🔥 Dieta" items={dietAch} />
-      <Section title="🏋️ Entrenamiento" items={workoutAch} />
-      <Section title="💧 Hidratación" items={waterAch} />
+      <Section title="ðŸ”¥ Dieta" items={dietAch} />
+      <Section title="ðŸ‹ï¸ Entrenamiento" items={workoutAch} />
+      <Section title="ðŸ’§ HidrataciÃ³n" items={waterAch} />
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // CALENDARIO
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMeals, onClose }) {
   const [month, setMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [selDay, setSelDay] = useState(dateKey(new Date()));
@@ -2161,7 +2188,7 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
 
   const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-  // ¿Qué actividad hay en un día?
+  // Â¿QuÃ© actividad hay en un dÃ­a?
   const dayActivity = (key) => {
     const hasWeight = measureLog[key] && Object.values(measureLog[key]).some(v=>v!=null&&v!=="");
     const hasFood = history[key] && ALL_MEALS.some(m => BLOCKS.some(b => (history[key][m.id]?.selected?.[b.id]||[]).length>0));
@@ -2169,7 +2196,7 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
     return { hasWeight, hasFood, hasWorkout, any: hasWeight||hasFood||hasWorkout };
   };
 
-  // Detalle del día seleccionado
+  // Detalle del dÃ­a seleccionado
   const renderDayDetail = () => {
     const key = selDay;
     const act = dayActivity(key);
@@ -2182,13 +2209,13 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
       <div style={{ marginTop:18 }}>
         <div style={{ color:"white", fontWeight:800, fontSize:16, marginBottom:14 }}>{formatDateLong(parseKey(key))}</div>
         {!act.any && workouts.length===0 && measuresPresent.length===0 && (
-          <div style={{ color:"#555", fontSize:14, textAlign:"center", padding:"30px 0", background:"#15151c", borderRadius:14 }}>Sin registros este día</div>
+          <div style={{ color:"#555", fontSize:14, textAlign:"center", padding:"30px 0", background:"#15151c", borderRadius:14 }}>Sin registros este dÃ­a</div>
         )}
 
         {/* Peso y medidas */}
         {measuresPresent.length>0 && (
           <div style={{ background:"#1a1a24", borderRadius:14, padding:"14px", border:"1px solid #2a2a3a", marginBottom:12 }}>
-            <div style={{ color:"#4caf50", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>⚖️ Peso y medidas</div>
+            <div style={{ color:"#4caf50", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>âš–ï¸ Peso y medidas</div>
             <div style={{ display:"flex", flexWrap:"wrap", gap:10 }}>
               {measuresPresent.map(m => (
                 <div key={m.id} style={{ background:"#0f0f14", borderRadius:10, padding:"8px 12px" }}>
@@ -2242,7 +2269,7 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
           return (
             <div style={{ background:"#1a1a24", borderRadius:14, padding:"14px", border:"1px solid #2a2a3a", marginBottom:12 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-                <div style={{ color:"#ff9800", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1 }}>🍽️ Nutrición</div>
+                <div style={{ color:"#ff9800", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1 }}>ðŸ½ï¸ NutriciÃ³n</div>
                 <div style={{ color:"#ff9800", fontSize:13, fontWeight:800 }}>{dayTotal} kcal</div>
               </div>
               {mealBlocks.map(({meal, items, mealKcal}) => (
@@ -2254,7 +2281,7 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
                   {items.map((it,j) => (
                     <div key={j} style={{ display:"flex", justifyContent:"space-between", padding:"3px 0" }}>
                       <span style={{ color:"#999", fontSize:12.5 }}>{it.name}</span>
-                      <span style={{ color:"#666", fontSize:12 }}>{it.gr}g · {it.kcal}kcal</span>
+                      <span style={{ color:"#666", fontSize:12 }}>{it.gr}g Â· {it.kcal}kcal</span>
                     </div>
                   ))}
                 </div>
@@ -2271,10 +2298,10 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
             <button key={i} onClick={()=>setViewWorkout(w)} style={{ width:"100%", textAlign:"left", background:"#1a1a24", borderRadius:14, padding:"14px", border:"1px solid #2a2a3a", marginBottom:12, cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ color:"#8bc34a", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>{w.routineDay || g?.label || "Entreno"}</div>
-                <div style={{ color:"#999", fontSize:12, lineHeight:1.5, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{w.exercises.map(e=>e.name).join(" · ")}</div>
-                <div style={{ color:"#5a7a5a", fontSize:11, marginTop:6 }}>{w.exercises.length} ejercicios{hasMarks?" · con marcas":""} · toca para ver</div>
+                <div style={{ color:"#999", fontSize:12, lineHeight:1.5, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{w.exercises.map(e=>e.name).join(" Â· ")}</div>
+                <div style={{ color:"#5a7a5a", fontSize:11, marginTop:6 }}>{w.exercises.length} ejercicios{hasMarks?" Â· con marcas":""} Â· toca para ver</div>
               </div>
-              <span style={{ color:"#4caf50", fontSize:16, flexShrink:0 }}>›</span>
+              <span style={{ color:"#4caf50", fontSize:16, flexShrink:0 }}>â€º</span>
             </button>
           );
         })}
@@ -2289,7 +2316,7 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
     const d = parseKey(w.date);
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setViewWorkout(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={()=>setViewWorkout(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
         <div style={{ fontWeight:900, fontSize:21, color:"white", marginBottom:2 }}>{w.routineDay || g?.label || "Entreno"}</div>
         <div style={{ color:"#666", fontSize:13, marginBottom:20 }}>{formatDateLong(d)}</div>
 
@@ -2312,8 +2339,8 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
                   {exMarks.map((s,si) => (s && (s.peso||s.reps)) ? (
                     <div key={si} style={{ display:"flex", gap:10, alignItems:"center", padding:"5px 0", borderTop:si>0?"1px solid #1a1a1a":"none" }}>
                       <span style={{ width:50, color:"#888", fontSize:13, fontWeight:700 }}>{si+1}</span>
-                      <span style={{ flex:1, color:"white", fontSize:14, textAlign:"center", fontWeight:600 }}>{s.peso?`${s.peso} kg`:"—"}</span>
-                      <span style={{ flex:1, color:"white", fontSize:14, textAlign:"center", fontWeight:600 }}>{s.reps||"—"}</span>
+                      <span style={{ flex:1, color:"white", fontSize:14, textAlign:"center", fontWeight:600 }}>{s.peso?`${s.peso} kg`:"â€”"}</span>
+                      <span style={{ flex:1, color:"white", fontSize:14, textAlign:"center", fontWeight:600 }}>{s.reps||"â€”"}</span>
                     </div>
                   ) : null)}
                 </div>
@@ -2334,22 +2361,22 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
 
   return (
     <div style={{ padding:"20px 16px 40px" }}>
-      <button onClick={onClose} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+      <button onClick={onClose} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
       <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:16 }}>Calendario</div>
 
-      {/* Navegación de mes */}
+      {/* NavegaciÃ³n de mes */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
-        <button onClick={()=>setMonth(new Date(year, mon-1, 1))} style={{ background:"#1a1a24", border:"1px solid #2a2a3a", borderRadius:10, color:"#4caf50", fontSize:18, cursor:"pointer", padding:"4px 14px" }}>‹</button>
+        <button onClick={()=>setMonth(new Date(year, mon-1, 1))} style={{ background:"#1a1a24", border:"1px solid #2a2a3a", borderRadius:10, color:"#4caf50", fontSize:18, cursor:"pointer", padding:"4px 14px" }}>â€¹</button>
         <div style={{ color:"white", fontWeight:800, fontSize:16 }}>{meses[mon]} {year}</div>
-        <button onClick={()=>setMonth(new Date(year, mon+1, 1))} style={{ background:"#1a1a24", border:"1px solid #2a2a3a", borderRadius:10, color:"#4caf50", fontSize:18, cursor:"pointer", padding:"4px 14px" }}>›</button>
+        <button onClick={()=>setMonth(new Date(year, mon+1, 1))} style={{ background:"#1a1a24", border:"1px solid #2a2a3a", borderRadius:10, color:"#4caf50", fontSize:18, cursor:"pointer", padding:"4px 14px" }}>â€º</button>
       </div>
 
-      {/* Días de la semana */}
+      {/* DÃ­as de la semana */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4, marginBottom:4 }}>
         {["L","M","X","J","V","S","D"].map((d,i) => <div key={i} style={{ textAlign:"center", color:"#555", fontSize:11, fontWeight:700, padding:"4px 0" }}>{d}</div>)}
       </div>
 
-      {/* Cuadrícula del mes */}
+      {/* CuadrÃ­cula del mes */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4 }}>
         {Array.from({length:startWeekday}).map((_,i)=><div key={"e"+i} />)}
         {Array.from({length:daysInMonth}).map((_,i) => {
@@ -2385,9 +2412,9 @@ function CalendarView({ measureLog, history, workoutLog, macros, mealDist, numMe
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PESTAÑA: DASHBOARD (INICIO)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PESTAÃ‘A: DASHBOARD (INICIO)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function DashboardTab({ userData, macros, measureLog, history, workoutLog, waterLog, mealDist, numMeals, savedRoutine, racePlan, onGoTo }) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [showStreakInfo, setShowStreakInfo] = useState(false);
@@ -2404,7 +2431,7 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
   const currentWeight = weightData.length > 0 ? weightData[weightData.length-1].value : parseFloat(userData.weight);
   const weightChange = currentWeight - startWeight;
 
-  // Días activos y racha
+  // DÃ­as activos y racha
   const weightDays = weightKeys;
   const nutritionDays = Object.keys(history).filter(k => { const d = history[k]; return ALL_MEALS.some(m => BLOCKS.some(b => (d[m.id]?.selected?.[b.id]||[]).length>0)); });
   const nutritionSet = new Set(nutritionDays);
@@ -2412,14 +2439,14 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
 
   const greeting = (() => {
     const h = today.getHours();
-    if (h < 12) return "Buenos días";
+    if (h < 12) return "Buenos dÃ­as";
     if (h < 20) return "Buenas tardes";
     return "Buenas noches";
   })();
 
-  // ── Progreso de hoy ──
+  // â”€â”€ Progreso de hoy â”€â”€
   const todayKey = dateKey(today);
-  // Calorías de hoy
+  // CalorÃ­as de hoy
   const mealList = getMeals(numMeals);
   const lastMealId = mealList[mealList.length-1].id;
   const todayKcal = (() => {
@@ -2454,7 +2481,7 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
     return Object.values(workoutLog||{}).filter(w => { const d=parseKey(w.date); return d>=new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()) && d<=today; }).length;
   })();
 
-  // ── Modo coach: mensaje inteligente según el día ──
+  // â”€â”€ Modo coach: mensaje inteligente segÃºn el dÃ­a â”€â”€
   const coachMsg = (() => {
     const h = today.getHours();
     const kcalLeft = macros.targetKcal - todayKcal;
@@ -2462,35 +2489,35 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
     const trainedToday = Object.values(workoutLog||{}).some(w => w.date === todayKey);
     const dietToday = todayKcal > 0;
 
-    // Noche: resumen del día
+    // Noche: resumen del dÃ­a
     if (h >= 21) {
       if (dietToday && todayKcal >= macros.targetKcal*0.85 && todayWater >= waterGoal*0.8) {
-        return { icon:"🌙", text:"¡Gran día! Has cumplido bien con tu nutrición e hidratación. Descansa, que el descanso también construye." };
+        return { icon:"ðŸŒ™", text:"Â¡Gran dÃ­a! Has cumplido bien con tu nutriciÃ³n e hidrataciÃ³n. Descansa, que el descanso tambiÃ©n construye." };
       }
-      return { icon:"🌙", text:"Cierra el día: recuerda registrar lo que te falte y prepárate para mañana. La constancia es lo que cuenta." };
+      return { icon:"ðŸŒ™", text:"Cierra el dÃ­a: recuerda registrar lo que te falte y prepÃ¡rate para maÃ±ana. La constancia es lo que cuenta." };
     }
-    // Si no ha registrado comida aún
+    // Si no ha registrado comida aÃºn
     if (!dietToday && h >= 10) {
-      return { icon:"🍽️", text:"Aún no has registrado ninguna comida hoy. ¡No olvides apuntar lo que comes para llevar el control!" };
+      return { icon:"ðŸ½ï¸", text:"AÃºn no has registrado ninguna comida hoy. Â¡No olvides apuntar lo que comes para llevar el control!" };
     }
-    // Mañana temprano
+    // MaÃ±ana temprano
     if (h < 10) {
-      return { icon:"☀️", text:`¡Buen día por delante! Tu objetivo: ${macros.targetKcal} kcal y ${(waterGoal/1000).toFixed(1)}L de agua. A por ello.` };
+      return { icon:"â˜€ï¸", text:`Â¡Buen dÃ­a por delante! Tu objetivo: ${macros.targetKcal} kcal y ${(waterGoal/1000).toFixed(1)}L de agua. A por ello.` };
     }
-    // Mensajes según lo que falta
+    // Mensajes segÃºn lo que falta
     const parts = [];
     if (kcalLeft > 100) parts.push(`te faltan ${kcalLeft} kcal`);
     else if (kcalLeft < -150) parts.push(`te has pasado ${Math.abs(kcalLeft)} kcal de tu objetivo`);
     if (waterLeftL > 0.3) parts.push(`${waterLeftL.toFixed(1)}L de agua`);
-    if (!trainedToday && weekWorkouts < 3) parts.push("aún no has entrenado hoy");
+    if (!trainedToday && weekWorkouts < 3) parts.push("aÃºn no has entrenado hoy");
 
     if (parts.length === 0) {
-      return { icon:"🎯", text:"¡Vas perfecto hoy! Estás cumpliendo tus objetivos. Sigue así 💪" };
+      return { icon:"ðŸŽ¯", text:"Â¡Vas perfecto hoy! EstÃ¡s cumpliendo tus objetivos. Sigue asÃ­ ðŸ’ª" };
     }
-    return { icon:"💪", text:`Para cerrar un buen día: ${parts.join(", ")}. ¡Tú puedes!` };
+    return { icon:"ðŸ’ª", text:`Para cerrar un buen dÃ­a: ${parts.join(", ")}. Â¡TÃº puedes!` };
   })();
 
-  // Entrenos por semana (últimas 8) para la gráfica
+  // Entrenos por semana (Ãºltimas 8) para la grÃ¡fica
   const weeklyWorkoutData = (() => {
     const arr = [];
     for (let w=7; w>=0; w--) {
@@ -2520,7 +2547,7 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
   return (
     <div style={{ padding:"20px 16px 30px" }}>
       <div style={{ color:"#888", fontSize:14, marginBottom:2 }}>{greeting},</div>
-      <div style={{ fontWeight:900, fontSize:26, color:"white", marginBottom:18 }}>{userData.name} 👋</div>
+      <div style={{ fontWeight:900, fontSize:26, color:"white", marginBottom:18 }}>{userData.name} ðŸ‘‹</div>
 
       {/* Coach - mensaje directo sin etiqueta */}
       <div style={{ background:"linear-gradient(135deg,#1a2440,#16161f)", borderRadius:16, padding:"16px 18px", marginBottom:18, border:"1px solid #2a3a5a", display:"flex", gap:14, alignItems:"center" }}>
@@ -2537,18 +2564,18 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
           return (
             <button onClick={()=>onGoTo("entreno")} style={{ width:"100%", textAlign:"left", background:"linear-gradient(135deg,#1a2e1a,#16161f)", borderRadius:16, padding:"16px 18px", marginBottom:18, border:"1px solid #2e7d32", cursor:"pointer" }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:day.rest?0:10 }}>
-                <span style={{ color:"#8bc34a", fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:1 }}>Hoy · {day.weekday}</span>
-                <span style={{ color:"#4caf50", fontSize:18 }}>→</span>
+                <span style={{ color:"#8bc34a", fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:1 }}>Hoy Â· {day.weekday}</span>
+                <span style={{ color:"#4caf50", fontSize:18 }}>â†’</span>
               </div>
               {day.rest ? (
                 <div style={{ color:"white", fontWeight:800, fontSize:16, display:"flex", alignItems:"center", gap:8 }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8bc34a" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-                  Día de descanso
+                  DÃ­a de descanso
                 </div>
               ) : (
                 day.workouts.map((w,wi)=>(
                   <div key={wi} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:wi<day.workouts.length-1?8:0 }}>
-                    <span style={{ fontSize:9, background:w.type==="fuerza"?"#2e4a7a":w.type==="core"?"#5a3a7a":w.type==="estiramiento"?"#3a5a4a":"#7a5a1a", color:"white", borderRadius:20, padding:"2px 7px", fontWeight:700, textTransform:"uppercase", flexShrink:0 }}>{w.type==="fuerza"?"Fuerza":w.type==="carrera"?"Carrera":w.type==="bici"?"Bici":w.type==="natacion"?"Natación":w.type==="core"?"Core":"Movilidad"}</span>
+                    <span style={{ fontSize:9, background:w.type==="fuerza"?"#2e4a7a":w.type==="core"?"#5a3a7a":w.type==="estiramiento"?"#3a5a4a":"#7a5a1a", color:"white", borderRadius:20, padding:"2px 7px", fontWeight:700, textTransform:"uppercase", flexShrink:0 }}>{w.type==="fuerza"?"Fuerza":w.type==="carrera"?"Carrera":w.type==="bici"?"Bici":w.type==="natacion"?"NataciÃ³n":w.type==="core"?"Core":"Movilidad"}</span>
                     <span style={{ color:"white", fontWeight:600, fontSize:14 }}>{w.name}</span>
                   </div>
                 ))
@@ -2563,10 +2590,10 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
             <button onClick={()=>onGoTo("entreno")} style={{ width:"100%", textAlign:"left", background:"linear-gradient(135deg,#2a2410,#16161f)", borderRadius:16, padding:"16px 18px", marginBottom:18, border:"1px solid #b8860b", cursor:"pointer" }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
                 <span style={{ color:"#ffd700", fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:1 }}>Tu plan de carrera</span>
-                <span style={{ color:"#ffd700", fontSize:18 }}>→</span>
+                <span style={{ color:"#ffd700", fontSize:18 }}>â†’</span>
               </div>
               <div style={{ color:"white", fontWeight:800, fontSize:15 }}>{racePlan.discipline==="running"?`Camino a tu ${racePlan.targetLabel}`:"Tu reto en bici"}</div>
-              <div style={{ color:"#aa9", fontSize:12, marginTop:3 }}>Fase {racePlan.currentPhase+1}/{racePlan.phases.length} · semana {(racePlan.currentWeek||0)+1} · {wk?wk.sessions.length:0} entrenos</div>
+              <div style={{ color:"#aa9", fontSize:12, marginTop:3 }}>Fase {racePlan.currentPhase+1}/{racePlan.phases.length} Â· semana {(racePlan.currentWeek||0)+1} Â· {wk?wk.sessions.length:0} entrenos</div>
             </button>
           );
         }
@@ -2575,10 +2602,10 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
 
       {/* Progreso de hoy */}
       <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:18 }}>
-        <ProgressBar emoji="🔥" label="Calorías de hoy" value={todayKcal} max={macros.targetKcal} unit="" color="#4caf50" onClick={()=>onGoTo("nutricion")} />
-        <ProgressBar emoji="💧" label="Agua de hoy" value={(todayWater/1000).toFixed(1)*1} max={(waterGoal/1000).toFixed(1)*1} unit="L" color="#4fc3f7" onClick={()=>onGoTo("agua")} />
+        <ProgressBar emoji="ðŸ”¥" label="CalorÃ­as de hoy" value={todayKcal} max={macros.targetKcal} unit="" color="#4caf50" onClick={()=>onGoTo("nutricion")} />
+        <ProgressBar emoji="ðŸ’§" label="Agua de hoy" value={(todayWater/1000).toFixed(1)*1} max={(waterGoal/1000).toFixed(1)*1} unit="L" color="#4fc3f7" onClick={()=>onGoTo("agua")} />
         <div style={{ background:"#1a1a24", borderRadius:14, padding:"12px 14px", border:"1px solid #2a2a3a", display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer" }} onClick={()=>onGoTo("entreno")}>
-          <span style={{ color:"#ccc", fontSize:13, fontWeight:600 }}>🏋️ Entrenos esta semana</span>
+          <span style={{ color:"#ccc", fontSize:13, fontWeight:600 }}>ðŸ‹ï¸ Entrenos esta semana</span>
           <span style={{ color:"#8bc34a", fontSize:15, fontWeight:900 }}>{weekWorkouts}</span>
         </div>
       </div>
@@ -2587,50 +2614,50 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom: (showStreakInfo||showWeightInfo)?12:16 }}>
         <div style={{ background:"linear-gradient(135deg,#2a1a00,#1a1a24)", borderRadius:16, padding:"16px", border:"1px solid #3a2a1a", position:"relative" }}>
           <button onClick={()=>{setShowStreakInfo(!showStreakInfo); setShowWeightInfo(false);}} style={{ position:"absolute", top:10, right:10, width:22, height:22, borderRadius:"50%", border:`1px solid ${showStreakInfo?"#ff9800":"#5a4a2a"}`, background:showStreakInfo?"#3a2800":"transparent", color:showStreakInfo?"#ff9800":"#a88", fontSize:12, fontWeight:800, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, fontStyle:"italic", fontFamily:"Georgia, serif" }}>i</button>
-          <div style={{ fontSize:28, marginBottom:4 }}>🔥</div>
+          <div style={{ fontSize:28, marginBottom:4 }}>ðŸ”¥</div>
           <div style={{ color:"#ff9800", fontWeight:900, fontSize:24, lineHeight:1 }}>{streak}</div>
-          <div style={{ color:"#888", fontSize:12, marginTop:2 }}>días de racha</div>
+          <div style={{ color:"#888", fontSize:12, marginTop:2 }}>dÃ­as de racha</div>
         </div>
         <div style={{ background:"linear-gradient(135deg,#1a2e1a,#1a1a24)", borderRadius:16, padding:"16px", border:"1px solid #2a3a2a", position:"relative" }}>
           <button onClick={()=>{setShowWeightInfo(!showWeightInfo); setShowStreakInfo(false);}} style={{ position:"absolute", top:10, right:10, width:22, height:22, borderRadius:"50%", border:`1px solid ${showWeightInfo?"#4caf50":"#2a4a2a"}`, background:showWeightInfo?"#0d2818":"transparent", color:showWeightInfo?"#4caf50":"#8a8", fontSize:12, fontWeight:800, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, fontStyle:"italic", fontFamily:"Georgia, serif" }}>i</button>
-          <div style={{ fontSize:28, marginBottom:4 }}>{weightChange<=0?"📉":"📈"}</div>
+          <div style={{ fontSize:28, marginBottom:4 }}>{weightChange<=0?"ðŸ“‰":"ðŸ“ˆ"}</div>
           <div style={{ color:weightChange<=0?"#4caf50":"#ff9800", fontWeight:900, fontSize:24, lineHeight:1 }}>{weightChange>0?"+":""}{weightChange.toFixed(1)}<span style={{ fontSize:13 }}>kg</span></div>
           <div style={{ color:"#888", fontSize:12, marginTop:2 }}>desde el inicio</div>
         </div>
       </div>
 
-      {/* Popup explicación racha/logros */}
+      {/* Popup explicaciÃ³n racha/logros */}
       {showStreakInfo && (
         <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:16, padding:"16px 18px", marginBottom:16 }}>
-          <div style={{ color:"#8bc34a", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>¿Cómo funciona la racha?</div>
+          <div style={{ color:"#8bc34a", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>Â¿CÃ³mo funciona la racha?</div>
           <div style={{ color:"#cde", fontSize:13, lineHeight:1.6 }}>
-            <div style={{ marginBottom:8 }}>Tu racha sube <b style={{ color:"#ff9800" }}>cada día que registras tu comida</b>. Si te saltas un día, vuelve a empezar desde cero.</div>
-            <div>Mantenla activa para desbloquear logros: 3, 7, 15, 30 y 100 días seguidos. Consulta todos tus logros en la pestaña 🏆.</div>
+            <div style={{ marginBottom:8 }}>Tu racha sube <b style={{ color:"#ff9800" }}>cada dÃ­a que registras tu comida</b>. Si te saltas un dÃ­a, vuelve a empezar desde cero.</div>
+            <div>Mantenla activa para desbloquear logros: 3, 7, 15, 30 y 100 dÃ­as seguidos. Consulta todos tus logros en la pestaÃ±a ðŸ†.</div>
           </div>
         </div>
       )}
 
-      {/* Popup explicación cambio de peso */}
+      {/* Popup explicaciÃ³n cambio de peso */}
       {showWeightInfo && (
         <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:16, padding:"16px 18px", marginBottom:16 }}>
           <div style={{ color:"#8bc34a", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>Cambio de peso</div>
           <div style={{ color:"#cde", fontSize:13, lineHeight:1.6 }}>
-            <div style={{ marginBottom:8 }}>Muestra los kilos que has <b style={{ color:"#4caf50" }}>ganado o perdido</b> desde tu primer registro de peso hasta el último.</div>
-            <div>📉 en verde si bajas, 📈 en naranja si subes. Apunta tu peso en la pestaña 📊 Medidas para mantenerlo actualizado.</div>
+            <div style={{ marginBottom:8 }}>Muestra los kilos que has <b style={{ color:"#4caf50" }}>ganado o perdido</b> desde tu primer registro de peso hasta el Ãºltimo.</div>
+            <div>ðŸ“‰ en verde si bajas, ðŸ“ˆ en naranja si subes. Apunta tu peso en la pestaÃ±a ðŸ“Š Medidas para mantenerlo actualizado.</div>
           </div>
         </div>
       )}
 
-      {/* Gráfica con pestañas: Peso / Entrenos */}
+      {/* GrÃ¡fica con pestaÃ±as: Peso / Entrenos */}
       <div style={{ background:"#1a1a24", borderRadius:18, padding:"16px 8px 12px", marginBottom:16, border:"1px solid #2a2a3a" }}>
         <div style={{ display:"flex", gap:8, paddingLeft:8, paddingRight:8, marginBottom:12 }}>
-          <button onClick={()=>setChartTab("peso")} style={{ flex:1, padding:"8px", borderRadius:10, border:"none", background:chartTab==="peso"?"#1a3a1a":"transparent", color:chartTab==="peso"?"#4caf50":"#888", fontSize:13, fontWeight:700, cursor:"pointer" }}>⚖️ Peso</button>
-          <button onClick={()=>setChartTab("entrenos")} style={{ flex:1, padding:"8px", borderRadius:10, border:"none", background:chartTab==="entrenos"?"#1a3a1a":"transparent", color:chartTab==="entrenos"?"#8bc34a":"#888", fontSize:13, fontWeight:700, cursor:"pointer" }}>🏋️ Entrenos</button>
+          <button onClick={()=>setChartTab("peso")} style={{ flex:1, padding:"8px", borderRadius:10, border:"none", background:chartTab==="peso"?"#1a3a1a":"transparent", color:chartTab==="peso"?"#4caf50":"#888", fontSize:13, fontWeight:700, cursor:"pointer" }}>âš–ï¸ Peso</button>
+          <button onClick={()=>setChartTab("entrenos")} style={{ flex:1, padding:"8px", borderRadius:10, border:"none", background:chartTab==="entrenos"?"#1a3a1a":"transparent", color:chartTab==="entrenos"?"#8bc34a":"#888", fontSize:13, fontWeight:700, cursor:"pointer" }}>ðŸ‹ï¸ Entrenos</button>
         </div>
         {chartTab==="peso" ? (
           <>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", paddingLeft:8, paddingRight:8, marginBottom:8 }}>
-              <span style={{ color:"#ccc", fontWeight:800, fontSize:14 }}>Evolución del peso</span>
+              <span style={{ color:"#ccc", fontWeight:800, fontSize:14 }}>EvoluciÃ³n del peso</span>
               <span style={{ color:"#4caf50", fontSize:13, fontWeight:700 }}>{currentWeight.toFixed(1)} kg</span>
             </div>
             <LineChart data={weightData.length?weightData:[{label:"inicio",value:startWeight}]} unit="kg" color="#4caf50" />
@@ -2657,15 +2684,15 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
         )}
       </div>
 
-      {/* Accesos rápidos */}
+      {/* Accesos rÃ¡pidos */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
         <button onClick={()=>onGoTo("nutricion")} style={{ background:"linear-gradient(135deg,#1a2e1a,#1a1a24)", border:"1px solid #2a3a2a", borderRadius:16, padding:"18px", cursor:"pointer", textAlign:"left" }}>
-          <div style={{ fontSize:26, marginBottom:6 }}>🍽️</div>
+          <div style={{ fontSize:26, marginBottom:6 }}>ðŸ½ï¸</div>
           <div style={{ color:"white", fontWeight:800, fontSize:14 }}>Registrar comida</div>
           <div style={{ color:"#888", fontSize:11, marginTop:2 }}>{macros.targetKcal} kcal objetivo</div>
         </button>
         <button onClick={()=>onGoTo("medidas")} style={{ background:"linear-gradient(135deg,#1a1a2e,#1a1a24)", border:"1px solid #2a2a3a", borderRadius:16, padding:"18px", cursor:"pointer", textAlign:"left" }}>
-          <div style={{ fontSize:26, marginBottom:6 }}>📊</div>
+          <div style={{ fontSize:26, marginBottom:6 }}>ðŸ“Š</div>
           <div style={{ color:"white", fontWeight:800, fontSize:14 }}>Anotar peso</div>
           <div style={{ color:"#888", fontSize:11, marginTop:2 }}>Mide tu progreso</div>
         </button>
@@ -2673,34 +2700,34 @@ function DashboardTab({ userData, macros, measureLog, history, workoutLog, water
 
       {/* Calendario */}
       <button onClick={()=>setShowCalendar(true)} style={{ width:"100%", marginTop:12, background:"linear-gradient(135deg,#1a1a24,#1f1f2e)", border:"1px solid #2a2a3a", borderRadius:16, padding:"18px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:14 }}>
-        <div style={{ fontSize:26 }}>📅</div>
+        <div style={{ fontSize:26 }}>ðŸ“…</div>
         <div style={{ flex:1 }}>
           <div style={{ color:"white", fontWeight:800, fontSize:14 }}>Ver calendario</div>
-          <div style={{ color:"#888", fontSize:11, marginTop:2 }}>Todo tu historial día a día</div>
+          <div style={{ color:"#888", fontSize:11, marginTop:2 }}>Todo tu historial dÃ­a a dÃ­a</div>
         </div>
-        <span style={{ color:"#4caf50", fontSize:18 }}>→</span>
+        <span style={{ color:"#4caf50", fontSize:18 }}>â†’</span>
       </button>
 
       {/* Lista de la compra */}
       <button onClick={()=>onGoTo("compra")} style={{ width:"100%", marginTop:12, background:"linear-gradient(135deg,#1a1a24,#1f1f2e)", border:"1px solid #2a2a3a", borderRadius:16, padding:"18px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:14 }}>
-        <div style={{ fontSize:26 }}>🛒</div>
+        <div style={{ fontSize:26 }}>ðŸ›’</div>
         <div style={{ flex:1 }}>
           <div style={{ color:"white", fontWeight:800, fontSize:14 }}>Lista de la compra</div>
           <div style={{ color:"#888", fontSize:11, marginTop:2 }}>Planifica tu semana y genera la lista</div>
         </div>
-        <span style={{ color:"#4caf50", fontSize:18 }}>→</span>
+        <span style={{ color:"#4caf50", fontSize:18 }}>â†’</span>
       </button>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// GRÁFICAS DE ENTRENAMIENTO
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// GRÃFICAS DE ENTRENAMIENTO
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function TrainingCharts({ workoutLog }) {
   const entries = Object.values(workoutLog);
 
-  // 1) Constancia: entrenos por semana (últimas 8 semanas)
+  // 1) Constancia: entrenos por semana (Ãºltimas 8 semanas)
   const now = new Date();
   const weeks = [];
   for (let w = 7; w >= 0; w--) {
@@ -2713,7 +2740,7 @@ function TrainingCharts({ workoutLog }) {
     weeks.push({ label: `${start.getDate()}/${start.getMonth()+1}`, value: count });
   }
 
-  // 2) Evolución de peso por ejercicio (los que tienen marcas de peso)
+  // 2) EvoluciÃ³n de peso por ejercicio (los que tienen marcas de peso)
   const exerciseWeights = {}; // {exName: [{date, maxPeso}]}
   entries.sort((a,b)=>a.ts-b.ts).forEach(e => {
     Object.entries(e.marks||{}).forEach(([exId, series]) => {
@@ -2751,7 +2778,7 @@ function TrainingCharts({ workoutLog }) {
 
       {/* Constancia semanal (barras) */}
       <div style={{ background:"#1a1a24", borderRadius:16, padding:"16px", border:"1px solid #2a2a3a", marginBottom:16 }}>
-        <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:14 }}>📊 Entrenos por semana</div>
+        <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:14 }}>ðŸ“Š Entrenos por semana</div>
         <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", gap:6, height:100 }}>
           {weeks.map((w,i) => (
             <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
@@ -2763,11 +2790,11 @@ function TrainingCharts({ workoutLog }) {
         </div>
       </div>
 
-      {/* Evolución de peso por ejercicio */}
+      {/* EvoluciÃ³n de peso por ejercicio */}
       {exNames.length > 0 && selEx && (
         <div style={{ background:"#1a1a24", borderRadius:16, padding:"16px 8px 8px", border:"1px solid #2a2a3a" }}>
           <div style={{ paddingLeft:8, paddingRight:8, marginBottom:10 }}>
-            <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:10 }}>🏋️ Peso levantado</div>
+            <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:10 }}>ðŸ‹ï¸ Peso levantado</div>
             <div style={{ display:"flex", gap:8, overflowX:"auto", paddingBottom:4 }}>
               {exNames.map(n => (
                 <button key={n} onClick={()=>setSelEx(n)} style={{ flexShrink:0, padding:"6px 12px", borderRadius:16, border:`1px solid ${selEx===n?"#4caf50":"#2a2a3a"}`, background:selEx===n?"#1a3a1a":"transparent", color:selEx===n?"#4caf50":"#888", fontSize:12, fontWeight:700, cursor:"pointer", whiteSpace:"nowrap" }}>{n}</button>
@@ -2781,24 +2808,24 @@ function TrainingCharts({ workoutLog }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PESTAÑA: ENTRENAMIENTO
-// ═══════════════════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PESTAÃ‘A: ENTRENAMIENTO
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // PLANIFICADOR DE CARRERA (Running y Bici)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 // Distancias de running con su valor en km
 const RACE_DISTANCES = [
   { id:"5k", label:"5K", km:5 },
   { id:"10k", label:"10K", km:10 },
-  { id:"21k", label:"Media maratón (21K)", km:21.097 },
-  { id:"42k", label:"Maratón (42K)", km:42.195 },
+  { id:"21k", label:"Media maratÃ³n (21K)", km:21.097 },
+  { id:"42k", label:"MaratÃ³n (42K)", km:42.195 },
 ];
 
 // Formatea segundos a "h:mm:ss" o "mm:ss"
 function fmtTime(secs) {
-  if (!secs || secs<=0) return "—";
+  if (!secs || secs<=0) return "â€”";
   secs = Math.round(secs);
   const h = Math.floor(secs/3600);
   const m = Math.floor((secs%3600)/60);
@@ -2808,7 +2835,7 @@ function fmtTime(secs) {
 }
 // Formatea ritmo (seg/km) a "m:ss/km"
 function fmtPace(secsPerKm) {
-  if (!secsPerKm || secsPerKm<=0) return "—";
+  if (!secsPerKm || secsPerKm<=0) return "â€”";
   const m = Math.floor(secsPerKm/60);
   const s = Math.round(secsPerKm%60);
   return `${m}:${String(s).padStart(2,"0")}/km`;
@@ -2822,14 +2849,14 @@ function parseTimeToSecs(str) {
   return 0;
 }
 
-// Fórmula de Riegel: predice tiempo en distancia D2 a partir de tiempo T1 en distancia D1
+// FÃ³rmula de Riegel: predice tiempo en distancia D2 a partir de tiempo T1 en distancia D1
 // T2 = T1 * (D2/D1)^1.06
 function riegelPredict(t1secs, d1km, d2km) {
   if (!t1secs || !d1km || !d2km) return 0;
   return t1secs * Math.pow(d2km/d1km, 1.06);
 }
 
-// A partir de las marcas del usuario, estima su mejor predicción para una distancia objetivo
+// A partir de las marcas del usuario, estima su mejor predicciÃ³n para una distancia objetivo
 function bestPrediction(marks, targetKm) {
   // marks: { "5k": secs, "10k": secs, ... }
   let best = 0;
@@ -2843,12 +2870,12 @@ function bestPrediction(marks, targetKm) {
   return best; // 0 si no tiene ninguna marca
 }
 
-// Decide las fases necesarias para llegar de la condición actual a la distancia objetivo
+// Decide las fases necesarias para llegar de la condiciÃ³n actual a la distancia objetivo
 // Si el objetivo es muy superior a lo que ha corrido, escalona: 5k->10k->21k->42k
 function racePhases(marks, targetId) {
   const order = ["5k","10k","21k","42k"];
   const targetIdx = order.indexOf(targetId);
-  // ¿Cuál es la mayor distancia que ya domina (tiene marca)?
+  // Â¿CuÃ¡l es la mayor distancia que ya domina (tiene marca)?
   let maxDoneIdx = -1;
   order.forEach((id,i) => { if (marks[id] && marks[id]>0) maxDoneIdx = Math.max(maxDoneIdx, i); });
   // Empieza desde la siguiente a la que domina (o desde 5k si no ha corrido nada)
@@ -2860,7 +2887,7 @@ function racePhases(marks, targetId) {
   return phases; // array de ids de distancia, en orden
 }
 
-// Semanas recomendadas para una fase según la distancia objetivo de la fase y el nivel
+// Semanas recomendadas para una fase segÃºn la distancia objetivo de la fase y el nivel
 function phaseWeeks(distId, level, experience) {
   const base = { "5k":8, "10k":8, "21k":10, "42k":12 }[distId] || 8;
   let mult = 1;
@@ -2870,19 +2897,19 @@ function phaseWeeks(distId, level, experience) {
   return Math.max(6, Math.round(base*mult));
 }
 
-// Genera el plan semanal de UNA fase de running (días con tipo de entreno y descripción)
-// Mensaje del entrenador según nivel y experiencia
+// Genera el plan semanal de UNA fase de running (dÃ­as con tipo de entreno y descripciÃ³n)
+// Mensaje del entrenador segÃºn nivel y experiencia
 function raceCoachMessage(disc, level, experience, targetId, numPhases) {
   if (experience==="cero") {
-    return `Empezamos desde la base, y eso está genial: todos empezamos por algún sitio. Vamos poco a poco, sin prisa pero sin pausa, para que tu cuerpo se adapte sin lesiones.${numPhases>1?` Tienes ${numPhases} fases por delante: cada una es un logro.`:""} Confía en el proceso. ¡Tú puedes!`;
+    return `Empezamos desde la base, y eso estÃ¡ genial: todos empezamos por algÃºn sitio. Vamos poco a poco, sin prisa pero sin pausa, para que tu cuerpo se adapte sin lesiones.${numPhases>1?` Tienes ${numPhases} fases por delante: cada una es un logro.`:""} ConfÃ­a en el proceso. Â¡TÃº puedes!`;
   }
   if (level==="principiante") {
-    return `Ya tienes algo de base, así que construimos sobre ello con cabeza. La constancia marca la diferencia: mejor poco y siempre que mucho de golpe.${numPhases>1?` Iremos fase a fase hasta tu meta.`:""} Notarás el progreso semana a semana.`;
+    return `Ya tienes algo de base, asÃ­ que construimos sobre ello con cabeza. La constancia marca la diferencia: mejor poco y siempre que mucho de golpe.${numPhases>1?` Iremos fase a fase hasta tu meta.`:""} NotarÃ¡s el progreso semana a semana.`;
   }
   if (level==="avanzado") {
-    return `Se nota que llevas rodaje. Este plan busca pulir tu rendimiento y llevarte a tu mejor versión. Cuida la recuperación tanto como los entrenos duros: ahí está la diferencia en tu nivel. A darlo todo.`;
+    return `Se nota que llevas rodaje. Este plan busca pulir tu rendimiento y llevarte a tu mejor versiÃ³n. Cuida la recuperaciÃ³n tanto como los entrenos duros: ahÃ­ estÃ¡ la diferencia en tu nivel. A darlo todo.`;
   }
-  return `Tienes buena base para este reto. Trabajaremos de forma progresiva combinando calidad, fondo y fuerza. Respeta las semanas de descarga: es cuando el cuerpo asimila y mejora. ¡A por ello!`;
+  return `Tienes buena base para este reto. Trabajaremos de forma progresiva combinando calidad, fondo y fuerza. Respeta las semanas de descarga: es cuando el cuerpo asimila y mejora. Â¡A por ello!`;
 }
 
 function generateRunPhase(distId, level, daysPerWeek, targetPaceSecsPerKm, experience, runType, desnivel) {
@@ -2899,19 +2926,19 @@ function generateRunPhase(distId, level, daysPerWeek, targetPaceSecsPerKm, exper
     const desnObj = desnivel ? Math.round(desnivel*(0.4+prog*0.6)) : 0;
     // Sesiones base de carrera
     const pool = isTrail ? [
-      { type:"carrera", name:"Rodaje suave", detail:`Rodaje cómodo de ${rodajeMin} min por terreno fácil, a ritmo conversacional.${semNota}` },
-      { type:"carrera", name:"Subidas (cuestas)", detail:`Series en cuesta: ${wIdx<3?"6":"8"}×1-2 min subiendo fuerte, baja trotando a recuperar. Mejora potencia y te prepara para el desnivel.` },
+      { type:"carrera", name:"Rodaje suave", detail:`Rodaje cÃ³modo de ${rodajeMin} min por terreno fÃ¡cil, a ritmo conversacional.${semNota}` },
+      { type:"carrera", name:"Subidas (cuestas)", detail:`Series en cuesta: ${wIdx<3?"6":"8"}Ã—1-2 min subiendo fuerte, baja trotando a recuperar. Mejora potencia y te prepara para el desnivel.` },
       { type:"fuerza", name:"Fuerza para trail", detail:"Sentadillas, zancadas, peso muerto rumano, gemelos, tibial y core. 4 series. Clave para subir fuerte y bajar sin destrozarte." },
       { type:"carrera", name:"Tirada larga con desnivel", detail:`Tirada larga de ${longKm} km${desnObj?` buscando ~${desnObj} m de desnivel positivo`:" por terreno con subidas y bajadas"} a ritmo suave. Practica caminar fuerte en las subidas duras.${semNota}` },
-      { type:"carrera", name:"Bajadas técnicas", detail:"Rodaje 30 min trabajando bajadas: pasos cortos, mirada adelante, brazos para equilibrio. Bajar bien ahorra mucho tiempo en trail." },
-      { type:"fuerza", name:"Fuerza excéntrica y core", detail:"Trabajo excéntrico de cuádriceps (bajadas controladas), glúteo, tobillo y core. 3 series. Protege tus piernas en las bajadas." },
+      { type:"carrera", name:"Bajadas tÃ©cnicas", detail:"Rodaje 30 min trabajando bajadas: pasos cortos, mirada adelante, brazos para equilibrio. Bajar bien ahorra mucho tiempo en trail." },
+      { type:"fuerza", name:"Fuerza excÃ©ntrica y core", detail:"Trabajo excÃ©ntrico de cuÃ¡driceps (bajadas controladas), glÃºteo, tobillo y core. 3 series. Protege tus piernas en las bajadas." },
     ] : [
-      { type:"carrera", name:"Rodaje suave", detail:`Rodaje cómodo de ${rodajeMin} min a ritmo conversacional (deberías poder hablar)${paceTxt}.${semNota}` },
-      { type:"carrera", name:"Series / calidad", detail:`Entrenamiento de calidad. Ej: ${wIdx<3?"5×400m":"6×800m"} a ritmo fuerte con 2 min de recuperación. Calienta 10 min antes.` },
-      { type:"fuerza", name:"Fuerza para correr", detail:"Sentadillas, zancadas, peso muerto rumano, gemelos y core. 3-4 series. Previene lesiones y mejora tu economía de carrera." },
-      { type:"carrera", name:"Tirada larga", detail:`Tirada larga de ${longKm} km a ritmo suave y constante. La sesión clave para ganar fondo.${semNota}` },
-      { type:"carrera", name:"Rodaje + técnica", detail:"Rodaje suave 30 min + 4-5 ejercicios de técnica (skipping, talones al glúteo, zancadas progresivas)." },
-      { type:"fuerza", name:"Fuerza y core", detail:"Core, glúteo, estabilidad e isométricos (plancha, hollow). 3 series. Clave para aguantar la distancia." },
+      { type:"carrera", name:"Rodaje suave", detail:`Rodaje cÃ³modo de ${rodajeMin} min a ritmo conversacional (deberÃ­as poder hablar)${paceTxt}.${semNota}` },
+      { type:"carrera", name:"Series / calidad", detail:`Entrenamiento de calidad. Ej: ${wIdx<3?"5Ã—400m":"6Ã—800m"} a ritmo fuerte con 2 min de recuperaciÃ³n. Calienta 10 min antes.` },
+      { type:"fuerza", name:"Fuerza para correr", detail:"Sentadillas, zancadas, peso muerto rumano, gemelos y core. 3-4 series. Previene lesiones y mejora tu economÃ­a de carrera." },
+      { type:"carrera", name:"Tirada larga", detail:`Tirada larga de ${longKm} km a ritmo suave y constante. La sesiÃ³n clave para ganar fondo.${semNota}` },
+      { type:"carrera", name:"Rodaje + tÃ©cnica", detail:"Rodaje suave 30 min + 4-5 ejercicios de tÃ©cnica (skipping, talones al glÃºteo, zancadas progresivas)." },
+      { type:"fuerza", name:"Fuerza y core", detail:"Core, glÃºteo, estabilidad e isomÃ©tricos (plancha, hollow). 3 series. Clave para aguantar la distancia." },
     ];
     return pool.slice(0, daysPerWeek);
   };
@@ -2931,12 +2958,12 @@ function generateBikePhase(kmObjetivo, desnivel, level, daysPerWeek, experience)
     const fondoKm = Math.round(kmObjetivo * 0.4);
     const semNota = isDeload ? " (semana de descarga)" : "";
     const sessions = [
-      { type:"bici", name:"Salida de fondo", detail:`Rodar ${fondoKm} km a ritmo cómodo y constante. Base aeróbica.${semNota}` },
-      { type:"bici", name:"Intervalos de potencia", detail:`Series de intensidad: ${wIdx<3?"4×3 min":"5×4 min"} fuertes con recuperación pedaleando suave. Mejora tu potencia.` },
-      { type:"fuerza", name:"Fuerza para ciclismo", detail:"Sentadilla, prensa, zancadas, peso muerto y core. 4 series. Más vatios en el pedaleo." },
-      { type:"bici", name:"Salida larga", detail:`Salida de ${longKm} km${desnivel?` buscando ~${Math.round(desnivel*(0.4+prog*0.6))} m de desnivel`:""}. Resistencia específica para tu reto.${semNota}` },
-      { type:"bici", name:"Trabajo de subidas", detail:"Repeticiones en cuesta (4-6 subidas firmes). Gana fuerza específica para el desnivel." },
-      { type:"fuerza", name:"Core y estabilidad", detail:"Core, lumbares y estabilidad para mantener la posición sin molestias. 3 series." },
+      { type:"bici", name:"Salida de fondo", detail:`Rodar ${fondoKm} km a ritmo cÃ³modo y constante. Base aerÃ³bica.${semNota}` },
+      { type:"bici", name:"Intervalos de potencia", detail:`Series de intensidad: ${wIdx<3?"4Ã—3 min":"5Ã—4 min"} fuertes con recuperaciÃ³n pedaleando suave. Mejora tu potencia.` },
+      { type:"fuerza", name:"Fuerza para ciclismo", detail:"Sentadilla, prensa, zancadas, peso muerto y core. 4 series. MÃ¡s vatios en el pedaleo." },
+      { type:"bici", name:"Salida larga", detail:`Salida de ${longKm} km${desnivel?` buscando ~${Math.round(desnivel*(0.4+prog*0.6))} m de desnivel`:""}. Resistencia especÃ­fica para tu reto.${semNota}` },
+      { type:"bici", name:"Trabajo de subidas", detail:"Repeticiones en cuesta (4-6 subidas firmes). Gana fuerza especÃ­fica para el desnivel." },
+      { type:"fuerza", name:"Core y estabilidad", detail:"Core, lumbares y estabilidad para mantener la posiciÃ³n sin molestias. 3 series." },
     ];
     return sessions.slice(0, daysPerWeek);
   };
@@ -2945,54 +2972,54 @@ function generateBikePhase(kmObjetivo, desnivel, level, daysPerWeek, experience)
   return { kmObjetivo, desnivel, weeks, weekPlans };
 }
 
-// Genera una rutina SEMANAL según objetivo, días y nivel
+// Genera una rutina SEMANAL segÃºn objetivo, dÃ­as y nivel
 // Etiquetas legibles de grupos musculares
 const MUSCLE_LABELS = { pecho:"Pecho", espalda:"Espalda", pierna:"Pierna", hombro:"Hombro", brazo:"Brazo", core:"Core" };
 
 function generateWeeklyRoutine(type, focus, days, level, equip = []) {
-  // ── RUNNING: plan semanal de carrera ──
+  // â”€â”€ RUNNING: plan semanal de carrera â”€â”€
   if (type === "running") {
     const plans = {
-      principiante: ["Rodaje suave 20-30 min","Caminata + carrera (intervalos suaves)","Rodaje suave 25-35 min","Tirada larga cómoda 35-45 min"],
-      intermedio: ["Rodaje suave 30-40 min","Series cortas (ej: 6×400m)","Rodaje medio 40-50 min","Tirada larga 60-75 min","Trote regenerativo 25 min"],
-      avanzado: ["Rodaje 40-50 min","Series largas (ej: 5×1000m)","Tempo run 30-40 min ritmo exigente","Rodaje medio 50 min","Tirada larga 75-90 min","Series en cuesta"],
+      principiante: ["Rodaje suave 20-30 min","Caminata + carrera (intervalos suaves)","Rodaje suave 25-35 min","Tirada larga cÃ³moda 35-45 min"],
+      intermedio: ["Rodaje suave 30-40 min","Series cortas (ej: 6Ã—400m)","Rodaje medio 40-50 min","Tirada larga 60-75 min","Trote regenerativo 25 min"],
+      avanzado: ["Rodaje 40-50 min","Series largas (ej: 5Ã—1000m)","Tempo run 30-40 min ritmo exigente","Rodaje medio 50 min","Tirada larga 75-90 min","Series en cuesta"],
     };
     const list = plans[level] || plans.principiante;
     const dayPlans = [];
     const shortNames = { principiante:["Rodaje suave","Intervalos suaves","Rodaje suave","Tirada larga"], intermedio:["Rodaje suave","Series cortas","Rodaje medio","Tirada larga","Trote suave"], avanzado:["Rodaje","Series largas","Tempo run","Rodaje medio","Tirada larga","Series en cuesta"] };
     const names = shortNames[level] || shortNames.principiante;
     for (let i=0;i<days;i++){ dayPlans.push({ name:names[i % names.length], groupsLabel:"Carrera", exercises:[], runDetail:list[i % list.length] }); }
-    return { type, params:{ desc:"Plan de carrera progresivo. Alterna rodajes, series y tirada larga. Respeta los días de descanso.", rest:"—" }, dayPlans };
+    return { type, params:{ desc:"Plan de carrera progresivo. Alterna rodajes, series y tirada larga. Respeta los dÃ­as de descanso.", rest:"â€”" }, dayPlans };
   }
-  // ── CARDIO: HIIT, comba, circuitos (sin carrera) ──
+  // â”€â”€ CARDIO: HIIT, comba, circuitos (sin carrera) â”€â”€
   if (type === "cardio") {
     const sessions = [
       { name:"HIIT cuerpo completo", detail:"20-25 min. Intervalos de alta intensidad: burpees, mountain climbers, jumping jacks. 40s trabajo / 20s descanso." },
-      { name:"Circuito metabólico", detail:"30 min en circuito: saltos, sentadilla con salto, escaladores, comba. 4-5 rondas." },
+      { name:"Circuito metabÃ³lico", detail:"30 min en circuito: saltos, sentadilla con salto, escaladores, comba. 4-5 rondas." },
       { name:"Comba y core", detail:"15-20 min de comba por intervalos + core al final." },
       { name:"Cardio + fuerza ligera", detail:"30 min combinando ejercicios de peso corporal a ritmo alto." },
-      { name:"HIIT piernas y glúteo", detail:"20 min: sentadillas, zancadas saltadas, puente de glúteo dinámico." },
+      { name:"HIIT piernas y glÃºteo", detail:"20 min: sentadillas, zancadas saltadas, puente de glÃºteo dinÃ¡mico." },
       { name:"Tabata", detail:"4 bloques de 4 min (20s/10s) con ejercicios explosivos." },
     ];
     const dayPlans = [];
     for (let i=0;i<days;i++){ const s = sessions[i % sessions.length]; dayPlans.push({ name:s.name, groupsLabel:"Cardio", exercises:[], runDetail:s.detail }); }
-    return { type, params:{ desc:"Entrenamiento cardiovascular de alta intensidad (sin carrera). Ideal para quemar y mejorar tu condición.", rest:"—" }, dayPlans };
+    return { type, params:{ desc:"Entrenamiento cardiovascular de alta intensidad (sin carrera). Ideal para quemar y mejorar tu condiciÃ³n.", rest:"â€”" }, dayPlans };
   }
 
-  // ── GIMNASIO o CASA: rutina de fuerza por grupos ──
+  // â”€â”€ GIMNASIO o CASA: rutina de fuerza por grupos â”€â”€
   const splits = {
     2: [ {n:"Cuerpo completo A", g:["pecho","espalda","pierna","core"]}, {n:"Cuerpo completo B", g:["hombro","brazo","pierna","core"]} ],
-    3: [ {n:"Empuje", g:["pecho","hombro","brazo"]}, {n:"Tirón", g:["espalda","brazo","core"]}, {n:"Pierna", g:["pierna","core"]} ],
-    4: [ {n:"Pecho y Tríceps", g:["pecho","brazo"]}, {n:"Espalda y Bíceps", g:["espalda","brazo"]}, {n:"Pierna", g:["pierna","core"]}, {n:"Hombro y Core", g:["hombro","core","brazo"]} ],
+    3: [ {n:"Empuje", g:["pecho","hombro","brazo"]}, {n:"TirÃ³n", g:["espalda","brazo","core"]}, {n:"Pierna", g:["pierna","core"]} ],
+    4: [ {n:"Pecho y TrÃ­ceps", g:["pecho","brazo"]}, {n:"Espalda y BÃ­ceps", g:["espalda","brazo"]}, {n:"Pierna", g:["pierna","core"]}, {n:"Hombro y Core", g:["hombro","core","brazo"]} ],
     5: [ {n:"Pecho", g:["pecho","brazo"]}, {n:"Espalda", g:["espalda","brazo"]}, {n:"Pierna", g:["pierna","core"]}, {n:"Hombro", g:["hombro","core"]}, {n:"Brazo y Core", g:["brazo","core"]} ],
-    6: [ {n:"Empuje A", g:["pecho","hombro","brazo"]}, {n:"Tirón A", g:["espalda","brazo"]}, {n:"Pierna A", g:["pierna","core"]}, {n:"Empuje B", g:["pecho","hombro","brazo"]}, {n:"Tirón B", g:["espalda","brazo","core"]}, {n:"Pierna B", g:["pierna","core"]} ],
+    6: [ {n:"Empuje A", g:["pecho","hombro","brazo"]}, {n:"TirÃ³n A", g:["espalda","brazo"]}, {n:"Pierna A", g:["pierna","core"]}, {n:"Empuje B", g:["pecho","hombro","brazo"]}, {n:"TirÃ³n B", g:["espalda","brazo","core"]}, {n:"Pierna B", g:["pierna","core"]} ],
   };
   const split = splits[days] || splits[3];
 
   const params = {
     masa: { reps:"8-12", series:4, rir:"1-2", rest:"90 seg", desc:"Hipertrofia: volumen e intensidad medias-altas" },
-    estetica: { reps:"10-15", series:4, rir:"1-2", rest:"60-75 seg", desc:"Estética: definición muscular y trabajo completo" },
-    fuerza: { reps:"3-6", series:5, rir:"2-3", rest:"2-3 min", desc:"Fuerza: cargas altas y más descanso entre series" },
+    estetica: { reps:"10-15", series:4, rir:"1-2", rest:"60-75 seg", desc:"EstÃ©tica: definiciÃ³n muscular y trabajo completo" },
+    fuerza: { reps:"3-6", series:5, rir:"2-3", rest:"2-3 min", desc:"Fuerza: cargas altas y mÃ¡s descanso entre series" },
     resistencia: { reps:"15-20", series:3, rir:"0-1", rest:"30-45 seg", desc:"Resistencia muscular: muchas reps, poco descanso" },
   };
   const p = params[focus] || params.masa;
@@ -3025,29 +3052,29 @@ function generateWeeklyRoutine(type, focus, days, level, equip = []) {
       if (!added && idx > 12) break;
     }
     const exercises = chosen.map(ex => ({ id:ex.id, name:ex.name, group:ex.group, series:p.series, reps:p.reps, rir:p.rir }));
-    const groupsLabel = d.g.map(g=>MUSCLE_LABELS[g]).filter((v,i,a)=>a.indexOf(v)===i).join(" · ");
+    const groupsLabel = d.g.map(g=>MUSCLE_LABELS[g]).filter((v,i,a)=>a.indexOf(v)===i).join(" Â· ");
     return { name:d.n, groups:d.g, groupsLabel, exercises };
   });
 
   return { type, params:p, dayPlans };
 }
 
-// Recomienda días de entreno según nivel
+// Recomienda dÃ­as de entreno segÃºn nivel
 function recommendedDays(level) {
   return level==="principiante" ? 3 : level==="intermedio" ? 4 : 5;
 }
 
-// Disciplinas disponibles para atleta híbrido
+// Disciplinas disponibles para atleta hÃ­brido
 const HYBRID_DISCIPLINES = [
-  { id:"fuerza", label:"Fuerza", desc:"Gimnasio / pesas", session:"Fuerza · cuerpo completo" },
+  { id:"fuerza", label:"Fuerza", desc:"Gimnasio / pesas", session:"Fuerza Â· cuerpo completo" },
   { id:"carrera", label:"Carrera", desc:"Running", session:"Carrera" },
   { id:"bici", label:"Bici", desc:"Ciclismo", session:"Bici" },
-  { id:"natacion", label:"Natación", desc:"Piscina", session:"Natación" },
+  { id:"natacion", label:"NataciÃ³n", desc:"Piscina", session:"NataciÃ³n" },
   { id:"core", label:"Core", desc:"Abdomen / zona media", session:"Core y estabilidad" },
   { id:"estiramiento", label:"Estiramientos", desc:"Movilidad", session:"Estiramientos y movilidad" },
 ];
 
-// Construye los ejercicios concretos de un día híbrido según la disciplina
+// Construye los ejercicios concretos de un dÃ­a hÃ­brido segÃºn la disciplina
 function hybridDayExercises(discId) {
   if (discId === "fuerza") {
     // Cuerpo completo: compuestos de varios grupos
@@ -3066,24 +3093,24 @@ function hybridDayExercises(discId) {
   if (discId === "estiramiento") {
     return [{ id:"estiramiento_dia", name:"Rutina de movilidad y estiramientos", group:"movilidad", series:"15-20 min", reps:"", rir:"" }];
   }
-  // Disciplinas cardio: carrera, bici, natación → sesión con dist/tiempo
-  const cardioNames = { carrera:"Sesión de carrera", bici:"Salida en bici", natacion:"Sesión de natación" };
-  return [{ id:`${discId}_session`, name:cardioNames[discId]||"Sesión", group:"cardio", series:"1 sesión", reps:"", rir:"" }];
+  // Disciplinas cardio: carrera, bici, nataciÃ³n â†’ sesiÃ³n con dist/tiempo
+  const cardioNames = { carrera:"SesiÃ³n de carrera", bici:"Salida en bici", natacion:"SesiÃ³n de nataciÃ³n" };
+  return [{ id:`${discId}_session`, name:cardioNames[discId]||"SesiÃ³n", group:"cardio", series:"1 sesiÃ³n", reps:"", rir:"" }];
 }
 
 // Detalle descriptivo de cada disciplina
 function hybridDayDetail(discId) {
   return {
     fuerza:"Entrenamiento de fuerza de cuerpo completo con ejercicios compuestos. Apunta el peso y las reps de cada serie.",
-    carrera:"Sesión de carrera: rodaje suave, series o tirada larga según cómo te encuentres. Registra distancia y tiempo.",
+    carrera:"SesiÃ³n de carrera: rodaje suave, series o tirada larga segÃºn cÃ³mo te encuentres. Registra distancia y tiempo.",
     bici:"Salida en bici combinando fondo e intensidad. Registra distancia y tiempo.",
-    natacion:"Sesión de natación: técnica y series de resistencia, alternando estilos. Registra distancia y tiempo.",
+    natacion:"SesiÃ³n de nataciÃ³n: tÃ©cnica y series de resistencia, alternando estilos. Registra distancia y tiempo.",
     core:"Trabajo de core y zona media: plancha, hollow, rotaciones. Clave para rendir en todos los deportes.",
     estiramiento:"15-20 min de estiramientos y movilidad para recuperar y prevenir lesiones.",
   }[discId] || "";
 }
 
-// Genera una semana híbrida repartiendo las disciplinas elegidas en los días disponibles
+// Genera una semana hÃ­brida repartiendo las disciplinas elegidas en los dÃ­as disponibles
 function generateHybridRoutine(disciplines, days) {
   const sessions = [];
   const discObjs = disciplines.map(id => HYBRID_DISCIPLINES.find(d=>d.id===id)).filter(Boolean);
@@ -3099,18 +3126,18 @@ function generateHybridRoutine(disciplines, days) {
   return sessions;
 }
 
-// Nombres de los días de la semana (Lunes a Domingo)
-const WEEKDAYS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+// Nombres de los dÃ­as de la semana (Lunes a Domingo)
+const WEEKDAYS = ["Lunes","Martes","MiÃ©rcoles","Jueves","Viernes","SÃ¡bado","Domingo"];
 
-// Reparte N días de entreno en la semana (7 días) de forma óptima, dejando descansos espaciados.
+// Reparte N dÃ­as de entreno en la semana (7 dÃ­as) de forma Ã³ptima, dejando descansos espaciados.
 // Devuelve un array de 7 posiciones con true (entreno) o false (descanso).
 function distributeTrainingDays(numTrain, restDayIdx) {
   const slots = new Array(7).fill(false);
   if (restDayIdx != null && restDayIdx >= 0) {
-    // El usuario eligió un día concreto de descanso → el resto se reparte
+    // El usuario eligiÃ³ un dÃ­a concreto de descanso â†’ el resto se reparte
     const trainable = [];
     for (let i=0;i<7;i++) if (i!==restDayIdx) trainable.push(i);
-    // Coger numTrain días de los trainables, espaciados
+    // Coger numTrain dÃ­as de los trainables, espaciados
     if (numTrain >= trainable.length) { trainable.forEach(i=>slots[i]=true); }
     else {
       // repartir uniformemente
@@ -3118,21 +3145,21 @@ function distributeTrainingDays(numTrain, restDayIdx) {
     }
     return slots;
   }
-  // Aleatorio/óptimo: repartir numTrain entrenos espaciados en 7 días
+  // Aleatorio/Ã³ptimo: repartir numTrain entrenos espaciados en 7 dÃ­as
   for (let k=0;k<numTrain;k++){ const idx = Math.round(k*6/(numTrain-1||1)); slots[idx]=true; }
-  // Si por redondeo faltan días, rellenar huecos
+  // Si por redondeo faltan dÃ­as, rellenar huecos
   let count = slots.filter(Boolean).length;
   for (let i=0;i<7 && count<numTrain;i++){ if(!slots[i]){slots[i]=true;count++;} }
   return slots;
 }
 
-// Construye la semana L-D a partir de los días de entreno (dayPlans) + opcionalmente días extra (fusión).
-// Cada día del resultado: { weekday, rest:bool, workouts:[{name, type, exercises, detail, disc}] }
+// Construye la semana L-D a partir de los dÃ­as de entreno (dayPlans) + opcionalmente dÃ­as extra (fusiÃ³n).
+// Cada dÃ­a del resultado: { weekday, rest:bool, workouts:[{name, type, exercises, detail, disc}] }
 function buildWeekSchedule(dayPlans, restDayIdx, extraDays) {
   const numTrain = dayPlans.length;
   const slots = distributeTrainingDays(numTrain, restDayIdx);
   const week = [];
-  let di = 0; // índice del dayPlan actual
+  let di = 0; // Ã­ndice del dayPlan actual
   for (let d=0; d<7; d++) {
     if (!slots[d]) { week.push({ weekday:WEEKDAYS[d], rest:true, workouts:[] }); continue; }
     const dp = dayPlans[di]; di++;
@@ -3140,7 +3167,7 @@ function buildWeekSchedule(dayPlans, restDayIdx, extraDays) {
       name: dp.name || dp.session, type: dp.disc || (dp.groups?"fuerza":"fuerza"),
       exercises: dp.exercises || [], detail: dp.hybridDetail || "", disc: dp.disc,
     }];
-    // Día extra (fusión): se añade un segundo entreno a este día si hay extras disponibles
+    // DÃ­a extra (fusiÃ³n): se aÃ±ade un segundo entreno a este dÃ­a si hay extras disponibles
     if (extraDays && extraDays.length) {
       const ex = extraDays[di % extraDays.length];
       if (ex) workouts.push({ name:ex.name, type:ex.type, exercises:ex.exercises||[], detail:ex.detail||"", extra:true });
@@ -3155,11 +3182,11 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
   const [step, setStep] = useState(trainingState?.goal ? "workout" : "goal");
   const [tempGoal, setTempGoal] = useState(null);
   const [tempEquip, setTempEquip] = useState([]);
-  const [swapping, setSwapping] = useState(null); // ejercicio que se está sustituyendo
+  const [swapping, setSwapping] = useState(null); // ejercicio que se estÃ¡ sustituyendo
   const [customForm, setCustomForm] = useState(null); // formulario de ejercicio personalizado
-  const [marks, setMarks] = useState({}); // {exId: [{peso,reps}...]} de la sesión actual
+  const [marks, setMarks] = useState({}); // {exId: [{peso,reps}...]} de la sesiÃ³n actual
   const [comment, setComment] = useState("");
-  const [viewExercise, setViewExercise] = useState(null); // ver animación en grande
+  const [viewExercise, setViewExercise] = useState(null); // ver animaciÃ³n en grande
   const [confirmFinish, setConfirmFinish] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
   const [newPRs, setNewPRs] = useState([]);
@@ -3168,7 +3195,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
   const [weekType, setWeekType] = useState(null);
   const [weekFocus, setWeekFocus] = useState(null);
   const [weekDays, setWeekDays] = useState(null);
-  const [restDay, setRestDay] = useState(null); // día de descanso elegido (0-6) o null=óptimo
+  const [restDay, setRestDay] = useState(null); // dÃ­a de descanso elegido (0-6) o null=Ã³ptimo
   const [weekLevel, setWeekLevel] = useState(null);
   const [weekEquip, setWeekEquip] = useState([]);
   const [hybridDiscs, setHybridDiscs] = useState([]);
@@ -3188,12 +3215,12 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
   const [raceLevel, setRaceLevel] = useState(null);
   const [raceExperience, setRaceExperience] = useState(null);
   const [raceDays, setRaceDays] = useState(4);
-  const [phaseComplete, setPhaseComplete] = useState(false); // animación fase completada
-  const [creatingRacePlan, setCreatingRacePlan] = useState(false); // animación al crear plan
+  const [phaseComplete, setPhaseComplete] = useState(false); // animaciÃ³n fase completada
+  const [creatingRacePlan, setCreatingRacePlan] = useState(false); // animaciÃ³n al crear plan
   const [confirmWeek, setConfirmWeek] = useState(false); // pop-up confirmar completar semana
-  const [weekComplete, setWeekComplete] = useState(false); // animación semana completada
+  const [weekComplete, setWeekComplete] = useState(false); // animaciÃ³n semana completada
   const [confirmFinishRoutineWeek, setConfirmFinishRoutineWeek] = useState(false); // pop-up finalizar semana de rutina
-  const [askNextWeek, setAskNextWeek] = useState(false); // pop-up ¿otra semana igual?
+  const [askNextWeek, setAskNextWeek] = useState(false); // pop-up Â¿otra semana igual?
   const [routineConflict, setRoutineConflict] = useState(null); // {pending} datos de la rutina nueva pendiente de confirmar
   const [confirmDeleteRace, setConfirmDeleteRace] = useState(false);
 
@@ -3206,19 +3233,19 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
   const muscleGroups = trainingState?.muscleGroups || null;
 
   // Lista de ejercicios actual (con sustituciones aplicadas)
-  // Si el entreno viene de un día de la rutina, usar ejercicios fijos; si no, generar
+  // Si el entreno viene de un dÃ­a de la rutina, usar ejercicios fijos; si no, generar
   const fixedExercises = trainingState?.fixedExercises || null;
   const baseExercises = fixedExercises
     ? fixedExercises.map(fe => {
         const base = EXERCISES.find(e=>e.id===fe.id);
         if (!base) {
-          // Ejercicio que no está en la base (sesión de carrera/bici/natación o movilidad)
+          // Ejercicio que no estÃ¡ en la base (sesiÃ³n de carrera/bici/nataciÃ³n o movilidad)
           const isCardio = (fe.group==="cardio");
           return { id:fe.id, name:fe.name, group:fe.group||"cardio", anim:isCardio?"cardio":"movilidad", metric:isCardio?"cardio":"tiempo",
-            series: (fe.series && fe.reps) ? `${fe.series} × ${fe.reps}` : (fe.series||"1 sesión"),
+            series: (fe.series && fe.reps) ? `${fe.series} Ã— ${fe.reps}` : (fe.series||"1 sesiÃ³n"),
             rir: fe.rir||"", goals:["running"], equip:["peso_corporal"], _custom:true };
         }
-        const series = (fe.series && fe.reps) ? `${fe.series} × ${fe.reps}` : base.series;
+        const series = (fe.series && fe.reps) ? `${fe.series} Ã— ${fe.reps}` : base.series;
         return { ...base, series, rir: fe.rir || base.rir };
       }).filter(Boolean)
     : (goal ? generateWorkout(goal, equipment, seed, muscleGroups) : []);
@@ -3241,14 +3268,14 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     setStep("workout");
   };
 
-  // Entrenar un día concreto de la rutina guardada
+  // Entrenar un dÃ­a concreto de la rutina guardada
   const startRoutineDay = (dayPlan) => {
     setTrainingState({ goal:"fuerza", equipment:[], seed:0, overrides:{}, fixedExercises: dayPlan.exercises, routineDayName: dayPlan.name });
     setMarks({});
     setStep("workout");
   };
 
-  // Entrenar un día (de rutina normal o híbrida). Detecta si es cardio para el formato correcto.
+  // Entrenar un dÃ­a (de rutina normal o hÃ­brida). Detecta si es cardio para el formato correcto.
   const startHybridOrRoutineDay = (dayPlan) => {
     const isCardioDay = dayPlan.disc==="carrera" || dayPlan.disc==="bici" || dayPlan.disc==="natacion";
     setTrainingState({
@@ -3270,7 +3297,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
       fixed = workout.exercises;
     } else if (isCardio) {
       const exId = workout.type==="bici"?"bike_session":workout.type==="natacion"?"natacion_session":"run_session";
-      fixed = [{ id:exId, name:workout.name, group:"cardio", series:"1 sesión", reps:"", rir:"" }];
+      fixed = [{ id:exId, name:workout.name, group:"cardio", series:"1 sesiÃ³n", reps:"", rir:"" }];
     } else {
       fixed = [{ id:`${workout.type}_dia`, name:workout.name, group:workout.type==="core"?"core":"movilidad", series:workout.type==="core"?3:"15-20 min", reps:workout.type==="core"?"12-15":"", rir:"" }];
     }
@@ -3278,7 +3305,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
       goal: isCardio ? "running" : "fuerza",
       equipment:[], seed:0, overrides:{},
       fixedExercises: fixed,
-      routineDayName: `${day.weekday} · ${workout.name}`,
+      routineDayName: `${day.weekday} Â· ${workout.name}`,
       raceCardio: isCardio,
       schedCtx: { dayIdx, workoutIdx },
     });
@@ -3286,14 +3313,14 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     setStep("workout");
   };
 
-  // Finalizar la semana de la rutina: muestra el pop-up de "¿otra semana?"
+  // Finalizar la semana de la rutina: muestra el pop-up de "Â¿otra semana?"
   const finishRoutineWeek = () => {
     setConfirmFinishRoutineWeek(false);
     setWeekComplete(true);
     setTimeout(()=>{ setWeekComplete(false); setAskNextWeek(true); }, 2000);
   };
 
-  // Regenerar la misma rutina para la semana siguiente (misma estructura) y limpiar los días hechos
+  // Regenerar la misma rutina para la semana siguiente (misma estructura) y limpiar los dÃ­as hechos
   const regenerateSameRoutine = () => {
     if (!savedRoutine) return;
     const weekNum = (savedRoutine.weekNum||1) + 1;
@@ -3311,14 +3338,14 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     setAskNextWeek(false);
   };
 
-  // Guardar una rutina con animación y volver al inicio de Entreno
+  // Guardar una rutina con animaciÃ³n y volver al inicio de Entreno
   const saveRoutineWithAnimation = (routineData) => {
     setSavedRoutine(routineData);
     setSavingRoutine(true);
     setTimeout(()=>{ setSavingRoutine(false); setStep("goal"); }, 2200);
   };
 
-  // ¿Hay ya alguna rutina o plan activos? (para avisar de conflicto)
+  // Â¿Hay ya alguna rutina o plan activos? (para avisar de conflicto)
   const hasActivePlan = () => (savedRoutine || racePlan);
 
   // Intentar guardar una rutina nueva: si ya hay otra rutina/plan, avisar; si no, guardar
@@ -3330,18 +3357,18 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     }
   };
 
-  // Fusiona la rutina pendiente con lo que ya existe (alta exigencia, días extra)
+  // Fusiona la rutina pendiente con lo que ya existe (alta exigencia, dÃ­as extra)
   const mergeRoutines = () => {
     const c = routineConflict;
     if (!c) return;
-    // CASO 1: hay un plan de carrera activo → añadir los días de la rutina nueva como EXTRA a cada semana del plan
+    // CASO 1: hay un plan de carrera activo â†’ aÃ±adir los dÃ­as de la rutina nueva como EXTRA a cada semana del plan
     if (racePlan && c.kind==="routine") {
       const nuevaData = c.data;
-      // Días extra a añadir (de fuerza/disciplinas de la rutina nueva)
+      // DÃ­as extra a aÃ±adir (de fuerza/disciplinas de la rutina nueva)
       const extraDays = (nuevaData.dayPlans||[]).map(dp => ({
         type: dp.disc==="carrera"||dp.disc==="bici"||dp.disc==="natacion" ? dp.disc : "fuerza",
         name: dp.name + " (extra)",
-        detail: dp.hybridDetail || "Sesión extra de tu otra rutina para subir la carga.",
+        detail: dp.hybridDetail || "SesiÃ³n extra de tu otra rutina para subir la carga.",
         exercises: dp.exercises || [],
         extra: true,
       }));
@@ -3358,11 +3385,11 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
       setTimeout(()=>{ setSavingRoutine(false); setStep("race_plan"); }, 2200);
       return;
     }
-    // CASO 2: dos rutinas normales/híbridas → fusionar por días (dobles sesiones) en una semana estructurada
+    // CASO 2: dos rutinas normales/hÃ­bridas â†’ fusionar por dÃ­as (dobles sesiones) en una semana estructurada
     if (savedRoutine && c.kind==="routine") {
       const dpsA = savedRoutine.dayPlans || [];
       const dpsB = c.data.dayPlans || [];
-      // A son los días principales; B se añaden como segundo entreno del día (días extra)
+      // A son los dÃ­as principales; B se aÃ±aden como segundo entreno del dÃ­a (dÃ­as extra)
       const extraDays = dpsB.map(dp => ({
         type: dp.disc==="carrera"||dp.disc==="bici"||dp.disc==="natacion" ? dp.disc : "fuerza",
         name: dp.name, detail: dp.hybridDetail||"", exercises: dp.exercises||[], extra:true,
@@ -3376,12 +3403,12 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
       saveRoutineWithAnimation(nueva);
       return;
     }
-    // CASO 3: rutina pendiente es un PLAN de carrera y ya hay una rutina → añadir días de la rutina como extra al plan
+    // CASO 3: rutina pendiente es un PLAN de carrera y ya hay una rutina â†’ aÃ±adir dÃ­as de la rutina como extra al plan
     if (c.kind==="race" && savedRoutine) {
-      // El plan ya se habrá construido; lo recogemos de c.data (racePlan)
+      // El plan ya se habrÃ¡ construido; lo recogemos de c.data (racePlan)
       const extraDays = (savedRoutine.dayPlans||[]).map(dp => ({
         type: dp.disc==="carrera"||dp.disc==="bici"||dp.disc==="natacion" ? dp.disc : "fuerza",
-        name: dp.name + " (extra)", detail: dp.hybridDetail || "Sesión extra de tu otra rutina.", exercises: dp.exercises || [], extra:true,
+        name: dp.name + " (extra)", detail: dp.hybridDetail || "SesiÃ³n extra de tu otra rutina.", exercises: dp.exercises || [], extra:true,
       }));
       const plan = c.data;
       const phases = plan.phases.map(ph => ({
@@ -3409,10 +3436,10 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
       const targetKm = RACE_DISTANCES.find(d=>d.id===raceTarget).km;
       const pred = bestPrediction(marksSecs, targetKm);
       const objSecs = parseTimeToSecs(raceTargetTime);
-      // ¿Es realista el objetivo?
+      // Â¿Es realista el objetivo?
       let realismo = "sin_objetivo";
       if (objSecs>0 && pred>0) realismo = objSecs >= pred*0.97 ? "realista" : "ambicioso";
-      // Ritmo objetivo (del objetivo o de la predicción)
+      // Ritmo objetivo (del objetivo o de la predicciÃ³n)
       const refSecs = objSecs>0 ? objSecs : pred;
       const targetPace = refSecs>0 ? refSecs/targetKm : 0;
       // Generar plan de cada fase
@@ -3422,7 +3449,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
       });
       const totalWeeks = phasePlans.reduce((a,p)=>a+p.weeks,0);
       const finishDate = new Date(); finishDate.setDate(finishDate.getDate()+totalWeeks*7);
-      // Mensaje del entrenador según nivel/experiencia
+      // Mensaje del entrenador segÃºn nivel/experiencia
       const coach = raceCoachMessage("running", raceLevel, raceExperience, raceTarget, phases.length);
       plan = {
         discipline:"running", runType:raceRunType, runDesnivel:parseInt(raceRunDesnivel)||0, target:raceTarget, targetLabel:RACE_DISTANCES.find(d=>d.id===raceTarget).label,
@@ -3438,7 +3465,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
       const coach = raceCoachMessage("bici", raceLevel, raceExperience, null, 1);
       plan = {
         discipline:"bici", bikeType:raceBikeType, km, desnivel:desn, level:raceLevel, experience:raceExperience, days:raceDays,
-        phases:[{ ...ph, label:`${km} km${desn?` · ${desn}m`:""}`, completed:false }],
+        phases:[{ ...ph, label:`${km} km${desn?` Â· ${desn}m`:""}`, completed:false }],
         currentPhase:0, currentWeek:0, totalWeeks:ph.weeks, coach,
         estFinish:(()=>{ const d=new Date(); d.setDate(d.getDate()+ph.weeks*7); return d.toISOString(); })(), ts:Date.now(),
       };
@@ -3449,18 +3476,18 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
       return;
     }
     setRacePlan(plan);
-    // Animación de "plan creado" antes de mostrarlo
+    // AnimaciÃ³n de "plan creado" antes de mostrarlo
     setCreatingRacePlan(true);
     setTimeout(()=>{ setCreatingRacePlan(false); setStep("race_plan"); window.scrollTo(0,0); }, 2400);
   };
 
-  // Iniciar una sesión del plan de carrera (fuerza = ejercicios; carrera/bici = registro simple)
+  // Iniciar una sesiÃ³n del plan de carrera (fuerza = ejercicios; carrera/bici = registro simple)
   const startRaceSession = (session, sessionIdx) => {
     const raceCtx = { phase: racePlan?.currentPhase||0, week: racePlan?.currentWeek||0, sessionIdx };
     if (session.type === "fuerza") {
       let fixed;
       if (session.exercises && session.exercises.length) {
-        // Día extra fusionado: usar sus propios ejercicios
+        // DÃ­a extra fusionado: usar sus propios ejercicios
         fixed = session.exercises;
       } else {
         const pool = EXERCISES.filter(ex => ex.goals.includes("fuerza") && (ex.group==="pierna"||ex.group==="core"));
@@ -3474,14 +3501,14 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     } else {
       const exId = session.type==="bici" ? "bike_session" : session.type==="natacion" ? "natacion_session" : "run_session";
       setTrainingState({ goal:"running", equipment:[], seed:0, overrides:{},
-        fixedExercises:[{ id:exId, name:session.name, group:"cardio", series:"1 sesión", reps:"", rir:"" }],
+        fixedExercises:[{ id:exId, name:session.name, group:"cardio", series:"1 sesiÃ³n", reps:"", rir:"" }],
         routineDayName:`${session.name} (plan de carrera)`, raceCardio:true, raceCtx });
       setMarks({});
       setStep("workout");
     }
   };
 
-  // Marcar una sesión como completada en el plan (se llama al terminar el entreno)
+  // Marcar una sesiÃ³n como completada en el plan (se llama al terminar el entreno)
   const markRaceSessionDone = (ctx) => {
     if (!ctx) return;
     setRacePlan(prev => {
@@ -3506,7 +3533,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     }, 2000);
   };
 
-  // Marcar la fase actual como completada y avanzar (con animación)
+  // Marcar la fase actual como completada y avanzar (con animaciÃ³n)
   const completeRacePhase = () => {
     setPhaseComplete(true);
     setTimeout(()=>{
@@ -3527,10 +3554,10 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
 
   const changeGoal = () => { setStep("goal"); setTempGoal(null); setTempEquip([]); if (trainingState?.fixedExercises) setTrainingState({ ...trainingState, fixedExercises:null, routineDayName:null, goal:null }); };
 
-  // Días de rutina completados esta semana (lunes a domingo)
+  // DÃ­as de rutina completados esta semana (lunes a domingo)
   const completedRoutineDaysThisWeek = (() => {
-    // Los días completados de la semana actual se guardan en la propia rutina (doneDays).
-    // Así al finalizar semana o regenerar se resetean al 100% sin depender de fechas.
+    // Los dÃ­as completados de la semana actual se guardan en la propia rutina (doneDays).
+    // AsÃ­ al finalizar semana o regenerar se resetean al 100% sin depender de fechas.
     return new Set(savedRoutine?.doneDays || []);
   })();
 
@@ -3556,12 +3583,12 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
 
   const doFinishWorkout = () => {
     const now = new Date();
-    // Detectar récords personales (peso máximo por ejercicio)
+    // Detectar rÃ©cords personales (peso mÃ¡ximo por ejercicio)
     const prs = [];
     exercises.forEach(ex => {
       const todayMax = Math.max(0, ...((marks[ex.id]||[]).map(s => parseFloat(s?.peso)||0)));
       if (todayMax <= 0) return;
-      // Máximo histórico anterior de este ejercicio
+      // MÃ¡ximo histÃ³rico anterior de este ejercicio
       let prevMax = 0;
       Object.values(workoutLog||{}).forEach(w => {
         const m = w.marks?.[ex.id];
@@ -3575,9 +3602,9 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     const key = dateKey(now) + "_" + Date.now();
     const entry = { date: dateKey(now), goal, exercises: exercises.map(e=>({ id:e.id, name:e.name, series:e.series })), marks, comment, ts: Date.now(), routineDay: trainingState?.routineDayName||null };
     setWorkoutLog(prev => ({ ...prev, [key]: entry }));
-    // Si es una sesión del plan de carrera, marcarla como completada
+    // Si es una sesiÃ³n del plan de carrera, marcarla como completada
     if (trainingState?.raceCtx) markRaceSessionDone(trainingState.raceCtx);
-    // Si es un día de la rutina guardada, marcarlo como hecho (check) en la propia rutina
+    // Si es un dÃ­a de la rutina guardada, marcarlo como hecho (check) en la propia rutina
     const rDay = trainingState?.routineDayName;
     const schedCtx = trainingState?.schedCtx;
     if (schedCtx && savedRoutine?.schedule) {
@@ -3587,7 +3614,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         if (!prev) return prev;
         const dd = prev.doneDays ? [...prev.doneDays] : [];
         if (!dd.includes(keyW)) dd.push(keyW);
-        // ¿Se ha completado toda la semana? (todos los workouts de todos los días no-descanso)
+        // Â¿Se ha completado toda la semana? (todos los workouts de todos los dÃ­as no-descanso)
         let totalW = 0; prev.schedule.forEach((d)=>{ if(!d.rest) totalW += d.workouts.length; });
         const allDone = dd.length >= totalW && totalW>0;
         if (allDone) setTimeout(()=>{ setWeekComplete(true); setTimeout(()=>{ setWeekComplete(false); setAskNextWeek(true); }, 2000); }, 700);
@@ -3606,12 +3633,12 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     if (trainingState?.fixedExercises) setTrainingState({ ...trainingState, fixedExercises:null, routineDayName:null, goal:null, raceCtx:null, schedCtx:null });
     setNewPRs(prs);
     setCelebrating(true);
-    // Si hay récords, la animación dura un poco más para verlos
+    // Si hay rÃ©cords, la animaciÃ³n dura un poco mÃ¡s para verlos
     const dur = prs.length ? 3600 : 2400;
     setTimeout(()=>{ setCelebrating(false); setNewPRs([]); if (onGoTo) onGoTo("inicio"); }, dur);
   };
 
-  // Busca la última sesión registrada de un ejercicio (sus marcas) para mostrarlas como referencia
+  // Busca la Ãºltima sesiÃ³n registrada de un ejercicio (sus marcas) para mostrarlas como referencia
   const lastMarksFor = (exId) => {
     const past = Object.values(workoutLog)
       .filter(w => w.marks && w.marks[exId] && w.marks[exId].some(s => s && (s.peso || s.reps)))
@@ -3620,17 +3647,17 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     return { date: past[0].date, series: past[0].marks[exId] };
   };
 
-  // Overlay de animación al guardar rutina (visible desde cualquier paso)
+  // Overlay de animaciÃ³n al guardar rutina (visible desde cualquier paso)
   // Pop-up de conflicto: ya hay una rutina/plan y se intenta crear otra
   if (routineConflict) {
-    const existing = racePlan ? "plan de carrera" : savedRoutine?.hybrid ? "rutina híbrida" : "rutina semanal";
+    const existing = racePlan ? "plan de carrera" : savedRoutine?.hybrid ? "rutina hÃ­brida" : "rutina semanal";
     const nuevaEsRace = routineConflict.kind==="race";
     return (
       <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.82)", backdropFilter:"blur(5px)", WebkitBackdropFilter:"blur(5px)", zIndex:500, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", animation:"fade-in 0.3s ease" }}>
         <div style={{ background:"#16161f", borderRadius:22, padding:"26px 22px", maxWidth:380, width:"100%", border:"1px solid #3a3a2a", animation:"scale-fade 0.35s ease", maxHeight:"88vh", overflowY:"auto" }}>
           <div style={{ color:"#ffb74d", fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:1.5, textAlign:"center", marginBottom:8 }}>Aviso</div>
           <div style={{ color:"white", fontWeight:900, fontSize:19, textAlign:"center", marginBottom:10 }}>Ya tienes un {existing} activo</div>
-          <div style={{ color:"#aaa", fontSize:13.5, textAlign:"center", lineHeight:1.55, marginBottom:22 }}>Tener dos planes a la vez hace difícil cumplir ambos al 100%. ¿Qué prefieres hacer?</div>
+          <div style={{ color:"#aaa", fontSize:13.5, textAlign:"center", lineHeight:1.55, marginBottom:22 }}>Tener dos planes a la vez hace difÃ­cil cumplir ambos al 100%. Â¿QuÃ© prefieres hacer?</div>
 
           {/* Quedarme con la nueva */}
           <button onClick={()=>{
@@ -3650,7 +3677,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           <button onClick={mergeRoutines} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #b8860b", background:"linear-gradient(135deg,#2a2410,#1a1a24)", color:"#ffd700", fontWeight:800, fontSize:14, cursor:"pointer" }}>
             Fusionar ambas (alta exigencia)
           </button>
-          <div style={{ color:"#666", fontSize:11, textAlign:"center", marginTop:10, lineHeight:1.5 }}>{(racePlan||nuevaEsRace) ? "Al fusionar, añadiremos los entrenos extra a tu plan de carrera para subir la carga." : "Crearemos una rutina semanal combinada subiendo un poco la carga (sin saturar)."}</div>
+          <div style={{ color:"#666", fontSize:11, textAlign:"center", marginTop:10, lineHeight:1.5 }}>{(racePlan||nuevaEsRace) ? "Al fusionar, aÃ±adiremos los entrenos extra a tu plan de carrera para subir la carga." : "Crearemos una rutina semanal combinada subiendo un poco la carga (sin saturar)."}</div>
         </div>
       </div>
     );
@@ -3668,8 +3695,8 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             <path d="M3 11l19-9-9 19-2-8-8-2z" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <div style={{ color:"#ffd700", fontWeight:900, fontSize:24, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.9s both", textAlign:"center" }}>¡Plan de carrera creado!</div>
-        <div style={{ color:"#fff", fontSize:14, marginTop:10, fontWeight:600, animation:"rise-up 0.5s ease 1.1s both", textAlign:"center" }}>Preparando tu camino hacia la meta…</div>
+        <div style={{ color:"#ffd700", fontWeight:900, fontSize:24, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.9s both", textAlign:"center" }}>Â¡Plan de carrera creado!</div>
+        <div style={{ color:"#fff", fontSize:14, marginTop:10, fontWeight:600, animation:"rise-up 0.5s ease 1.1s both", textAlign:"center" }}>Preparando tu camino hacia la metaâ€¦</div>
       </div>
     );
   }
@@ -3689,16 +3716,16 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           </svg>
         </div>
         <div style={{ color:"white", fontWeight:900, fontSize:24, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.8s both" }}>Rutina guardada</div>
-        <div style={{ color:"#4caf50", fontSize:14, marginTop:8, fontWeight:600, letterSpacing:2, textTransform:"uppercase", animation:"rise-up 0.5s ease 1s both" }}>Ya está en tu rutina programada</div>
+        <div style={{ color:"#4caf50", fontSize:14, marginTop:8, fontWeight:600, letterSpacing:2, textTransform:"uppercase", animation:"rise-up 0.5s ease 1s both" }}>Ya estÃ¡ en tu rutina programada</div>
       </div>
     );
   }
 
-  // ── PASO 1: elegir objetivo ──
+  // â”€â”€ PASO 1: elegir objetivo â”€â”€
   if (step === "goal") {
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        {/* Modal detalle día híbrido */}
+        {/* Modal detalle dÃ­a hÃ­brido */}
         {viewHybridDay && (
           <div onClick={()=>setViewHybridDay(null)} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
             <div onClick={e=>e.stopPropagation()} style={{ background:"#16161f", borderRadius:20, padding:"24px 22px", maxWidth:380, width:"100%", border:"1px solid #2a4a5a" }}>
@@ -3710,7 +3737,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         )}
 
         {/* Modal confirmar borrar rutina */}
-        {/* Animación de semana completada (rutina) */}
+        {/* AnimaciÃ³n de semana completada (rutina) */}
         {weekComplete && (
           <div style={{ position:"fixed", inset:0, background:"radial-gradient(circle at center, #16201a 0%, #0a0d0a 100%)", zIndex:400, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", animation:"fade-in 0.3s ease", padding:"24px" }}>
             <div style={{ position:"relative", width:120, height:120, marginBottom:26, display:"flex", alignItems:"center", justifyContent:"center", animation:"glow-pulse 1.5s ease-out 0.3s" }}>
@@ -3720,7 +3747,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
                 <path d="M38 62 L53 76 L83 44" fill="none" stroke="#8bc34a" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" pathLength="1" style={{ strokeDasharray:1, strokeDashoffset:1, animation:"draw-line 0.4s ease-out 0.85s forwards" }} />
               </svg>
             </div>
-            <div style={{ color:"white", fontWeight:900, fontSize:23, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.8s both", textAlign:"center" }}>¡Semana completada!</div>
+            <div style={{ color:"white", fontWeight:900, fontSize:23, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.8s both", textAlign:"center" }}>Â¡Semana completada!</div>
             <div style={{ color:"#4caf50", fontSize:13.5, marginTop:8, fontWeight:600, letterSpacing:1, textTransform:"uppercase", animation:"rise-up 0.5s ease 1s both" }}>Buen trabajo esta semana</div>
           </div>
         )}
@@ -3740,28 +3767,28 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           return (
             <div onClick={()=>setConfirmFinishRoutineWeek(false)} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.78)", backdropFilter:"blur(4px)", WebkitBackdropFilter:"blur(4px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", animation:"fade-in 0.25s ease" }}>
               <div onClick={e=>e.stopPropagation()} style={{ background:"#1a1a24", borderRadius:20, padding:"26px 22px", maxWidth:360, width:"100%", border:"1px solid #2a2a3a", animation:"scale-fade 0.3s ease" }}>
-                <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>¿Finalizar la semana?</div>
+                <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>Â¿Finalizar la semana?</div>
                 {pendientes>0 ? (
                   <div style={{ background:"#2a2410", border:"1px solid #b8860b", borderRadius:12, padding:"12px 14px", margin:"14px 0" }}>
                     <div style={{ color:"#ffd700", fontSize:13, fontWeight:700, textAlign:"center", lineHeight:1.5 }}>Te {pendientes===1?"queda":"quedan"} {pendientes} {pendientes===1?"entreno":"entrenos"} sin hacer esta semana.</div>
-                    <div style={{ color:"#aa9", fontSize:12, textAlign:"center", marginTop:5 }}>Puedes finalizarla igualmente, pero lo ideal es completar todos los días.</div>
+                    <div style={{ color:"#aa9", fontSize:12, textAlign:"center", marginTop:5 }}>Puedes finalizarla igualmente, pero lo ideal es completar todos los dÃ­as.</div>
                   </div>
                 ) : (
-                  <div style={{ color:"#8bc34a", fontSize:13.5, textAlign:"center", lineHeight:1.5, margin:"14px 0" }}>¡Has completado todos los días de la semana! Eres una máquina.</div>
+                  <div style={{ color:"#8bc34a", fontSize:13.5, textAlign:"center", lineHeight:1.5, margin:"14px 0" }}>Â¡Has completado todos los dÃ­as de la semana! Eres una mÃ¡quina.</div>
                 )}
-                <button onClick={finishRoutineWeek} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Sí, finalizar semana</button>
+                <button onClick={finishRoutineWeek} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>SÃ­, finalizar semana</button>
                 <button onClick={()=>setConfirmFinishRoutineWeek(false)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Volver</button>
               </div>
             </div>
           );
         })()}
 
-        {/* Pop-up ¿otra semana con la misma estructura? */}
+        {/* Pop-up Â¿otra semana con la misma estructura? */}
         {askNextWeek && savedRoutine && (
           <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.78)", backdropFilter:"blur(4px)", WebkitBackdropFilter:"blur(4px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", animation:"fade-in 0.25s ease" }}>
             <div style={{ background:"#1a1a24", borderRadius:20, padding:"26px 22px", maxWidth:360, width:"100%", border:"1px solid #2a2a3a", animation:"scale-fade 0.3s ease" }}>
-              <div style={{ color:"white", fontWeight:900, fontSize:19, textAlign:"center", marginBottom:8 }}>¡Semana terminada!</div>
-              <div style={{ color:"#aaa", fontSize:13.5, textAlign:"center", lineHeight:1.55, marginBottom:22 }}>¿Quieres otra semana con la misma estructura, o prefieres cambiar las modalidades y crear una rutina nueva?</div>
+              <div style={{ color:"white", fontWeight:900, fontSize:19, textAlign:"center", marginBottom:8 }}>Â¡Semana terminada!</div>
+              <div style={{ color:"#aaa", fontSize:13.5, textAlign:"center", lineHeight:1.55, marginBottom:22 }}>Â¿Quieres otra semana con la misma estructura, o prefieres cambiar las modalidades y crear una rutina nueva?</div>
               <button onClick={regenerateSameRoutine} style={{ width:"100%", padding:"15px", borderRadius:14, border:"none", background:savedRoutine.hybrid?"linear-gradient(135deg,#0288d1,#01579b)":"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Otra semana igual</button>
               <button onClick={()=>{ setAskNextWeek(false); if (savedRoutine.hybrid) { setHybridDiscs([]); setStep("hybrid_setup"); } else { setWeekType(null); setWeekFocus(null); setWeekLevel(null); setWeekDays(null); setWeekEquip([]); setStep("weekly_setup"); } }} style={{ width:"100%", padding:"15px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#ccc", fontWeight:700, fontSize:14, cursor:"pointer" }}>Cambiar modalidades</button>
             </div>
@@ -3771,9 +3798,9 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         {confirmDeleteRoutine && (
           <div onClick={()=>setConfirmDeleteRoutine(false)} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.78)", backdropFilter:"blur(4px)", WebkitBackdropFilter:"blur(4px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", animation:"fade-in 0.25s ease" }}>
             <div onClick={e=>e.stopPropagation()} style={{ background:"#1a1a24", borderRadius:20, padding:"28px 22px", maxWidth:360, width:"100%", border:"1px solid #2a2a3a", animation:"scale-fade 0.3s ease" }}>
-              <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>¿Eliminar tu rutina?</div>
-              <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>Se borrará tu rutina programada. Tus entrenos ya registrados se mantienen en el historial.</div>
-              <button onClick={()=>{ setSavedRoutine(null); setConfirmDeleteRoutine(false); }} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#c62828,#8e1f1f)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Sí, eliminar</button>
+              <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>Â¿Eliminar tu rutina?</div>
+              <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>Se borrarÃ¡ tu rutina programada. Tus entrenos ya registrados se mantienen en el historial.</div>
+              <button onClick={()=>{ setSavedRoutine(null); setConfirmDeleteRoutine(false); }} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#c62828,#8e1f1f)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>SÃ­, eliminar</button>
               <button onClick={()=>setConfirmDeleteRoutine(false)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Cancelar</button>
             </div>
           </div>
@@ -3788,14 +3815,14 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             <div style={{ color:"#666", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>Tu rutina programada</div>
             <div style={{ background: (savedRoutine.hybrid||savedRoutine.cardio)?"linear-gradient(135deg,#15252e,#16161f)":"linear-gradient(135deg,#1a2e1a,#1a1a24)", borderRadius:16, border:`1px solid ${(savedRoutine.hybrid||savedRoutine.cardio)?"#2a4a5a":"#2e7d32"}`, overflow:"hidden" }}>
               <div style={{ padding:"12px 16px", borderBottom:"1px solid #232330", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <span style={{ color:(savedRoutine.hybrid||savedRoutine.cardio)?"#4fc3f7":"#8bc34a", fontWeight:800, fontSize:13 }}>{savedRoutine.cardio?`${savedRoutine.dayPlans.length} días de entreno`:savedRoutine.schedule?(()=>{ const dd=savedRoutine.doneDays||[]; let total=0; savedRoutine.schedule.forEach(d=>{if(!d.rest)total+=d.workouts.length;}); return `${dd.length}/${total} entrenos · semana ${savedRoutine.weekNum||1}`; })():`${completedRoutineDaysThisWeek.size}/${savedRoutine.dayPlans.length} días esta semana`}</span>
+                <span style={{ color:(savedRoutine.hybrid||savedRoutine.cardio)?"#4fc3f7":"#8bc34a", fontWeight:800, fontSize:13 }}>{savedRoutine.cardio?`${savedRoutine.dayPlans.length} dÃ­as de entreno`:savedRoutine.schedule?(()=>{ const dd=savedRoutine.doneDays||[]; let total=0; savedRoutine.schedule.forEach(d=>{if(!d.rest)total+=d.workouts.length;}); return `${dd.length}/${total} entrenos Â· semana ${savedRoutine.weekNum||1}`; })():`${completedRoutineDaysThisWeek.size}/${savedRoutine.dayPlans.length} dÃ­as esta semana`}</span>
                 <button onClick={()=>setConfirmDeleteRoutine(true)} style={{ background:"none", border:"none", color:"#a44", fontSize:12, cursor:"pointer", fontWeight:600, display:"flex", alignItems:"center", gap:5 }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a44" strokeWidth="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
                   Eliminar
                 </button>
               </div>
               {savedRoutine.schedule ? (() => {
-                // Nueva estructura: semana L-D con días y workouts
+                // Nueva estructura: semana L-D con dÃ­as y workouts
                 const done = savedRoutine.doneDays || []; // claves "diaIdx_workoutIdx"
                 const dayIsDone = (di, day) => day.workouts.length>0 && day.workouts.every((_,wi)=>done.includes(`${di}_${wi}`));
                 const accent = savedRoutine.hybrid ? "#4fc3f7" : "#8bc34a";
@@ -3816,14 +3843,14 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
                     <div key={di} style={{ borderBottom:di<6?"1px solid #1e2a1e":"none", background:dDone?"rgba(76,175,80,0.05)":"none" }}>
                       <div style={{ padding:"11px 16px 6px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                         <span style={{ color:dDone?"#7a9":"white", fontWeight:800, fontSize:14 }}>{day.weekday}</span>
-                        {dDone && <span style={{ fontSize:10, background:"#2e7d32", color:"white", borderRadius:20, padding:"2px 8px", fontWeight:700 }}>DÍA COMPLETO</span>}
+                        {dDone && <span style={{ fontSize:10, background:"#2e7d32", color:"white", borderRadius:20, padding:"2px 8px", fontWeight:700 }}>DÃA COMPLETO</span>}
                       </div>
                       {day.workouts.map((w, wi) => {
                         const wDone = done.includes(`${di}_${wi}`);
                         return (
                           <button key={wi} onClick={()=>startScheduledWorkout(day, di, w, wi)} style={{ width:"100%", padding:"9px 16px 11px", background:"none", border:"none", cursor:"pointer", textAlign:"left", display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
                             <div style={{ flex:1, minWidth:0, display:"flex", alignItems:"center", gap:10 }}>
-                              <span style={{ fontSize:9, background:w.type==="fuerza"?"#2e4a7a":w.type==="core"?"#5a3a7a":w.type==="estiramiento"?"#3a5a4a":"#7a5a1a", color:"white", borderRadius:20, padding:"2px 7px", fontWeight:700, letterSpacing:0.3, textTransform:"uppercase", flexShrink:0 }}>{w.type==="fuerza"?"Fuerza":w.type==="carrera"?"Carrera":w.type==="bici"?"Bici":w.type==="natacion"?"Natación":w.type==="core"?"Core":w.type==="estiramiento"?"Movilidad":w.type}</span>
+                              <span style={{ fontSize:9, background:w.type==="fuerza"?"#2e4a7a":w.type==="core"?"#5a3a7a":w.type==="estiramiento"?"#3a5a4a":"#7a5a1a", color:"white", borderRadius:20, padding:"2px 7px", fontWeight:700, letterSpacing:0.3, textTransform:"uppercase", flexShrink:0 }}>{w.type==="fuerza"?"Fuerza":w.type==="carrera"?"Carrera":w.type==="bici"?"Bici":w.type==="natacion"?"NataciÃ³n":w.type==="core"?"Core":w.type==="estiramiento"?"Movilidad":w.type}</span>
                               <span style={{ color:wDone?"#7a9":"#ddd", fontSize:13.5, fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{w.name}</span>
                             </div>
                             <div style={{ width:26, height:26, borderRadius:"50%", border:`1.5px solid ${wDone?"#2e7d32":"#3a4a3a"}`, background:wDone?"#2e7d32":"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
@@ -3846,10 +3873,10 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
                 <button key={i} onClick={()=> detailOnly ? setViewHybridDay({ name:day.name, hybridDetail: day.hybridDetail || day.runDetail }) : startHybridOrRoutineDay(day)} style={{ width:"100%", padding:"13px 16px", background:done?"rgba(76,175,80,0.06)":"none", border:"none", borderBottom:i<savedRoutine.dayPlans.length-1?"1px solid #1e2a1e":"none", cursor:"pointer", textAlign:"left", display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ color:done?"#7a9":"white", fontWeight:700, fontSize:14, display:"flex", alignItems:"center", gap:8 }}>
-                      Día {i+1} · {day.name}
+                      DÃ­a {i+1} Â· {day.name}
                       {done && <span style={{ fontSize:10, background:"#2e7d32", color:"white", borderRadius:20, padding:"2px 8px", fontWeight:700, letterSpacing:0.5 }}>HECHO</span>}
                     </div>
-                    <div style={{ color:"#5a7a5a", fontSize:11, marginTop:2 }}>{detailOnly ? day.groupsLabel : `${day.groupsLabel}${exCount?` · ${exCount} ${exCount===1?"bloque":"ejercicios"}`:""}`}</div>
+                    <div style={{ color:"#5a7a5a", fontSize:11, marginTop:2 }}>{detailOnly ? day.groupsLabel : `${day.groupsLabel}${exCount?` Â· ${exCount} ${exCount===1?"bloque":"ejercicios"}`:""}`}</div>
                   </div>
                   <div style={{ width:30, height:30, borderRadius:"50%", border:`1.5px solid ${done?"#2e7d32":(savedRoutine.hybrid||detailOnly)?"#2a4a5a":"#3a5a3a"}`, background:done?"#2e7d32":"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                     {done
@@ -3859,10 +3886,10 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
                 </button>
                 );
               })}
-              {/* Botón finalizar semana (no para las rutinas cardio antiguas de solo-detalle) */}
+              {/* BotÃ³n finalizar semana (no para las rutinas cardio antiguas de solo-detalle) */}
               {!savedRoutine.cardio && (
                 <div style={{ padding:"12px 16px", borderTop:"1px solid #1e2a1e" }}>
-                  <button onClick={()=>setConfirmFinishRoutineWeek(true)} style={{ width:"100%", padding:"13px", borderRadius:12, border:`1px solid ${savedRoutine.hybrid?"#2a4a5a":"#2e7d32"}`, background:"transparent", color:savedRoutine.hybrid?"#4fc3f7":"#8bc34a", fontWeight:800, fontSize:14, cursor:"pointer" }}>Finalizar semana →</button>
+                  <button onClick={()=>setConfirmFinishRoutineWeek(true)} style={{ width:"100%", padding:"13px", borderRadius:12, border:`1px solid ${savedRoutine.hybrid?"#2a4a5a":"#2e7d32"}`, background:"transparent", color:savedRoutine.hybrid?"#4fc3f7":"#8bc34a", fontWeight:800, fontSize:14, cursor:"pointer" }}>Finalizar semana â†’</button>
                 </div>
               )}
             </div>
@@ -3871,32 +3898,32 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
 
         {/* Crear rutina semanal */}
         <button onClick={()=>{ setWeekType(null); setWeekFocus(null); setWeekLevel(null); setWeekDays(null); setWeekEquip([]); setStep("weekly_setup"); }} style={{ width:"100%", marginBottom:12, padding:"18px", borderRadius:16, border:"1px solid #2e7d32", background:"linear-gradient(135deg,#1a2e1a,#1a1a24)", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:14 }}>
-          <span style={{ fontSize:30 }}>📅</span>
+          <span style={{ fontSize:30 }}>ðŸ“…</span>
           <div style={{ flex:1 }}>
             <div style={{ color:"#8bc34a", fontWeight:800, fontSize:16 }}>{savedRoutine?"Crear otra rutina semanal":"Crea tu rutina semanal"}</div>
             <div style={{ color:"#777", fontSize:12, marginTop:2 }}>Un plan completo adaptado a tu objetivo y nivel</div>
           </div>
-          <span style={{ color:"#4caf50", fontSize:18 }}>→</span>
+          <span style={{ color:"#4caf50", fontSize:18 }}>â†’</span>
         </button>
 
-        {/* Atleta híbrido */}
+        {/* Atleta hÃ­brido */}
         <button onClick={()=>{ setHybridDiscs([]); setStep("hybrid_setup"); }} style={{ width:"100%", marginBottom:20, padding:"18px", borderRadius:16, border:"1px solid #2a4a5a", background:"linear-gradient(135deg,#15252e,#16161f)", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:14 }}>
-          <span style={{ fontSize:30 }}>🔀</span>
+          <span style={{ fontSize:30 }}>ðŸ”€</span>
           <div style={{ flex:1 }}>
-            <div style={{ color:"#4fc3f7", fontWeight:800, fontSize:16 }}>Atleta híbrido</div>
+            <div style={{ color:"#4fc3f7", fontWeight:800, fontSize:16 }}>Atleta hÃ­brido</div>
             <div style={{ color:"#777", fontSize:12, marginTop:2 }}>Combina varios deportes en tu semana</div>
           </div>
-          <span style={{ color:"#4fc3f7", fontSize:18 }}>→</span>
+          <span style={{ color:"#4fc3f7", fontSize:18 }}>â†’</span>
         </button>
 
         {/* Planificador de carrera */}
         <button onClick={()=>{ if(racePlan){ setStep("race_plan"); } else { setRaceDiscipline(null); setRaceBikeType(null); setRaceRunType(null); setRaceRunDesnivel(""); setRaceMarks({}); setRaceTarget(null); setRaceTargetTime(""); setRaceBikeKm(""); setRaceBikeDesnivel(""); setRaceLevel(null); setRaceExperience(null); setRaceDays(4); setStep("race_setup"); } }} style={{ width:"100%", marginBottom:20, padding:"18px", borderRadius:16, border:"1px solid #b8860b", background:"linear-gradient(135deg,#2a2410,#16161f)", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:14 }}>
-          <span style={{ fontSize:30 }}>🏁</span>
+          <span style={{ fontSize:30 }}>ðŸ</span>
           <div style={{ flex:1 }}>
             <div style={{ color:"#ffd700", fontWeight:800, fontSize:16 }}>{racePlan?"Ver mi plan de carrera":"Planificador de carrera"}</div>
-            <div style={{ color:"#777", fontSize:12, marginTop:2 }}>{racePlan?"Continúa tu preparación":"Prepara un 5K, 10K, maratón o ruta en bici"}</div>
+            <div style={{ color:"#777", fontSize:12, marginTop:2 }}>{racePlan?"ContinÃºa tu preparaciÃ³n":"Prepara un 5K, 10K, maratÃ³n o ruta en bici"}</div>
           </div>
-          <span style={{ color:"#ffd700", fontSize:18 }}>→</span>
+          <span style={{ color:"#ffd700", fontSize:18 }}>â†’</span>
         </button>
 
         <div style={{ color:"#666", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>O entrena hoy</div>
@@ -3914,20 +3941,20 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     );
   }
 
-  // ── PASO: elegir grupos musculares (fuerza) ──
+  // â”€â”€ PASO: elegir grupos musculares (fuerza) â”€â”€
   if (step === "muscles") {
     const MUSCLES = [
-      { id:"pecho", label:"Pecho", emoji:"🫀" },
-      { id:"espalda", label:"Espalda", emoji:"🔙" },
-      { id:"pierna", label:"Pierna", emoji:"🦵" },
-      { id:"hombro", label:"Hombro", emoji:"💪" },
-      { id:"brazo", label:"Brazo", emoji:"💪" },
-      { id:"core", label:"Core / Abdomen", emoji:"🎯" },
+      { id:"pecho", label:"Pecho", emoji:"ðŸ«€" },
+      { id:"espalda", label:"Espalda", emoji:"ðŸ”™" },
+      { id:"pierna", label:"Pierna", emoji:"ðŸ¦µ" },
+      { id:"hombro", label:"Hombro", emoji:"ðŸ’ª" },
+      { id:"brazo", label:"Brazo", emoji:"ðŸ’ª" },
+      { id:"core", label:"Core / Abdomen", emoji:"ðŸŽ¯" },
     ];
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>¿Qué quieres entrenar?</div>
+        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Â¿QuÃ© quieres entrenar?</div>
         <div style={{ color:"#666", fontSize:13, marginBottom:22 }}>Selecciona los grupos musculares (o ninguno para un entreno completo)</div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:24 }}>
           {MUSCLES.map(mus => {
@@ -3941,29 +3968,29 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             );
           })}
         </div>
-        <button onClick={startStrengthWorkout} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:900, fontSize:16, cursor:"pointer" }}>{tempMuscles.length?`Generar entreno (${tempMuscles.length} grupo${tempMuscles.length!==1?"s":""})`:"Generar entreno completo →"}</button>
+        <button onClick={startStrengthWorkout} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:900, fontSize:16, cursor:"pointer" }}>{tempMuscles.length?`Generar entreno (${tempMuscles.length} grupo${tempMuscles.length!==1?"s":""})`:"Generar entreno completo â†’"}</button>
       </div>
     );
   }
 
-  // ── PASO: asistente rutina semanal ──
+  // â”€â”€ PASO: asistente rutina semanal â”€â”€
   if (step === "weekly_setup") {
     const TYPES = [
-      { id:"gimnasio", label:"Gimnasio", desc:"Pesas y máquinas" },
+      { id:"gimnasio", label:"Gimnasio", desc:"Pesas y mÃ¡quinas" },
       { id:"casa", label:"En casa", desc:"Peso corporal y poco material" },
       { id:"running", label:"Running", desc:"Carrera: rodajes, series, tiradas" },
       { id:"cardio", label:"Cardio / HIIT", desc:"Quema intensa, sin carrera" },
     ];
     const FOCUS = [
-      { id:"masa", label:"Ganar masa muscular", desc:"Aumentar el tamaño del músculo" },
-      { id:"estetica", label:"Estética / definición", desc:"Marcar y tonificar el cuerpo" },
-      { id:"fuerza", label:"Fuerza", desc:"Levantar más peso, más potencia" },
-      { id:"resistencia", label:"Resistencia muscular", desc:"Aguantar más repeticiones" },
+      { id:"masa", label:"Ganar masa muscular", desc:"Aumentar el tamaÃ±o del mÃºsculo" },
+      { id:"estetica", label:"EstÃ©tica / definiciÃ³n", desc:"Marcar y tonificar el cuerpo" },
+      { id:"fuerza", label:"Fuerza", desc:"Levantar mÃ¡s peso, mÃ¡s potencia" },
+      { id:"resistencia", label:"Resistencia muscular", desc:"Aguantar mÃ¡s repeticiones" },
     ];
     const LEVELS = [
       { id:"principiante", label:"Principiante", desc:"Empiezo ahora o llevo poco" },
       { id:"intermedio", label:"Intermedio", desc:"Llevo meses entrenando" },
-      { id:"avanzado", label:"Avanzado", desc:"Años de experiencia" },
+      { id:"avanzado", label:"Avanzado", desc:"AÃ±os de experiencia" },
     ];
     const needsFocus = weekType==="gimnasio" || weekType==="casa";
     const recDays = weekLevel ? recommendedDays(weekLevel) : null;
@@ -3971,12 +3998,12 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
 
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
         <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Crea tu rutina semanal</div>
         <div style={{ color:"#666", fontSize:13, marginBottom:22 }}>Responde unas preguntas y te montamos un plan a medida</div>
 
         {/* Tipo de entrenamiento */}
-        <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>¿Qué tipo de entrenamiento?</div>
+        <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>Â¿QuÃ© tipo de entrenamiento?</div>
         {TYPES.map(t => (
           <button key={t.id} onClick={()=>{ setWeekType(t.id); if(t.id!=="gimnasio"&&t.id!=="casa") setWeekFocus(null); }} style={{ width:"100%", marginBottom:8, padding:"14px", borderRadius:12, border:`2px solid ${weekType===t.id?"#4caf50":"#2a2a3a"}`, background:weekType===t.id?"#1a3a1a":"#1a1a24", cursor:"pointer", textAlign:"left" }}>
             <div style={{ color:weekType===t.id?"#4caf50":"white", fontWeight:700, fontSize:15 }}>{t.label}</div><div style={{ color:"#777", fontSize:11.5, marginTop:1 }}>{t.desc}</div>
@@ -3986,7 +4013,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         {/* Material (solo en casa) */}
         {weekType==="casa" && (
           <>
-            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>¿Qué material tienes en casa?</div>
+            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>Â¿QuÃ© material tienes en casa?</div>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
               {EQUIPMENT.map(eq => {
                 const sel = weekEquip.includes(eq.id);
@@ -3998,14 +4025,14 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
                 );
               })}
             </div>
-            <div style={{ color:"#666", fontSize:11, marginTop:8 }}>Si no tienes nada, marca "Solo mi peso". La rutina se adaptará al material que elijas.</div>
+            <div style={{ color:"#666", fontSize:11, marginTop:8 }}>Si no tienes nada, marca "Solo mi peso". La rutina se adaptarÃ¡ al material que elijas.</div>
           </>
         )}
 
         {/* Objetivo (solo gimnasio/casa) */}
         {needsFocus && (
           <>
-            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>¿Cuál es tu objetivo?</div>
+            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>Â¿CuÃ¡l es tu objetivo?</div>
             {FOCUS.map(f => (
               <button key={f.id} onClick={()=>setWeekFocus(f.id)} style={{ width:"100%", marginBottom:8, padding:"14px", borderRadius:12, border:`2px solid ${weekFocus===f.id?"#4caf50":"#2a2a3a"}`, background:weekFocus===f.id?"#1a3a1a":"#1a1a24", cursor:"pointer", textAlign:"left" }}>
                 <div style={{ color:weekFocus===f.id?"#4caf50":"white", fontWeight:700, fontSize:15 }}>{f.label}</div><div style={{ color:"#777", fontSize:11.5, marginTop:1 }}>{f.desc}</div>
@@ -4017,7 +4044,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         {/* Nivel */}
         {weekType && (
           <>
-            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>¿Cuál es tu nivel?</div>
+            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>Â¿CuÃ¡l es tu nivel?</div>
             {LEVELS.map(l => (
               <button key={l.id} onClick={()=>{ setWeekLevel(l.id); if(!weekDays) setWeekDays(recommendedDays(l.id)); }} style={{ width:"100%", marginBottom:8, padding:"14px", borderRadius:12, border:`2px solid ${weekLevel===l.id?"#4caf50":"#2a2a3a"}`, background:weekLevel===l.id?"#1a3a1a":"#1a1a24", cursor:"pointer", textAlign:"left" }}>
                 <div style={{ color:weekLevel===l.id?"#4caf50":"white", fontWeight:700, fontSize:15 }}>{l.label}</div><div style={{ color:"#777", fontSize:11.5, marginTop:1 }}>{l.desc}</div>
@@ -4026,10 +4053,10 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           </>
         )}
 
-        {/* Días */}
+        {/* DÃ­as */}
         {weekLevel && (
           <>
-            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>¿Cuántos días quieres entrenar?</div>
+            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>Â¿CuÃ¡ntos dÃ­as quieres entrenar?</div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8, marginBottom:8 }}>
               {[2,3,4,5,6].map(n => (
                 <button key={n} onClick={()=>setWeekDays(n)} style={{ padding:"14px 0", borderRadius:12, border:`2px solid ${weekDays===n?"#4caf50":"#2a2a3a"}`, background:weekDays===n?"#1a3a1a":"#1a1a24", color:weekDays===n?"#4caf50":"#888", fontWeight:900, fontSize:18, cursor:"pointer" }}>{n}</button>
@@ -4037,12 +4064,12 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             </div>
             {recDays && weekDays && weekDays > recDays && (
               <div style={{ background:"#2a1a00", border:"1px solid #ff9800", borderRadius:12, padding:"12px 14px", marginTop:8 }}>
-                <div style={{ color:"#ffb74d", fontSize:12.5, lineHeight:1.5 }}>Para tu nivel ({weekLevel}), te recomendamos <b>{recDays} días</b>. Entrenar {weekDays} días puede ser demasiado y dificultar tu recuperación. Pero tú decides.</div>
+                <div style={{ color:"#ffb74d", fontSize:12.5, lineHeight:1.5 }}>Para tu nivel ({weekLevel}), te recomendamos <b>{recDays} dÃ­as</b>. Entrenar {weekDays} dÃ­as puede ser demasiado y dificultar tu recuperaciÃ³n. Pero tÃº decides.</div>
               </div>
             )}
             {recDays && weekDays && weekDays <= recDays && (
               <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:12, padding:"12px 14px", marginTop:8 }}>
-                <div style={{ color:"#8bc34a", fontSize:12.5, lineHeight:1.5 }}>{weekDays} días es una buena elección para tu nivel. Recuperarás bien entre sesiones.</div>
+                <div style={{ color:"#8bc34a", fontSize:12.5, lineHeight:1.5 }}>{weekDays} dÃ­as es una buena elecciÃ³n para tu nivel. RecuperarÃ¡s bien entre sesiones.</div>
               </div>
             )}
           </>
@@ -4050,23 +4077,23 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
 
         {weekLevel && weekDays && weekDays < 7 && (
           <>
-            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"22px 0 10px" }}>¿Qué día prefieres descansar?</div>
+            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"22px 0 10px" }}>Â¿QuÃ© dÃ­a prefieres descansar?</div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
-              <button onClick={()=>setRestDay(null)} style={{ gridColumn:"span 4", padding:"12px", borderRadius:12, border:`2px solid ${restDay===null?"#4caf50":"#2a2a3a"}`, background:restDay===null?"#1a3a1a":"#1a1a24", color:restDay===null?"#4caf50":"#aaa", fontWeight:700, fontSize:13.5, cursor:"pointer" }}>Lo que sea más óptimo (recomendado)</button>
+              <button onClick={()=>setRestDay(null)} style={{ gridColumn:"span 4", padding:"12px", borderRadius:12, border:`2px solid ${restDay===null?"#4caf50":"#2a2a3a"}`, background:restDay===null?"#1a3a1a":"#1a1a24", color:restDay===null?"#4caf50":"#aaa", fontWeight:700, fontSize:13.5, cursor:"pointer" }}>Lo que sea mÃ¡s Ã³ptimo (recomendado)</button>
               {WEEKDAYS.map((d,i) => (
                 <button key={i} onClick={()=>setRestDay(i)} style={{ padding:"11px 0", borderRadius:10, border:`2px solid ${restDay===i?"#4caf50":"#2a2a3a"}`, background:restDay===i?"#1a3a1a":"#1a1a24", color:restDay===i?"#4caf50":"#888", fontWeight:700, fontSize:12, cursor:"pointer" }}>{d.slice(0,3)}</button>
               ))}
             </div>
-            <div style={{ color:"#666", fontSize:11.5, marginTop:8 }}>Colocaremos los entrenos repartidos por la semana dejando ese día (y los necesarios) de descanso.</div>
+            <div style={{ color:"#666", fontSize:11.5, marginTop:8 }}>Colocaremos los entrenos repartidos por la semana dejando ese dÃ­a (y los necesarios) de descanso.</div>
           </>
         )}
 
-        <button onClick={()=>canGenerate && setStep("weekly_result")} disabled={!canGenerate} style={{ width:"100%", marginTop:20, padding:"16px", borderRadius:14, border:"none", background:canGenerate?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:canGenerate?"white":"#555", fontWeight:900, fontSize:16, cursor:canGenerate?"pointer":"default" }}>{canGenerate?"Generar mi rutina semanal →":"Responde todas las preguntas"}</button>
+        <button onClick={()=>canGenerate && setStep("weekly_result")} disabled={!canGenerate} style={{ width:"100%", marginTop:20, padding:"16px", borderRadius:14, border:"none", background:canGenerate?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:canGenerate?"white":"#555", fontWeight:900, fontSize:16, cursor:canGenerate?"pointer":"default" }}>{canGenerate?"Generar mi rutina semanal â†’":"Responde todas las preguntas"}</button>
       </div>
     );
   }
 
-  // ── PASO: resultado rutina semanal ──
+  // â”€â”€ PASO: resultado rutina semanal â”€â”€
   if (step === "weekly_result") {
     const routine = generateWeeklyRoutine(weekType, weekFocus, weekDays, weekLevel, weekEquip);
     const typeLabels = { gimnasio:"Gimnasio", casa:"En casa", running:"Running", cardio:"Cardio / HIIT" };
@@ -4074,19 +4101,19 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     const restDays = 7 - weekDays;
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setStep("weekly_setup")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={()=>setStep("weekly_setup")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
         <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Tu rutina semanal</div>
-        <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>{typeLabels[weekType]} · {weekDays} días · {weekLevel}</div>
+        <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>{typeLabels[weekType]} Â· {weekDays} dÃ­as Â· {weekLevel}</div>
 
         <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:14, padding:"14px 16px", marginBottom:18 }}>
-          <div style={{ color:"#cde", fontSize:13, lineHeight:1.5 }}>{routine.params.desc}{isStrength ? <>. <b>{routine.params.series} series</b> de <b>{routine.params.reps} reps</b> · RIR {routine.params.rir}.</> : "."} Descansa {restDays} día{restDays!==1?"s":""} a la semana.</div>
+          <div style={{ color:"#cde", fontSize:13, lineHeight:1.5 }}>{routine.params.desc}{isStrength ? <>. <b>{routine.params.series} series</b> de <b>{routine.params.reps} reps</b> Â· RIR {routine.params.rir}.</> : "."} Descansa {restDays} dÃ­a{restDays!==1?"s":""} a la semana.</div>
         </div>
 
         {routine.dayPlans.map((day, i) => (
           <div key={i} style={{ background:"#1a1a24", borderRadius:16, marginBottom:12, border:"1px solid #2a2a3a", overflow:"hidden" }}>
             <div style={{ background:"#15201a", padding:"12px 16px", borderBottom:isStrength?"1px solid #232330":"none" }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:4 }}>
-                <span style={{ color:"#8bc34a", fontWeight:800, fontSize:14 }}>Día {i+1} · {day.name}</span>
+                <span style={{ color:"#8bc34a", fontWeight:800, fontSize:14 }}>DÃ­a {i+1} Â· {day.name}</span>
                 {isStrength && <span style={{ color:"#666", fontSize:11 }}>{day.exercises.length} ejercicios</span>}
               </div>
               <div style={{ color:"#7a9", fontSize:11.5, fontWeight:600 }}>{day.groupsLabel}</div>
@@ -4096,7 +4123,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
                 {day.exercises.map((ex,j) => (
                   <div key={j} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"9px 0", borderBottom:j<day.exercises.length-1?"1px solid #1e1e28":"none" }}>
                     <span style={{ color:"white", fontSize:13.5, fontWeight:600 }}>{ex.name}</span>
-                    <span style={{ color:"#4caf50", fontSize:12.5, fontWeight:700 }}>{ex.series} × {ex.reps}</span>
+                    <span style={{ color:"#4caf50", fontSize:12.5, fontWeight:700 }}>{ex.series} Ã— {ex.reps}</span>
                   </div>
                 ))}
               </div>
@@ -4117,19 +4144,19 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         <button onClick={()=>{
           attemptSaveRoutine({ type:weekType, focus:weekFocus, days:weekDays, level:weekLevel, equip:weekEquip, restDay, params:routine.params, dayPlans:routine.dayPlans, schedule:buildWeekSchedule(routine.dayPlans, restDay, null), doneDays:[], weekNum:1, ts:Date.now(), cardio: !isStrength });
         }} style={{ width:"100%", marginTop:isStrength?0:12, padding:"16px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:900, fontSize:16, cursor:"pointer" }}>Guardar esta rutina</button>
-        <div style={{ color:"#666", fontSize:12, textAlign:"center", marginTop:10 }}>La tendrás disponible en "Rutina programada"</div>
+        <div style={{ color:"#666", fontSize:12, textAlign:"center", marginTop:10 }}>La tendrÃ¡s disponible en "Rutina programada"</div>
       </div>
     );
   }
 
-  // ── PASO: asistente atleta híbrido ──
+  // â”€â”€ PASO: asistente atleta hÃ­brido â”€â”€
   if (step === "hybrid_setup") {
     const canGen = hybridDiscs.length >= 2;
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Atleta híbrido</div>
-        <div style={{ color:"#666", fontSize:13, marginBottom:22 }}>Elige las disciplinas que TÚ quieres combinar. Solo las que selecciones entrarán en tu semana.</div>
+        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Atleta hÃ­brido</div>
+        <div style={{ color:"#666", fontSize:13, marginBottom:22 }}>Elige las disciplinas que TÃš quieres combinar. Solo las que selecciones entrarÃ¡n en tu semana.</div>
 
         <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>Tus disciplinas</div>
         {HYBRID_DISCIPLINES.map(d => {
@@ -4148,32 +4175,32 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           );
         })}
 
-        <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>Días de entreno por semana</div>
+        <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"20px 0 10px" }}>DÃ­as de entreno por semana</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8 }}>
           {[3,4,5,6,7].map(n => (
             <button key={n} onClick={()=>setHybridDays(n)} style={{ padding:"14px 0", borderRadius:12, border:`2px solid ${hybridDays===n?"#4fc3f7":"#2a2a3a"}`, background:hybridDays===n?"#15252e":"#1a1a24", color:hybridDays===n?"#4fc3f7":"#888", fontWeight:900, fontSize:18, cursor:"pointer" }}>{n}</button>
           ))}
         </div>
 
-        <button onClick={()=>canGen && setStep("hybrid_result")} disabled={!canGen} style={{ width:"100%", marginTop:24, padding:"16px", borderRadius:14, border:"none", background:canGen?"linear-gradient(135deg,#0288d1,#01579b)":"#2a2a3a", color:canGen?"white":"#555", fontWeight:900, fontSize:16, cursor:canGen?"pointer":"default" }}>{canGen?"Generar mi semana híbrida →":"Elige al menos 2 disciplinas"}</button>
+        <button onClick={()=>canGen && setStep("hybrid_result")} disabled={!canGen} style={{ width:"100%", marginTop:24, padding:"16px", borderRadius:14, border:"none", background:canGen?"linear-gradient(135deg,#0288d1,#01579b)":"#2a2a3a", color:canGen?"white":"#555", fontWeight:900, fontSize:16, cursor:canGen?"pointer":"default" }}>{canGen?"Generar mi semana hÃ­brida â†’":"Elige al menos 2 disciplinas"}</button>
       </div>
     );
   }
 
-  // ── PASO: resultado atleta híbrido ──
+  // â”€â”€ PASO: resultado atleta hÃ­brido â”€â”€
   if (step === "hybrid_result") {
     const sessions = generateHybridRoutine(hybridDiscs, hybridDays);
     const restDays = 7 - hybridDays;
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setStep("hybrid_setup")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Tu semana híbrida</div>
-        <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>{hybridDays} días de entreno · {restDays} de descanso · {hybridDiscs.length} disciplinas</div>
+        <button onClick={()=>setStep("hybrid_setup")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Tu semana hÃ­brida</div>
+        <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>{hybridDays} dÃ­as de entreno Â· {restDays} de descanso Â· {hybridDiscs.length} disciplinas</div>
 
         {sessions.map((s, i) => (
           <div key={i} style={{ background:"#1a1a24", borderRadius:16, marginBottom:12, border:"1px solid #2a2a3a", overflow:"hidden" }}>
             <div style={{ background:"#15252e", padding:"12px 16px", borderBottom:"1px solid #1e3038", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-              <span style={{ color:"#4fc3f7", fontWeight:800, fontSize:14 }}>Día {i+1}</span>
+              <span style={{ color:"#4fc3f7", fontWeight:800, fontSize:14 }}>DÃ­a {i+1}</span>
               <span style={{ color:"#ccc", fontWeight:700, fontSize:13 }}>{s.session}</span>
             </div>
             <div style={{ padding:"12px 16px" }}>
@@ -4183,7 +4210,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         ))}
 
         <div style={{ background:"#15252e", border:"1px solid #2a4a5a", borderRadius:14, padding:"14px 16px", marginTop:6 }}>
-          <div style={{ color:"#bde", fontSize:12.5, lineHeight:1.5 }}>Puedes ajustar el orden de los días según te convenga. Lo importante es alternar disciplinas y respetar los días de descanso para recuperar bien.</div>
+          <div style={{ color:"#bde", fontSize:12.5, lineHeight:1.5 }}>Puedes ajustar el orden de los dÃ­as segÃºn te convenga. Lo importante es alternar disciplinas y respetar los dÃ­as de descanso para recuperar bien.</div>
         </div>
 
         <button onClick={()=>{
@@ -4191,12 +4218,12 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             dayPlans: sessions.map(s=>({ name:s.session, groupsLabel:s.label, exercises:s.exercises, hybridDetail:s.detail, disc:s.disc })),
             schedule: buildWeekSchedule(sessions.map(s=>({ name:s.session, groupsLabel:s.label, exercises:s.exercises, hybridDetail:s.detail, disc:s.disc })), null, null) });
         }} style={{ width:"100%", marginTop:18, padding:"16px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#0288d1,#01579b)", color:"white", fontWeight:900, fontSize:16, cursor:"pointer" }}>Guardar esta semana</button>
-        <div style={{ color:"#666", fontSize:12, textAlign:"center", marginTop:10 }}>La tendrás disponible para consultarla cuando quieras</div>
+        <div style={{ color:"#666", fontSize:12, textAlign:"center", marginTop:10 }}>La tendrÃ¡s disponible para consultarla cuando quieras</div>
       </div>
     );
   }
 
-  // ── PASO: configurar planificador de carrera ──
+  // â”€â”€ PASO: configurar planificador de carrera â”€â”€
   if (step === "race_setup") {
     const LEVELS = [
       { id:"principiante", label:"Principiante", desc:"Empiezo o llevo poco" },
@@ -4210,14 +4237,14 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     );
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
         <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Planificador de carrera</div>
         <div style={{ color:"#666", fontSize:13, marginBottom:22 }}>Te montamos un plan progresivo y realista hasta tu meta, con entrenos de carrera y de fuerza.</div>
 
         {/* Disciplina */}
-        <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>¿Qué quieres preparar?</div>
+        <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>Â¿QuÃ© quieres preparar?</div>
         <div style={{ display:"flex", gap:10, marginBottom:8 }}>
-          {[{id:"running",label:"Running",emoji:"🏃"},{id:"bici",label:"Bici",emoji:"🚴"}].map(d=>(
+          {[{id:"running",label:"Running",emoji:"ðŸƒ"},{id:"bici",label:"Bici",emoji:"ðŸš´"}].map(d=>(
             <button key={d.id} onClick={()=>setRaceDiscipline(d.id)} style={{ flex:1, padding:"16px", borderRadius:14, border:`2px solid ${raceDiscipline===d.id?"#ffd700":"#2a2a3a"}`, background:raceDiscipline===d.id?"#2a2410":"#1a1a24", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
               <span style={{ fontSize:26 }}>{d.emoji}</span>
               <span style={{ color:raceDiscipline===d.id?"#ffd700":"#aaa", fontWeight:700, fontSize:14 }}>{d.label}</span>
@@ -4230,7 +4257,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           <div style={{ marginTop:16 }}>
             <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>Tipo de bici</div>
             <div style={{ display:"flex", gap:10 }}>
-              {[{id:"mtb",label:"MTB / Montaña"},{id:"carretera",label:"Carretera"}].map(t=>(
+              {[{id:"mtb",label:"MTB / MontaÃ±a"},{id:"carretera",label:"Carretera"}].map(t=>(
                 <button key={t.id} onClick={()=>setRaceBikeType(t.id)} style={{ flex:1, padding:"13px", borderRadius:12, border:`2px solid ${raceBikeType===t.id?"#ffd700":"#2a2a3a"}`, background:raceBikeType===t.id?"#2a2410":"#1a1a24", color:raceBikeType===t.id?"#ffd700":"#aaa", fontWeight:700, fontSize:13.5, cursor:"pointer" }}>{t.label}</button>
               ))}
             </div>
@@ -4242,7 +4269,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           <>
             <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"22px 0 10px" }}>Tipo de carrera</div>
             <div style={{ display:"flex", gap:10 }}>
-              {[{id:"asfalto",label:"Asfalto",desc:"Ciudad, ruta, pista"},{id:"trail",label:"Trail / Montaña",desc:"Senderos y desnivel"}].map(t=>(
+              {[{id:"asfalto",label:"Asfalto",desc:"Ciudad, ruta, pista"},{id:"trail",label:"Trail / MontaÃ±a",desc:"Senderos y desnivel"}].map(t=>(
                 <button key={t.id} onClick={()=>setRaceRunType(t.id)} style={{ flex:1, padding:"16px 12px", borderRadius:12, border:`2px solid ${raceRunType===t.id?"#ffd700":"#2a2a3a"}`, background:raceRunType===t.id?"#2a2410":"#1a1a24", cursor:"pointer", textAlign:"center" }}>
                   <div style={{ color:raceRunType===t.id?"#ffd700":"#aaa", fontWeight:700, fontSize:14 }}>{t.label}</div>
                   <div style={{ color:"#777", fontSize:11, marginTop:2 }}>{t.desc}</div>
@@ -4251,7 +4278,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             </div>
 
             <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"22px 0 6px" }}>Tus marcas actuales</div>
-            <div style={{ color:"#666", fontSize:12, marginBottom:12 }}>Pon tu mejor tiempo en cada distancia (formato mm:ss o h:mm:ss). Deja vacías las que no hayas corrido.</div>
+            <div style={{ color:"#666", fontSize:12, marginBottom:12 }}>Pon tu mejor tiempo en cada distancia (formato mm:ss o h:mm:ss). Deja vacÃ­as las que no hayas corrido.</div>
             {RACE_DISTANCES.map(d=>(
               <div key={d.id} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8, background:"#1a1a24", borderRadius:12, padding:"10px 14px", border:"1px solid #2a2a3a" }}>
                 <span style={{ color:"#ccc", fontSize:14, fontWeight:600 }}>{d.label}</span>
@@ -4259,7 +4286,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
               </div>
             ))}
 
-            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"22px 0 10px" }}>¿Qué distancia quieres conseguir?</div>
+            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"22px 0 10px" }}>Â¿QuÃ© distancia quieres conseguir?</div>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
               {RACE_DISTANCES.map(d=>(
                 <button key={d.id} onClick={()=>setRaceTarget(d.id)} style={{ padding:"14px", borderRadius:12, border:`2px solid ${raceTarget===d.id?"#ffd700":"#2a2a3a"}`, background:raceTarget===d.id?"#2a2410":"#1a1a24", color:raceTarget===d.id?"#ffd700":"#aaa", fontWeight:700, fontSize:13.5, cursor:"pointer" }}>{d.label}</button>
@@ -4270,14 +4297,14 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             {raceRunType==="trail" && (
               <div style={{ marginTop:16 }}>
                 <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>Desnivel de tu carrera objetivo</div>
-                <div style={{ color:"#666", fontSize:12, marginBottom:8 }}>¿Cuántos metros de desnivel positivo (D+) tendrá la carrera que preparas? Opcional, pero ayuda mucho a afinar el plan.</div>
+                <div style={{ color:"#666", fontSize:12, marginBottom:8 }}>Â¿CuÃ¡ntos metros de desnivel positivo (D+) tendrÃ¡ la carrera que preparas? Opcional, pero ayuda mucho a afinar el plan.</div>
                 <input value={raceRunDesnivel} onChange={e=>setRaceRunDesnivel(e.target.value.replace(/[^0-9]/g,""))} inputMode="numeric" placeholder="Ej: 1500 m D+" style={{ width:"100%", padding:"12px 14px", borderRadius:12, border:"1px solid #2a2a3a", background:"#15151c", color:"white", fontSize:15, outline:"none", boxSizing:"border-box" }} />
-                <div style={{ color:"#666", fontSize:11.5, marginTop:6 }}>Trabajaremos subidas, bajadas técnicas y fuerza específica para ese desnivel.</div>
+                <div style={{ color:"#666", fontSize:11.5, marginTop:6 }}>Trabajaremos subidas, bajadas tÃ©cnicas y fuerza especÃ­fica para ese desnivel.</div>
               </div>
             )}
 
             <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"22px 0 6px" }}>Tiempo objetivo (opcional)</div>
-            <div style={{ color:"#666", fontSize:12, marginBottom:10 }}>¿En qué tiempo te gustaría hacerla? Déjalo vacío si solo quieres terminarla.</div>
+            <div style={{ color:"#666", fontSize:12, marginBottom:10 }}>Â¿En quÃ© tiempo te gustarÃ­a hacerla? DÃ©jalo vacÃ­o si solo quieres terminarla.</div>
             <input value={raceTargetTime} onChange={e=>setRaceTargetTime(e.target.value.replace(/[^0-9:]/g,""))} inputMode="numeric" placeholder="Ej: 50:00 o 02:15:08" style={{ width:"100%", padding:"12px 14px", borderRadius:12, border:"1px solid #2a2a3a", background:"#15151c", color:"white", fontSize:15, outline:"none", boxSizing:"border-box" }} />
             <div style={{ color:"#666", fontSize:11.5, marginTop:6 }}>Formato: minutos:segundos (50:00) o horas:minutos:segundos (02:15:08)</div>
           </>
@@ -4289,7 +4316,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"22px 0 10px" }}>Tu reto</div>
             <div style={{ color:"#999", fontSize:13, marginBottom:6 }}>Distancia objetivo (km)</div>
             <input value={raceBikeKm} onChange={e=>setRaceBikeKm(e.target.value)} placeholder="Ej: 80" inputMode="numeric" style={{ width:"100%", padding:"12px 14px", borderRadius:12, border:"1px solid #2a2a3a", background:"#15151c", color:"white", fontSize:15, outline:"none", boxSizing:"border-box", marginBottom:14 }} />
-            <div style={{ color:"#999", fontSize:13, marginBottom:6 }}>Desnivel acumulado (m) — opcional</div>
+            <div style={{ color:"#999", fontSize:13, marginBottom:6 }}>Desnivel acumulado (m) â€” opcional</div>
             <input value={raceBikeDesnivel} onChange={e=>setRaceBikeDesnivel(e.target.value)} placeholder="Ej: 1200" inputMode="numeric" style={{ width:"100%", padding:"12px 14px", borderRadius:12, border:"1px solid #2a2a3a", background:"#15151c", color:"white", fontSize:15, outline:"none", boxSizing:"border-box" }} />
           </>
         )}
@@ -4304,17 +4331,17 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
               </button>
             ))}
 
-            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"18px 0 10px" }}>¿Cuánto {isBike?"montas en bici":"corres"} ahora mismo?</div>
+            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"18px 0 10px" }}>Â¿CuÃ¡nto {isBike?"montas en bici":"corres"} ahora mismo?</div>
             {[
               {id:"cero",label:"Parto de cero",desc:isBike?"No salgo en bici habitualmente":"No corro casi nada ahora"},
-              {id:"poco",label:"Algo, de vez en cuando",desc:"1-2 días por semana sueltos"},
-              {id:"regular",label:"Entreno regularmente",desc:"3 o más días por semana"},
+              {id:"poco",label:"Algo, de vez en cuando",desc:"1-2 dÃ­as por semana sueltos"},
+              {id:"regular",label:"Entreno regularmente",desc:"3 o mÃ¡s dÃ­as por semana"},
             ].map(e=>(
               <button key={e.id} onClick={()=>setRaceExperience(e.id)} style={{ width:"100%", marginBottom:8, padding:"14px", borderRadius:12, border:`2px solid ${raceExperience===e.id?"#ffd700":"#2a2a3a"}`, background:raceExperience===e.id?"#2a2410":"#1a1a24", cursor:"pointer", textAlign:"left" }}>
                 <div style={{ color:raceExperience===e.id?"#ffd700":"white", fontWeight:700, fontSize:15 }}>{e.label}</div><div style={{ color:"#777", fontSize:11.5, marginTop:1 }}>{e.desc}</div>
               </button>
             ))}
-            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"18px 0 10px" }}>Días por semana</div>
+            <div style={{ color:"#888", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:1, margin:"18px 0 10px" }}>DÃ­as por semana</div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
               {[3,4,5,6].map(n=>(
                 <button key={n} onClick={()=>setRaceDays(n)} style={{ padding:"13px 0", borderRadius:12, border:`2px solid ${raceDays===n?"#ffd700":"#2a2a3a"}`, background:raceDays===n?"#2a2410":"#1a1a24", color:raceDays===n?"#ffd700":"#888", fontWeight:900, fontSize:17, cursor:"pointer" }}>{n}</button>
@@ -4323,12 +4350,12 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           </>
         )}
 
-        <button onClick={()=>canGenerate && buildRacePlan()} disabled={!canGenerate} style={{ width:"100%", marginTop:24, padding:"16px", borderRadius:14, border:"none", background:canGenerate?"linear-gradient(135deg,#d4af37,#b8860b)":"#2a2a3a", color:canGenerate?"#1a1a10":"#555", fontWeight:900, fontSize:16, cursor:canGenerate?"pointer":"default" }}>{canGenerate?"Crear mi plan →":"Completa los datos"}</button>
+        <button onClick={()=>canGenerate && buildRacePlan()} disabled={!canGenerate} style={{ width:"100%", marginTop:24, padding:"16px", borderRadius:14, border:"none", background:canGenerate?"linear-gradient(135deg,#d4af37,#b8860b)":"#2a2a3a", color:canGenerate?"#1a1a10":"#555", fontWeight:900, fontSize:16, cursor:canGenerate?"pointer":"default" }}>{canGenerate?"Crear mi plan â†’":"Completa los datos"}</button>
       </div>
     );
   }
 
-  // ── PASO: ver el plan de carrera ──
+  // â”€â”€ PASO: ver el plan de carrera â”€â”€
   if (step === "race_plan" && racePlan) {
     const rp = racePlan;
     const phase = rp.phases[rp.currentPhase];
@@ -4338,7 +4365,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     const finishTxt = `${estFinish.getDate()} de ${meses[estFinish.getMonth()]} de ${estFinish.getFullYear()}`;
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        {/* Animación de semana completada */}
+        {/* AnimaciÃ³n de semana completada */}
         {weekComplete && (
           <div style={{ position:"fixed", inset:0, background:"radial-gradient(circle at center, #16201a 0%, #0a0d0a 100%)", zIndex:400, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", animation:"fade-in 0.3s ease", padding:"24px" }}>
             <div style={{ position:"relative", width:120, height:120, marginBottom:26, display:"flex", alignItems:"center", justifyContent:"center", animation:"glow-pulse 1.5s ease-out 0.3s" }}>
@@ -4349,7 +4376,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
               </svg>
             </div>
             <div style={{ color:"white", fontWeight:900, fontSize:23, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.8s both", textAlign:"center" }}>Semana completada</div>
-            <div style={{ color:"#4caf50", fontSize:13.5, marginTop:8, fontWeight:600, letterSpacing:1, textTransform:"uppercase", animation:"rise-up 0.5s ease 1s both" }}>Una semana más cerca de tu meta</div>
+            <div style={{ color:"#4caf50", fontSize:13.5, marginTop:8, fontWeight:600, letterSpacing:1, textTransform:"uppercase", animation:"rise-up 0.5s ease 1s both" }}>Una semana mÃ¡s cerca de tu meta</div>
           </div>
         )}
 
@@ -4361,23 +4388,23 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           return (
             <div onClick={()=>setConfirmWeek(false)} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.78)", backdropFilter:"blur(4px)", WebkitBackdropFilter:"blur(4px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", animation:"fade-in 0.25s ease" }}>
               <div onClick={e=>e.stopPropagation()} style={{ background:"#1a1a24", borderRadius:20, padding:"26px 22px", maxWidth:360, width:"100%", border:"1px solid #2a2a3a", animation:"scale-fade 0.3s ease" }}>
-                <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>¿Completar la semana {(rp.currentWeek||0)+1}?</div>
+                <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>Â¿Completar la semana {(rp.currentWeek||0)+1}?</div>
                 {pendientes>0 ? (
                   <div style={{ background:"#2a2410", border:"1px solid #b8860b", borderRadius:12, padding:"12px 14px", margin:"14px 0" }}>
                     <div style={{ color:"#ffd700", fontSize:13, fontWeight:700, textAlign:"center", lineHeight:1.5 }}>Te {pendientes===1?"queda":"quedan"} {pendientes} {pendientes===1?"entreno":"entrenos"} sin marcar esta semana.</div>
                     <div style={{ color:"#aa9", fontSize:12, textAlign:"center", marginTop:5 }}>Puedes completarla igualmente, pero lo ideal es hacer todos los entrenos.</div>
                   </div>
                 ) : (
-                  <div style={{ color:"#8bc34a", fontSize:13.5, textAlign:"center", lineHeight:1.5, margin:"14px 0" }}>¡Has hecho todos los entrenos de la semana! Pasas a la siguiente.</div>
+                  <div style={{ color:"#8bc34a", fontSize:13.5, textAlign:"center", lineHeight:1.5, margin:"14px 0" }}>Â¡Has hecho todos los entrenos de la semana! Pasas a la siguiente.</div>
                 )}
-                <button onClick={advanceRaceWeek} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Sí, completar semana</button>
+                <button onClick={advanceRaceWeek} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>SÃ­, completar semana</button>
                 <button onClick={()=>setConfirmWeek(false)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Volver</button>
               </div>
             </div>
           );
         })()}
 
-        {/* Animación de fase completada */}
+        {/* AnimaciÃ³n de fase completada */}
         {phaseComplete && (
           <div style={{ position:"fixed", inset:0, background:"radial-gradient(circle at center, #2a2410 0%, #0a0d0a 100%)", zIndex:400, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", animation:"fade-in 0.3s ease", padding:"24px" }}>
             <div style={{ position:"relative", width:130, height:130, marginBottom:28, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", animation:"glow-pulse 1.6s ease-out 0.4s" }}>
@@ -4387,20 +4414,20 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
               </svg>
               <svg width="56" height="56" viewBox="0 0 24 24" fill="#ffd700" style={{ animation:"scale-fade 0.5s ease 0.9s both" }}><path d="M5 4h14v2a5 5 0 01-3 4.58A4 4 0 0113 14v2h2v2H9v-2h2v-2a4 4 0 01-3-3.42A5 5 0 015 6V4z"/></svg>
             </div>
-            <div style={{ color:"#ffd700", fontWeight:900, fontSize:26, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.9s both", textAlign:"center" }}>¡Fase completada!</div>
-            <div style={{ color:"#fff", fontSize:15, marginTop:10, fontWeight:600, animation:"rise-up 0.5s ease 1.1s both", textAlign:"center" }}>{rp.currentPhase < rp.phases.length-1 ? "Siguiente nivel desbloqueado" : "¡Has llegado a tu meta!"}</div>
+            <div style={{ color:"#ffd700", fontWeight:900, fontSize:26, letterSpacing:0.5, animation:"rise-up 0.5s ease 0.9s both", textAlign:"center" }}>Â¡Fase completada!</div>
+            <div style={{ color:"#fff", fontSize:15, marginTop:10, fontWeight:600, animation:"rise-up 0.5s ease 1.1s both", textAlign:"center" }}>{rp.currentPhase < rp.phases.length-1 ? "Siguiente nivel desbloqueado" : "Â¡Has llegado a tu meta!"}</div>
           </div>
         )}
 
-        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
 
         {/* Modal confirmar borrar plan */}
         {confirmDeleteRace && (
           <div onClick={()=>setConfirmDeleteRace(false)} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.78)", backdropFilter:"blur(4px)", WebkitBackdropFilter:"blur(4px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", animation:"fade-in 0.25s ease" }}>
             <div onClick={e=>e.stopPropagation()} style={{ background:"#1a1a24", borderRadius:20, padding:"28px 22px", maxWidth:360, width:"100%", border:"1px solid #2a2a3a", animation:"scale-fade 0.3s ease" }}>
-              <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>¿Eliminar el plan de carrera?</div>
-              <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>Perderás el progreso de las fases. Tus entrenos registrados se mantienen en el historial.</div>
-              <button onClick={()=>{ setRacePlan(null); setConfirmDeleteRace(false); setStep("goal"); }} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#c62828,#8e1f1f)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Sí, eliminar</button>
+              <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>Â¿Eliminar el plan de carrera?</div>
+              <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>PerderÃ¡s el progreso de las fases. Tus entrenos registrados se mantienen en el historial.</div>
+              <button onClick={()=>{ setRacePlan(null); setConfirmDeleteRace(false); setStep("goal"); }} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#c62828,#8e1f1f)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>SÃ­, eliminar</button>
               <button onClick={()=>setConfirmDeleteRace(false)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Cancelar</button>
             </div>
           </div>
@@ -4408,21 +4435,21 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
 
         {/* Cabecera del plan */}
         <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:2 }}>{isRun?"Camino a tu "+rp.targetLabel:"Tu reto en bici"}</div>
-        <div style={{ color:"#666", fontSize:13, marginBottom:16 }}>{isRun?`${rp.runType==="trail"?"Trail":"Asfalto"}${rp.runDesnivel?` · ${rp.runDesnivel}m+`:""} · ${rp.days} días/semana · nivel ${rp.level}`:`${rp.bikeType==="mtb"?"MTB":"Carretera"} · ${rp.km} km${rp.desnivel?` · ${rp.desnivel}m desnivel`:""}`}</div>
+        <div style={{ color:"#666", fontSize:13, marginBottom:16 }}>{isRun?`${rp.runType==="trail"?"Trail":"Asfalto"}${rp.runDesnivel?` Â· ${rp.runDesnivel}m+`:""} Â· ${rp.days} dÃ­as/semana Â· nivel ${rp.level}`:`${rp.bikeType==="mtb"?"MTB":"Carretera"} Â· ${rp.km} km${rp.desnivel?` Â· ${rp.desnivel}m desnivel`:""}`}</div>
 
-        {/* Predicción y realismo (running) */}
+        {/* PredicciÃ³n y realismo (running) */}
         {isRun && rp.prediction>0 && (
           <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:14, padding:"14px 16px", marginBottom:14 }}>
             <div style={{ color:"#cde", fontSize:13, lineHeight:1.6 }}>
-              Según tus marcas, ahora mismo podrías hacer tu {rp.targetLabel} en torno a <b style={{color:"#8bc34a"}}>{fmtTime(rp.prediction)}</b>.
-              {rp.objective>0 && rp.realismo==="realista" && <> Tu objetivo de <b>{fmtTime(rp.objective)}</b> es <b style={{color:"#8bc34a"}}>realista</b>. ¡A por él!</>}
+              SegÃºn tus marcas, ahora mismo podrÃ­as hacer tu {rp.targetLabel} en torno a <b style={{color:"#8bc34a"}}>{fmtTime(rp.prediction)}</b>.
+              {rp.objective>0 && rp.realismo==="realista" && <> Tu objetivo de <b>{fmtTime(rp.objective)}</b> es <b style={{color:"#8bc34a"}}>realista</b>. Â¡A por Ã©l!</>}
               {rp.objective>0 && rp.realismo==="ambicioso" && <> Tu objetivo de <b>{fmtTime(rp.objective)}</b> es <b style={{color:"#ffb74d"}}>ambicioso</b>: trabajando este plan con constancia puedes acercarte mucho.</>}
             </div>
           </div>
         )}
         {isRun && rp.prediction===0 && (
           <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:14, padding:"14px 16px", marginBottom:14 }}>
-            <div style={{ color:"#cde", fontSize:13, lineHeight:1.6 }}>Como aún no tienes marcas, te montamos un plan progresivo y seguro desde la base hasta tu {rp.targetLabel}, sin forzar.</div>
+            <div style={{ color:"#cde", fontSize:13, lineHeight:1.6 }}>Como aÃºn no tienes marcas, te montamos un plan progresivo y seguro desde la base hasta tu {rp.targetLabel}, sin forzar.</div>
           </div>
         )}
 
@@ -4440,7 +4467,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
               {rp.phases.map((p,i)=>(
                 <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:5 }}>
                   <div style={{ width:"100%", height:6, borderRadius:3, background: p.completed?"#4caf50":i===rp.currentPhase?"#ffd700":"#2a2a3a" }} />
-                  <span style={{ color:p.completed?"#4caf50":i===rp.currentPhase?"#ffd700":"#666", fontSize:10, fontWeight:700 }}>{p.label.replace("Media maratón ","").replace("(","").replace(")","")}</span>
+                  <span style={{ color:p.completed?"#4caf50":i===rp.currentPhase?"#ffd700":"#666", fontSize:10, fontWeight:700 }}>{p.label.replace("Media maratÃ³n ","").replace("(","").replace(")","")}</span>
                 </div>
               ))}
             </div>
@@ -4449,9 +4476,9 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
 
         {rp.allDone ? (
           <div style={{ background:"linear-gradient(135deg,#2a2410,#15201a)", border:"1px solid #b8860b", borderRadius:16, padding:"24px", textAlign:"center" }}>
-            <div style={{ fontSize:44, marginBottom:10 }}>🏆</div>
-            <div style={{ color:"#ffd700", fontWeight:900, fontSize:18, marginBottom:6 }}>¡Plan completado!</div>
-            <div style={{ color:"#cde", fontSize:13, lineHeight:1.5 }}>Has recorrido todas las fases hasta tu meta. ¡Enhorabuena, máquina! Ya estás listo para tu {isRun?rp.targetLabel:"reto"}.</div>
+            <div style={{ fontSize:44, marginBottom:10 }}>ðŸ†</div>
+            <div style={{ color:"#ffd700", fontWeight:900, fontSize:18, marginBottom:6 }}>Â¡Plan completado!</div>
+            <div style={{ color:"#cde", fontSize:13, lineHeight:1.5 }}>Has recorrido todas las fases hasta tu meta. Â¡Enhorabuena, mÃ¡quina! Ya estÃ¡s listo para tu {isRun?rp.targetLabel:"reto"}.</div>
           </div>
         ) : (
           <>
@@ -4465,8 +4492,8 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
 
             {/* Fase actual */}
             <div style={{ background:"#2a2410", border:"1px solid #b8860b", borderRadius:14, padding:"12px 16px", marginBottom:14 }}>
-              <div style={{ color:"#ffd700", fontWeight:800, fontSize:14 }}>Fase {rp.currentPhase+1} de {rp.phases.length}{rp.phases.length>1?` · hasta ${phase.label}`:""}</div>
-              <div style={{ color:"#aa9", fontSize:12, marginTop:2 }}>Semana {(rp.currentWeek||0)+1} de {phase.weeks} · {rp.days} días/semana</div>
+              <div style={{ color:"#ffd700", fontWeight:800, fontSize:14 }}>Fase {rp.currentPhase+1} de {rp.phases.length}{rp.phases.length>1?` Â· hasta ${phase.label}`:""}</div>
+              <div style={{ color:"#aa9", fontSize:12, marginTop:2 }}>Semana {(rp.currentWeek||0)+1} de {phase.weeks} Â· {rp.days} dÃ­as/semana</div>
             </div>
 
             {/* Progreso de semanas dentro de la fase */}
@@ -4503,13 +4530,13 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
               });
             })()}
 
-            {/* Botón completar semana */}
+            {/* BotÃ³n completar semana */}
             {(rp.currentWeek||0) < phase.weeks-1 ? (
-              <button onClick={()=>setConfirmWeek(true)} style={{ width:"100%", marginTop:10, padding:"15px", borderRadius:14, border:"1px solid #ffd700", background:"transparent", color:"#ffd700", fontWeight:800, fontSize:14, cursor:"pointer" }}>Completar semana {(rp.currentWeek||0)+1} →</button>
+              <button onClick={()=>setConfirmWeek(true)} style={{ width:"100%", marginTop:10, padding:"15px", borderRadius:14, border:"1px solid #ffd700", background:"transparent", color:"#ffd700", fontWeight:800, fontSize:14, cursor:"pointer" }}>Completar semana {(rp.currentWeek||0)+1} â†’</button>
             ) : (
-              <button onClick={completeRacePhase} style={{ width:"100%", marginTop:10, padding:"15px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#d4af37,#b8860b)", color:"#1a1a10", fontWeight:900, fontSize:15, cursor:"pointer" }}>{rp.currentPhase < rp.phases.length-1 ? "¡Completar fase y desbloquear la siguiente!" : "¡Completar plan!"}</button>
+              <button onClick={completeRacePhase} style={{ width:"100%", marginTop:10, padding:"15px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#d4af37,#b8860b)", color:"#1a1a10", fontWeight:900, fontSize:15, cursor:"pointer" }}>{rp.currentPhase < rp.phases.length-1 ? "Â¡Completar fase y desbloquear la siguiente!" : "Â¡Completar plan!"}</button>
             )}
-            <div style={{ color:"#666", fontSize:11.5, textAlign:"center", marginTop:8, lineHeight:1.5 }}>{(rp.currentWeek||0) < phase.weeks-1 ? "Cuando termines los entrenos de esta semana, pasa a la siguiente." : "Última semana de la fase. ¡Remátala con ganas!"}</div>
+            <div style={{ color:"#666", fontSize:11.5, textAlign:"center", marginTop:8, lineHeight:1.5 }}>{(rp.currentWeek||0) < phase.weeks-1 ? "Cuando termines los entrenos de esta semana, pasa a la siguiente." : "Ãšltima semana de la fase. Â¡RemÃ¡tala con ganas!"}</div>
           </>
         )}
 
@@ -4518,12 +4545,12 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
     );
   }
 
-  // ── PASO 2: elegir material (solo "casa") ──
+  // â”€â”€ PASO 2: elegir material (solo "casa") â”€â”€
   if (step === "equip") {
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>¿Qué material tienes?</div>
+        <button onClick={()=>setStep("goal")} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Â¿QuÃ© material tienes?</div>
         <div style={{ color:"#666", fontSize:13, marginBottom:22 }}>Selecciona todo lo que tengas disponible</div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:24 }}>
           {EQUIPMENT.map(eq => {
@@ -4537,30 +4564,30 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             );
           })}
         </div>
-        <button onClick={startWorkout} disabled={tempEquip.length===0} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:tempEquip.length?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:tempEquip.length?"white":"#555", fontWeight:900, fontSize:16, cursor:tempEquip.length?"pointer":"default" }}>{tempEquip.length?"Generar entreno →":"Selecciona material"}</button>
+        <button onClick={startWorkout} disabled={tempEquip.length===0} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:tempEquip.length?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:tempEquip.length?"white":"#555", fontWeight:900, fontSize:16, cursor:tempEquip.length?"pointer":"default" }}>{tempEquip.length?"Generar entreno â†’":"Selecciona material"}</button>
       </div>
     );
   }
 
-  // ── Ver ejercicio en grande ──
+  // â”€â”€ Ver ejercicio en grande â”€â”€
   if (viewExercise) {
     const ex = viewExercise;
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setViewExercise(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={()=>setViewExercise(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
         <div style={{ background:"#1a1a24", borderRadius:20, padding:"26px 20px", border:"1px solid #2a2a3a", textAlign:"center", marginBottom:20 }}>
           <div style={{ color:"white", fontWeight:900, fontSize:24 }}>{ex.name}</div>
-          <div style={{ color:"#4caf50", fontSize:15, marginTop:8, fontWeight:700 }}>{ex.series} · RIR {ex.rir}</div>
+          <div style={{ color:"#4caf50", fontSize:15, marginTop:8, fontWeight:700 }}>{ex.series} Â· RIR {ex.rir}</div>
         </div>
         <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:14, padding:"14px 16px" }}>
-          <div style={{ color:"#8bc34a", fontSize:11, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>Cómo hacerlo</div>
-          <div style={{ color:"#cde", fontSize:13, lineHeight:1.5 }}>Realiza el movimiento de forma controlada, manteniendo la técnica en todo el rango. Respira de forma constante y mantén el RIR indicado (repeticiones en reserva) para regular la intensidad.</div>
+          <div style={{ color:"#8bc34a", fontSize:11, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>CÃ³mo hacerlo</div>
+          <div style={{ color:"#cde", fontSize:13, lineHeight:1.5 }}>Realiza el movimiento de forma controlada, manteniendo la tÃ©cnica en todo el rango. Respira de forma constante y mantÃ©n el RIR indicado (repeticiones en reserva) para regular la intensidad.</div>
         </div>
       </div>
     );
   }
 
-  // ── Sustituir ejercicio ──
+  // â”€â”€ Sustituir ejercicio â”€â”€
   if (swapping) {
     const alts = getAlternatives(swapping, goal, equipment);
     // Formulario de ejercicio personalizado
@@ -4569,44 +4596,44 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
       const validCustom = cf.name.trim() && cf.series.trim();
       return (
         <div style={{ padding:"20px 16px 40px" }}>
-          <button onClick={()=>setCustomForm(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+          <button onClick={()=>setCustomForm(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
           <div style={{ fontWeight:900, fontSize:20, color:"white", marginBottom:4 }}>Crear ejercicio propio</div>
-          <div style={{ color:"#666", fontSize:13, marginBottom:22 }}>Sustituirá a <b style={{color:"#aaa"}}>{swapping.name}</b></div>
+          <div style={{ color:"#666", fontSize:13, marginBottom:22 }}>SustituirÃ¡ a <b style={{color:"#aaa"}}>{swapping.name}</b></div>
 
           <label style={{ fontSize:12, color:"#888", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:6, display:"block" }}>Nombre del ejercicio</label>
           <input value={cf.name} onChange={e=>setCustomForm({...cf, name:e.target.value})} placeholder="Ej: Press inclinado con mancuernas" style={{ width:"100%", padding:"12px 14px", borderRadius:12, border:"2px solid #2a2a3a", background:"#1a1a24", color:"white", fontSize:15, outline:"none", boxSizing:"border-box", marginBottom:16 }} />
 
           <label style={{ fontSize:12, color:"#888", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:6, display:"block" }}>Series y repeticiones</label>
-          <input value={cf.series} onChange={e=>setCustomForm({...cf, series:e.target.value})} placeholder="Ej: 4 × 10" style={{ width:"100%", padding:"12px 14px", borderRadius:12, border:"2px solid #2a2a3a", background:"#1a1a24", color:"white", fontSize:15, outline:"none", boxSizing:"border-box", marginBottom:16 }} />
+          <input value={cf.series} onChange={e=>setCustomForm({...cf, series:e.target.value})} placeholder="Ej: 4 Ã— 10" style={{ width:"100%", padding:"12px 14px", borderRadius:12, border:"2px solid #2a2a3a", background:"#1a1a24", color:"white", fontSize:15, outline:"none", boxSizing:"border-box", marginBottom:16 }} />
 
           <label style={{ fontSize:12, color:"#888", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:6, display:"block" }}>RIR (repeticiones en reserva)</label>
           <input value={cf.rir} onChange={e=>setCustomForm({...cf, rir:e.target.value})} placeholder="Ej: 1-2" style={{ width:"100%", padding:"12px 14px", borderRadius:12, border:"2px solid #2a2a3a", background:"#1a1a24", color:"white", fontSize:15, outline:"none", boxSizing:"border-box", marginBottom:16 }} />
 
-          <label style={{ fontSize:12, color:"#888", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:6, display:"block" }}>¿Cómo se registra?</label>
+          <label style={{ fontSize:12, color:"#888", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:6, display:"block" }}>Â¿CÃ³mo se registra?</label>
           <div style={{ display:"flex", gap:8, marginBottom:24 }}>
             {[{id:"peso",label:"Peso y reps"},{id:"reps",label:"Solo reps"},{id:"tiempo",label:"Tiempo"}].map(m=>(
               <button key={m.id} onClick={()=>setCustomForm({...cf, metric:m.id})} style={{ flex:1, padding:"12px 6px", borderRadius:12, border:`2px solid ${cf.metric===m.id?"#4caf50":"#2a2a3a"}`, background:cf.metric===m.id?"#1a3a1a":"#1a1a24", color:cf.metric===m.id?"#4caf50":"#888", fontSize:12.5, fontWeight:700, cursor:"pointer" }}>{m.label}</button>
             ))}
           </div>
 
-          <button onClick={()=>validCustom && swapCustomExercise(swapping.id, { id:`custom_${Date.now()}`, name:cf.name.trim(), series:cf.series.trim()||"3 × 10", rir:cf.rir.trim()||"1-2", metric:cf.metric, group:swapping.group, goals:[goal] })} disabled={!validCustom} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:validCustom?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:validCustom?"white":"#555", fontWeight:900, fontSize:16, cursor:validCustom?"pointer":"default" }}>{validCustom?"Usar este ejercicio":"Pon al menos nombre y series"}</button>
+          <button onClick={()=>validCustom && swapCustomExercise(swapping.id, { id:`custom_${Date.now()}`, name:cf.name.trim(), series:cf.series.trim()||"3 Ã— 10", rir:cf.rir.trim()||"1-2", metric:cf.metric, group:swapping.group, goals:[goal] })} disabled={!validCustom} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:validCustom?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:validCustom?"white":"#555", fontWeight:900, fontSize:16, cursor:validCustom?"pointer":"default" }}>{validCustom?"Usar este ejercicio":"Pon al menos nombre y series"}</button>
         </div>
       );
     }
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setSwapping(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={()=>setSwapping(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
         <div style={{ fontWeight:900, fontSize:20, color:"white", marginBottom:4 }}>Cambiar ejercicio</div>
         <div style={{ color:"#666", fontSize:13, marginBottom:20 }}>Alternativas para <b style={{color:"#aaa"}}>{swapping.name}</b></div>
 
         {/* Crear ejercicio propio */}
-        <button onClick={()=>setCustomForm({ name:"", series:"4 × 10", rir:"1-2", metric:"peso" })} style={{ width:"100%", marginBottom:16, padding:"16px", borderRadius:14, border:"1px solid #2a4a5a", background:"linear-gradient(135deg,#15252e,#16161f)", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
+        <button onClick={()=>setCustomForm({ name:"", series:"4 Ã— 10", rir:"1-2", metric:"peso" })} style={{ width:"100%", marginBottom:16, padding:"16px", borderRadius:14, border:"1px solid #2a4a5a", background:"linear-gradient(135deg,#15252e,#16161f)", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
           <div style={{ width:34, height:34, borderRadius:"50%", border:"2px solid #4fc3f7", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
           </div>
           <div>
             <div style={{ color:"#4fc3f7", fontWeight:800, fontSize:15 }}>Crear ejercicio propio</div>
-            <div style={{ color:"#777", fontSize:11.5, marginTop:1 }}>Pon tú el nombre, series y reps</div>
+            <div style={{ color:"#777", fontSize:11.5, marginTop:1 }}>Pon tÃº el nombre, series y reps</div>
           </div>
         </button>
 
@@ -4615,21 +4642,21 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         {alts.map(alt => (
           <button key={alt.id} onClick={()=>swapExercise(swapping.id, alt.id)} style={{ width:"100%", marginBottom:10, padding:"16px", borderRadius:14, border:"1px solid #2a2a3a", background:"#1a1a24", cursor:"pointer", textAlign:"left" }}>
             <div style={{ color:"white", fontWeight:700, fontSize:15 }}>{alt.name}</div>
-            <div style={{ color:"#777", fontSize:12, marginTop:2 }}>{alt.series} · RIR {alt.rir}</div>
+            <div style={{ color:"#777", fontSize:12, marginTop:2 }}>{alt.series} Â· RIR {alt.rir}</div>
           </button>
         ))}
       </div>
     );
   }
 
-  // ── PASO 3: entreno generado ──
+  // â”€â”€ PASO 3: entreno generado â”€â”€
   const goalObj = TRAINING_GOALS.find(g=>g.id===goal);
-  // ¿Hay series sin rellenar? (ningún ejercicio con marca de peso o reps)
+  // Â¿Hay series sin rellenar? (ningÃºn ejercicio con marca de peso o reps)
   const hasAnyMark = exercises.some(ex => (marks[ex.id]||[]).some(s => s && (s.peso || s.reps || s.dist || s.tiempo)));
   const missingData = !hasAnyMark;
   return (
     <div style={{ padding:"16px 16px 40px" }}>
-      {/* Animación CSS */}
+      {/* AnimaciÃ³n CSS */}
       <style>{`
         @keyframes pop-in { 0% { transform:scale(0.3); opacity:0; } 60% { transform:scale(1.15); opacity:1; } 100% { transform:scale(1); } }
         @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
@@ -4648,15 +4675,15 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             {missingData ? (
               <>
                 <div style={{ color:"#ff9800", fontWeight:900, fontSize:19, textAlign:"center", marginBottom:8 }}>Faltan datos por rellenar</div>
-                <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>No has anotado el peso ni las repeticiones de ninguna serie. Puedes guardar igualmente, pero perderás el registro de tus marcas de hoy.</div>
+                <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>No has anotado el peso ni las repeticiones de ninguna serie. Puedes guardar igualmente, pero perderÃ¡s el registro de tus marcas de hoy.</div>
                 <button onClick={doFinishWorkout} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#ff9800,#e65100)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Guardar igualmente</button>
                 <button onClick={()=>setConfirmFinish(false)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Volver y rellenar</button>
               </>
             ) : (
               <>
-                <div style={{ color:"white", fontWeight:900, fontSize:19, textAlign:"center", marginBottom:8 }}>¿Finalizar el entrenamiento?</div>
-                <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>Se guardará en tu historial con las marcas que has registrado.</div>
-                <button onClick={doFinishWorkout} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Sí, finalizar</button>
+                <div style={{ color:"white", fontWeight:900, fontSize:19, textAlign:"center", marginBottom:8 }}>Â¿Finalizar el entrenamiento?</div>
+                <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:24 }}>Se guardarÃ¡ en tu historial con las marcas que has registrado.</div>
+                <button onClick={doFinishWorkout} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>SÃ­, finalizar</button>
                 <button onClick={()=>setConfirmFinish(false)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Seguir entrenando</button>
               </>
             )}
@@ -4664,7 +4691,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         </div>
       )}
 
-      {/* Animación de celebración moderna */}
+      {/* AnimaciÃ³n de celebraciÃ³n moderna */}
       {celebrating && (
         <div style={{ position:"fixed", inset:0, background:"radial-gradient(circle at center, #16201a 0%, #0a0d0a 100%)", zIndex:400, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", animation:"fade-in 0.3s ease", padding:"24px" }}>
           <div style={{ position:"relative", width:120, height:120, marginBottom:28, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", animation:"glow-pulse 1.6s ease-out 0.4s" }}>
@@ -4683,7 +4710,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
           {newPRs.length > 0 ? (
             <>
               <div style={{ color:"#ffd700", fontSize:13, marginTop:10, fontWeight:700, letterSpacing:2, textTransform:"uppercase", animation:"rise-up 0.5s ease 1s both" }}>
-                {newPRs.length===1 ? "¡Nuevo récord personal!" : `¡${newPRs.length} récords personales!`}
+                {newPRs.length===1 ? "Â¡Nuevo rÃ©cord personal!" : `Â¡${newPRs.length} rÃ©cords personales!`}
               </div>
               <div style={{ marginTop:18, width:"100%", maxWidth:340, animation:"rise-up 0.6s ease 1.2s both" }}>
                 {newPRs.map((pr,i) => (
@@ -4703,18 +4730,18 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         </div>
       )}
 
-      <button onClick={changeGoal} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+      <button onClick={changeGoal} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
 
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:16 }}>
         <div>
           <div style={{ fontWeight:900, fontSize:22, color:"white" }}>{trainingState?.routineDayName ? trainingState.routineDayName : (goalObj?.label||"Entreno")}</div>
-          <div style={{ color:"#666", fontSize:12, marginTop:2 }}>{trainingState?.routineDayName ? "Día de tu rutina" : "Tu entreno de hoy"} · {exercises.length} ejercicios</div>
+          <div style={{ color:"#666", fontSize:12, marginTop:2 }}>{trainingState?.routineDayName ? "DÃ­a de tu rutina" : "Tu entreno de hoy"} Â· {exercises.length} ejercicios</div>
         </div>
       </div>
 
       {!trainingState?.fixedExercises && (
         <div style={{ display:"flex", gap:8, marginBottom:18 }}>
-          <button onClick={rotate} style={{ flex:1, background:"linear-gradient(135deg,#1a2e1a,#1a1a24)", border:"1px solid #2e7d32", borderRadius:12, padding:"11px", cursor:"pointer", color:"#8bc34a", fontSize:13, fontWeight:700 }}>🔄 Rotar rutina</button>
+          <button onClick={rotate} style={{ flex:1, background:"linear-gradient(135deg,#1a2e1a,#1a1a24)", border:"1px solid #2e7d32", borderRadius:12, padding:"11px", cursor:"pointer", color:"#8bc34a", fontSize:13, fontWeight:700 }}>ðŸ”„ Rotar rutina</button>
         </div>
       )}
 
@@ -4722,28 +4749,28 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
         const exMarks = marks[ex.id] || [];
         const lastSession = lastMarksFor(ex.id);
         const isCardioSession = ex.group==="cardio" || ex.metric==="cardio";
-        // Nº de filas de series: usa el número antes del "×". Para cardio/tiempo sin "×", 1 fila.
+        // NÂº de filas de series: usa el nÃºmero antes del "Ã—". Para cardio/tiempo sin "Ã—", 1 fila.
         let numSeries = 3;
-        if (ex.series.includes("×")) {
-          numSeries = parseInt(ex.series.split("×")[0].trim()) || 3;
+        if (ex.series.includes("Ã—")) {
+          numSeries = parseInt(ex.series.split("Ã—")[0].trim()) || 3;
         } else {
           numSeries = 1; // ej: "25-35 min", "20 min"
         }
         numSeries = Math.min(numSeries, 6);
-        // ── Sesión de carrera/bici: registrar distancia y tiempo (no peso/reps) ──
+        // â”€â”€ SesiÃ³n de carrera/bici: registrar distancia y tiempo (no peso/reps) â”€â”€
         if (isCardioSession) {
           const m = exMarks[0] || {};
           return (
             <div key={ex.id} style={{ background:"#1a1a24", borderRadius:18, marginBottom:14, border:"1px solid #2a2a3a", overflow:"hidden" }}>
               <div style={{ padding:"14px", borderBottom:"1px solid #232330" }}>
                 <div style={{ color:"white", fontWeight:800, fontSize:15 }}>{ex.name}</div>
-                <div style={{ color:"#ffd700", fontSize:12, fontWeight:700, marginTop:2 }}>Registra tu sesión</div>
+                <div style={{ color:"#ffd700", fontSize:12, fontWeight:700, marginTop:2 }}>Registra tu sesiÃ³n</div>
               </div>
               {lastSession && (lastSession.series?.[0]?.dist || lastSession.series?.[0]?.tiempo) && (
                 <div style={{ background:"#13131a", padding:"8px 14px", borderBottom:"1px solid #232330" }}>
-                  <div style={{ color:"#666", fontSize:10.5, fontWeight:700, textTransform:"uppercase", letterSpacing:0.5, marginBottom:3 }}>📅 Última vez ({formatDateShort(parseKey(lastSession.date))})</div>
+                  <div style={{ color:"#666", fontSize:10.5, fontWeight:700, textTransform:"uppercase", letterSpacing:0.5, marginBottom:3 }}>ðŸ“… Ãšltima vez ({formatDateShort(parseKey(lastSession.date))})</div>
                   <span style={{ color:"#8bc34a", fontSize:11.5, background:"#1a2a1a", borderRadius:6, padding:"2px 7px", fontWeight:600 }}>
-                    {lastSession.series[0].dist?`${lastSession.series[0].dist} km`:""}{lastSession.series[0].dist&&lastSession.series[0].tiempo?" · ":""}{lastSession.series[0].tiempo?`${lastSession.series[0].tiempo}`:""}
+                    {lastSession.series[0].dist?`${lastSession.series[0].dist} km`:""}{lastSession.series[0].dist&&lastSession.series[0].tiempo?" Â· ":""}{lastSession.series[0].tiempo?`${lastSession.series[0].tiempo}`:""}
                   </span>
                 </div>
               )}
@@ -4751,7 +4778,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
                 <div style={{ display:"flex", gap:10 }}>
                   <div style={{ flex:1 }}>
                     <div style={{ fontSize:10, color:"#666", fontWeight:700, marginBottom:5, textAlign:"center" }}>DISTANCIA (km)</div>
-                    <input type="number" inputMode="decimal" placeholder="—" value={m.dist||""} onChange={e=>setMark(ex.id,0,"dist",e.target.value)} style={{ width:"100%", padding:"10px", borderRadius:8, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:15, textAlign:"center", outline:"none", boxSizing:"border-box" }} />
+                    <input type="number" inputMode="decimal" placeholder="â€”" value={m.dist||""} onChange={e=>setMark(ex.id,0,"dist",e.target.value)} style={{ width:"100%", padding:"10px", borderRadius:8, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:15, textAlign:"center", outline:"none", boxSizing:"border-box" }} />
                   </div>
                   <div style={{ flex:1 }}>
                     <div style={{ fontSize:10, color:"#666", fontWeight:700, marginBottom:5, textAlign:"center" }}>TIEMPO (h:mm:ss)</div>
@@ -4774,17 +4801,17 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
             <div style={{ display:"flex", alignItems:"center", gap:12, padding:"14px", borderBottom:"1px solid #232330" }}>
               <button onClick={()=>setViewExercise(ex)} style={{ flex:1, minWidth:0, background:"none", border:"none", textAlign:"left", cursor:"pointer", padding:0 }}>
                 <div style={{ color:"white", fontWeight:800, fontSize:15 }}>{ex.name}</div>
-                <div style={{ color:"#4caf50", fontSize:12, fontWeight:700, marginTop:2 }}>{ex.series} · RIR {ex.rir}</div>
+                <div style={{ color:"#4caf50", fontSize:12, fontWeight:700, marginTop:2 }}>{ex.series} Â· RIR {ex.rir}</div>
               </button>
               <button onClick={()=>setSwapping(ex)} style={{ background:"#232330", border:"none", borderRadius:10, color:"#aaa", fontSize:13, fontWeight:700, padding:"8px 12px", cursor:"pointer", flexShrink:0 }}>Cambiar</button>
             </div>
             {lastSession && (
               <div style={{ background:"#13131a", padding:"8px 14px", borderBottom:"1px solid #232330" }}>
-                <div style={{ color:"#666", fontSize:10.5, fontWeight:700, textTransform:"uppercase", letterSpacing:0.5, marginBottom:3 }}>📅 Última vez ({formatDateShort(parseKey(lastSession.date))})</div>
+                <div style={{ color:"#666", fontSize:10.5, fontWeight:700, textTransform:"uppercase", letterSpacing:0.5, marginBottom:3 }}>ðŸ“… Ãšltima vez ({formatDateShort(parseKey(lastSession.date))})</div>
                 <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
                   {lastSession.series.map((s,idx) => (s && (s.peso||s.reps)) ? (
                     <span key={idx} style={{ color:"#8bc34a", fontSize:11.5, background:"#1a2a1a", borderRadius:6, padding:"2px 7px", fontWeight:600 }}>
-                      {s.peso?`${s.peso}kg`:""}{s.peso&&s.reps?" × ":""}{s.reps?`${s.reps}`:""}{!s.peso&&s.reps?" reps":""}
+                      {s.peso?`${s.peso}kg`:""}{s.peso&&s.reps?" Ã— ":""}{s.reps?`${s.reps}`:""}{!s.peso&&s.reps?" reps":""}
                     </span>
                   ) : null)}
                 </div>
@@ -4801,8 +4828,8 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
                 return (
                 <div key={s} style={{ display:"flex", gap:6, alignItems:"center", marginBottom:6 }}>
                   <span style={{ width:30, color:"#888", fontSize:13, fontWeight:700 }}>{s+1}</span>
-                  {ex.metric==="peso" && <input type="number" inputMode="decimal" placeholder={prev?.peso?`${prev.peso}`:"—"} value={exMarks[s]?.peso||""} onChange={e=>setMark(ex.id,s,"peso",e.target.value)} style={{ flex:1, padding:"8px", borderRadius:8, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:14, textAlign:"center", outline:"none", minWidth:0 }} />}
-                  <input type="number" inputMode="numeric" placeholder={prev?.reps?`${prev.reps}`:"—"} value={exMarks[s]?.reps||""} onChange={e=>setMark(ex.id,s,"reps",e.target.value)} style={{ flex:1, padding:"8px", borderRadius:8, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:14, textAlign:"center", outline:"none", minWidth:0 }} />
+                  {ex.metric==="peso" && <input type="number" inputMode="decimal" placeholder={prev?.peso?`${prev.peso}`:"â€”"} value={exMarks[s]?.peso||""} onChange={e=>setMark(ex.id,s,"peso",e.target.value)} style={{ flex:1, padding:"8px", borderRadius:8, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:14, textAlign:"center", outline:"none", minWidth:0 }} />}
+                  <input type="number" inputMode="numeric" placeholder={prev?.reps?`${prev.reps}`:"â€”"} value={exMarks[s]?.reps||""} onChange={e=>setMark(ex.id,s,"reps",e.target.value)} style={{ flex:1, padding:"8px", borderRadius:8, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:14, textAlign:"center", outline:"none", minWidth:0 }} />
                 </div>
                 );
               })}
@@ -4813,13 +4840,13 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
 
       {/* Comentario de sensaciones */}
       <div style={{ background:"#1a1a24", borderRadius:18, padding:"16px", border:"1px solid #2a2a3a", marginBottom:18, marginTop:4 }}>
-        <div style={{ color:"#ccc", fontWeight:800, fontSize:14, marginBottom:8 }}>📝 ¿Cómo te has sentido?</div>
-        <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Sensaciones, energía, molestias, notas para la próxima vez..." rows={3} style={{ width:"100%", padding:"12px", borderRadius:12, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:14, outline:"none", boxSizing:"border-box", resize:"vertical", fontFamily:"inherit" }} />
+        <div style={{ color:"#ccc", fontWeight:800, fontSize:14, marginBottom:8 }}>ðŸ“ Â¿CÃ³mo te has sentido?</div>
+        <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Sensaciones, energÃ­a, molestias, notas para la prÃ³xima vez..." rows={3} style={{ width:"100%", padding:"12px", borderRadius:12, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:14, outline:"none", boxSizing:"border-box", resize:"vertical", fontFamily:"inherit" }} />
       </div>
 
-      <button onClick={()=>setConfirmFinish(true)} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:900, fontSize:16, cursor:"pointer" }}>✓ Finalizar y guardar entreno</button>
+      <button onClick={()=>setConfirmFinish(true)} style={{ width:"100%", padding:"16px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:900, fontSize:16, cursor:"pointer" }}>âœ“ Finalizar y guardar entreno</button>
 
-      {/* Gráficas de entrenamiento */}
+      {/* GrÃ¡ficas de entrenamiento */}
       {Object.keys(workoutLog).length > 0 && <TrainingCharts workoutLog={workoutLog} />}
 
       {/* Historial reciente */}
@@ -4834,7 +4861,7 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
                   <span style={{ color:"white", fontWeight:700, fontSize:13 }}>{g?.emoji} {g?.label}</span>
                   <span style={{ color:"#666", fontSize:11 }}>{formatDateLong(parseKey(w.date))}</span>
                 </div>
-                <div style={{ color:"#777", fontSize:11, marginTop:4 }}>{w.exercises.map(e=>e.name).join(" · ")}</div>
+                <div style={{ color:"#777", fontSize:11, marginTop:4 }}>{w.exercises.map(e=>e.name).join(" Â· ")}</div>
                 {w.comment && <div style={{ color:"#8bc34a", fontSize:12, marginTop:6, fontStyle:"italic" }}>"{w.comment}"</div>}
               </div>
             );
@@ -4845,84 +4872,84 @@ function TrainingTab({ trainingState, setTrainingState, workoutLog, setWorkoutLo
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// SECCIONES DE INFORMACIÓN
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// SECCIONES DE INFORMACIÃ“N
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function InfoTab({ onBack }) {
   const [section, setSection] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
 
   const faqs = [
-    { q:"¿Mis datos se guardan?", a:"Sí. Todo lo que registras (perfil, comidas, peso, entrenos) se guarda en tu propio móvil. Cada persona que usa la app tiene sus propios datos privados." },
-    { q:"¿Por qué empiezo desde cero al abrir la app?", a:"Porque los datos son personales de cada usuario y se guardan en tu dispositivo. Al abrir por primera vez, rellenas tu perfil y a partir de ahí es tu app personal." },
-    { q:"¿Las cantidades son en crudo o cocinado?", a:"Todos los alimentos están en CRUDO o EN SECO. Pesa el arroz, la pasta, las legumbres, etc. antes de cocinarlos. El peso cambia bastante al cocinar." },
-    { q:"¿Cómo cambio mis calorías o macros?", a:"Edita tu perfil con el icono de perfil de arriba a la derecha. Al cambiar tu peso, actividad u objetivo, los macros se recalculan automáticamente." },
-    { q:"¿Puedo cambiar el número de comidas?", a:"Sí, en cualquier momento desde tu perfil. Puedes elegir de 2 a 6 comidas al día y el reparto de calorías se ajusta solo." },
-    { q:"¿Qué hago si un alimento no está en la lista?", a:"Pulsa 'Crear alimento' dentro de cualquier bloque, mete el nombre y los valores de la etiqueta (por 100g). La app lo clasifica automáticamente y se guarda en tu lista." },
-    { q:"¿Cómo uso las recetas predefinidas?", a:"En Nutrición, entra en 'Recetas para tus macros', elige una receta y pulsa 'Añadir a una comida'. Selecciona en qué comida quieres meterla y sus ingredientes se añaden con las cantidades ya calculadas." },
-    { q:"¿Qué es el RIR en los entrenamientos?", a:"Son las repeticiones que te quedan 'en reserva' al acabar una serie. RIR 2 = podrías hacer 2 reps más. Tienes la explicación completa en las guías de arriba." },
-    { q:"¿La app sirve para perder y para ganar peso?", a:"Sí. Al crear tu perfil eliges tu objetivo (pérdida de grasa, mantenimiento o ganancia muscular) y la app ajusta tus calorías y macros en consecuencia." },
-    { q:"¿Cada cuánto debo pesarme?", a:"El peso puedes anotarlo a diario, pero fíjate en la tendencia semanal, no en el dato de un día. Las medidas, una vez por semana es suficiente." },
-    { q:"¿Necesito material para entrenar?", a:"No. Puedes entrenar solo con tu peso corporal. Si tienes material (mancuernas, bandas, etc.), selecciónalo y la app adaptará los ejercicios." },
+    { q:"Â¿Mis datos se guardan?", a:"SÃ­. Todo lo que registras (perfil, comidas, peso, entrenos) se guarda en tu propio mÃ³vil. Cada persona que usa la app tiene sus propios datos privados." },
+    { q:"Â¿Por quÃ© empiezo desde cero al abrir la app?", a:"Porque los datos son personales de cada usuario y se guardan en tu dispositivo. Al abrir por primera vez, rellenas tu perfil y a partir de ahÃ­ es tu app personal." },
+    { q:"Â¿Las cantidades son en crudo o cocinado?", a:"Todos los alimentos estÃ¡n en CRUDO o EN SECO. Pesa el arroz, la pasta, las legumbres, etc. antes de cocinarlos. El peso cambia bastante al cocinar." },
+    { q:"Â¿CÃ³mo cambio mis calorÃ­as o macros?", a:"Edita tu perfil con el icono de perfil de arriba a la derecha. Al cambiar tu peso, actividad u objetivo, los macros se recalculan automÃ¡ticamente." },
+    { q:"Â¿Puedo cambiar el nÃºmero de comidas?", a:"SÃ­, en cualquier momento desde tu perfil. Puedes elegir de 2 a 6 comidas al dÃ­a y el reparto de calorÃ­as se ajusta solo." },
+    { q:"Â¿QuÃ© hago si un alimento no estÃ¡ en la lista?", a:"Pulsa 'Crear alimento' dentro de cualquier bloque, mete el nombre y los valores de la etiqueta (por 100g). La app lo clasifica automÃ¡ticamente y se guarda en tu lista." },
+    { q:"Â¿CÃ³mo uso las recetas predefinidas?", a:"En NutriciÃ³n, entra en 'Recetas para tus macros', elige una receta y pulsa 'AÃ±adir a una comida'. Selecciona en quÃ© comida quieres meterla y sus ingredientes se aÃ±aden con las cantidades ya calculadas." },
+    { q:"Â¿QuÃ© es el RIR en los entrenamientos?", a:"Son las repeticiones que te quedan 'en reserva' al acabar una serie. RIR 2 = podrÃ­as hacer 2 reps mÃ¡s. Tienes la explicaciÃ³n completa en las guÃ­as de arriba." },
+    { q:"Â¿La app sirve para perder y para ganar peso?", a:"SÃ­. Al crear tu perfil eliges tu objetivo (pÃ©rdida de grasa, mantenimiento o ganancia muscular) y la app ajusta tus calorÃ­as y macros en consecuencia." },
+    { q:"Â¿Cada cuÃ¡nto debo pesarme?", a:"El peso puedes anotarlo a diario, pero fÃ­jate en la tendencia semanal, no en el dato de un dÃ­a. Las medidas, una vez por semana es suficiente." },
+    { q:"Â¿Necesito material para entrenar?", a:"No. Puedes entrenar solo con tu peso corporal. Si tienes material (mancuernas, bandas, etc.), selecciÃ³nalo y la app adaptarÃ¡ los ejercicios." },
   ];
 
   const sections = [
-    { id:"empezar", emoji:"🚀", title:"Primeros pasos", body:[
-      "SMINK FIT calcula tus calorías y macronutrientes a partir de tus datos (peso, altura, edad, sexo, nivel de actividad y objetivo).",
-      "Lo primero es rellenar tu perfil con datos reales. Cuanto más precisos, mejor será el cálculo.",
-      "Después podrás registrar tus comidas, tu peso y medidas, y tus entrenamientos. La constancia es lo que marca la diferencia: registra cada día.",
-      "Puedes cambiar tus datos cuando quieras desde el icono de perfil de arriba a la derecha. Tus macros se recalcularán automáticamente.",
+    { id:"empezar", emoji:"ðŸš€", title:"Primeros pasos", body:[
+      "SMINK FIT calcula tus calorÃ­as y macronutrientes a partir de tus datos (peso, altura, edad, sexo, nivel de actividad y objetivo).",
+      "Lo primero es rellenar tu perfil con datos reales. Cuanto mÃ¡s precisos, mejor serÃ¡ el cÃ¡lculo.",
+      "DespuÃ©s podrÃ¡s registrar tus comidas, tu peso y medidas, y tus entrenamientos. La constancia es lo que marca la diferencia: registra cada dÃ­a.",
+      "Puedes cambiar tus datos cuando quieras desde el icono de perfil de arriba a la derecha. Tus macros se recalcularÃ¡n automÃ¡ticamente.",
     ]},
-    { id:"macros", emoji:"🥗", title:"Qué son los macros", body:[
-      "Los macronutrientes son los tres grandes grupos que aportan energía: proteínas, grasas e hidratos de carbono.",
-      "PROTEÍNAS (4 kcal/g): construyen y reparan el músculo. Clave para no perder masa muscular en déficit. Fuentes: carne, pescado, huevo, lácteos, legumbres.",
-      "GRASAS (9 kcal/g): esenciales para las hormonas y la salud. No les tengas miedo, pero mídelas porque aportan más del doble de calorías por gramo. Fuentes: aceite de oliva, aguacate, frutos secos, pescado azul.",
-      "HIDRATOS (4 kcal/g): tu principal fuente de energía, sobre todo para entrenar. Fuentes: arroz, pasta, patata, avena, fruta, pan.",
-      "La app calcula tu proteína según tu peso corporal (lo más correcto para preservar músculo), fija un porcentaje de grasa saludable y el resto lo completa con hidratos.",
+    { id:"macros", emoji:"ðŸ¥—", title:"QuÃ© son los macros", body:[
+      "Los macronutrientes son los tres grandes grupos que aportan energÃ­a: proteÃ­nas, grasas e hidratos de carbono.",
+      "PROTEÃNAS (4 kcal/g): construyen y reparan el mÃºsculo. Clave para no perder masa muscular en dÃ©ficit. Fuentes: carne, pescado, huevo, lÃ¡cteos, legumbres.",
+      "GRASAS (9 kcal/g): esenciales para las hormonas y la salud. No les tengas miedo, pero mÃ­delas porque aportan mÃ¡s del doble de calorÃ­as por gramo. Fuentes: aceite de oliva, aguacate, frutos secos, pescado azul.",
+      "HIDRATOS (4 kcal/g): tu principal fuente de energÃ­a, sobre todo para entrenar. Fuentes: arroz, pasta, patata, avena, fruta, pan.",
+      "La app calcula tu proteÃ­na segÃºn tu peso corporal (lo mÃ¡s correcto para preservar mÃºsculo), fija un porcentaje de grasa saludable y el resto lo completa con hidratos.",
     ]},
-    { id:"alimentacion", emoji:"🍽️", title:"Cómo funciona la nutrición", body:[
-      "En la pestaña Nutrición eliges cuántas comidas haces al día y la app reparte tus calorías entre ellas (puedes ajustar el reparto con los sliders).",
-      "Cada comida se divide en bloques: hidratos, proteínas, grasas y verduras. En la última comida del día tienes además un bloque de postre opcional.",
-      "Añades alimentos a cada bloque y la app calcula automáticamente los gramos que necesitas para cuadrar tus calorías objetivo.",
+    { id:"alimentacion", emoji:"ðŸ½ï¸", title:"CÃ³mo funciona la nutriciÃ³n", body:[
+      "En la pestaÃ±a NutriciÃ³n eliges cuÃ¡ntas comidas haces al dÃ­a y la app reparte tus calorÃ­as entre ellas (puedes ajustar el reparto con los sliders).",
+      "Cada comida se divide en bloques: hidratos, proteÃ­nas, grasas y verduras. En la Ãºltima comida del dÃ­a tienes ademÃ¡s un bloque de postre opcional.",
+      "AÃ±ades alimentos a cada bloque y la app calcula automÃ¡ticamente los gramos que necesitas para cuadrar tus calorÃ­as objetivo.",
       "Puedes seleccionar varios alimentos por bloque y repartirlos a partes iguales o de forma manual con los sliders.",
-      "Si un producto no está, créalo tú mismo con el botón 'Crear alimento': la app lo clasifica solo según su macro dominante.",
-      "Todos los alimentos están en CRUDO/SECO. Pesa el arroz, la pasta o las legumbres antes de cocinarlos.",
-      "¿No sabes qué cocinar? Usa las 'Recetas para tus macros': más de 130 recetas con cantidades ya ajustadas a tus macros y su explicación paso a paso.",
+      "Si un producto no estÃ¡, crÃ©alo tÃº mismo con el botÃ³n 'Crear alimento': la app lo clasifica solo segÃºn su macro dominante.",
+      "Todos los alimentos estÃ¡n en CRUDO/SECO. Pesa el arroz, la pasta o las legumbres antes de cocinarlos.",
+      "Â¿No sabes quÃ© cocinar? Usa las 'Recetas para tus macros': mÃ¡s de 130 recetas con cantidades ya ajustadas a tus macros y su explicaciÃ³n paso a paso.",
     ]},
-    { id:"entrenamiento", emoji:"🏋️", title:"Cómo funciona el entrenamiento", body:[
-      "En la pestaña Entreno eliges tu objetivo: running, calistenia, movilidad, entreno en casa o fuerza/hipertrofia.",
-      "Si entrenas en casa, seleccionas el material que tienes y la app solo te propondrá ejercicios que puedas hacer con él.",
+    { id:"entrenamiento", emoji:"ðŸ‹ï¸", title:"CÃ³mo funciona el entrenamiento", body:[
+      "En la pestaÃ±a Entreno eliges tu objetivo: running, calistenia, movilidad, entreno en casa o fuerza/hipertrofia.",
+      "Si entrenas en casa, seleccionas el material que tienes y la app solo te propondrÃ¡ ejercicios que puedas hacer con Ã©l.",
       "La rutina se genera con ejercicios adaptados. Puedes cambiar cualquier ejercicio por otra alternativa del mismo grupo muscular, o rotar toda la rutina.",
       "Anotas el peso y las repeticiones de cada serie. Al terminar, puedes dejar un comentario sobre tus sensaciones.",
-      "Todo queda guardado en el historial y verás gráficas de tu progreso: constancia semanal y evolución del peso que levantas.",
+      "Todo queda guardado en el historial y verÃ¡s grÃ¡ficas de tu progreso: constancia semanal y evoluciÃ³n del peso que levantas.",
     ]},
-    { id:"rir", emoji:"💪", title:"Qué es el RIR", body:[
-      "RIR significa 'Repeticiones En Reserva'. Es una forma de medir cuánto esfuerzo le pones a cada serie.",
-      "Un RIR de 2 significa que paras la serie cuando podrías haber hecho 2 repeticiones más con buena técnica.",
-      "RIR 0 = al fallo total (no podrías hacer ni una más). RIR 3-4 = aún te quedan bastantes reps.",
-      "Para ganar músculo, lo ideal suele ser entrenar con RIR 1-3: cerca del fallo pero sin llegar siempre a él, para recuperar bien.",
-      "Ajusta el peso para que las últimas repeticiones de cada serie cuesten, manteniendo el RIR indicado.",
+    { id:"rir", emoji:"ðŸ’ª", title:"QuÃ© es el RIR", body:[
+      "RIR significa 'Repeticiones En Reserva'. Es una forma de medir cuÃ¡nto esfuerzo le pones a cada serie.",
+      "Un RIR de 2 significa que paras la serie cuando podrÃ­as haber hecho 2 repeticiones mÃ¡s con buena tÃ©cnica.",
+      "RIR 0 = al fallo total (no podrÃ­as hacer ni una mÃ¡s). RIR 3-4 = aÃºn te quedan bastantes reps.",
+      "Para ganar mÃºsculo, lo ideal suele ser entrenar con RIR 1-3: cerca del fallo pero sin llegar siempre a Ã©l, para recuperar bien.",
+      "Ajusta el peso para que las Ãºltimas repeticiones de cada serie cuesten, manteniendo el RIR indicado.",
     ]},
-    { id:"peso", emoji:"⚖️", title:"Peso, medidas y progreso", body:[
-      "Pésate siempre en las mismas condiciones: por la mañana, en ayunas, después de ir al baño y sin ropa. Usa la misma báscula.",
-      "El peso fluctúa cada día por agua, sal, glucógeno y digestión. No te obsesiones con el número diario: mira la TENDENCIA de la semana.",
-      "Las medidas corporales (pecho, brazo, abdomen, etc.) son tan importantes como el peso, sobre todo si ganas músculo y pierdes grasa a la vez.",
-      "Toma las medidas una vez por semana, en el mismo momento y de la misma forma. Usa el icono ⓘ de cada medida para ver cómo medir correctamente.",
-      "El progreso real se ve en semanas y meses, no en días. Confía en el proceso y sé constante.",
+    { id:"peso", emoji:"âš–ï¸", title:"Peso, medidas y progreso", body:[
+      "PÃ©sate siempre en las mismas condiciones: por la maÃ±ana, en ayunas, despuÃ©s de ir al baÃ±o y sin ropa. Usa la misma bÃ¡scula.",
+      "El peso fluctÃºa cada dÃ­a por agua, sal, glucÃ³geno y digestiÃ³n. No te obsesiones con el nÃºmero diario: mira la TENDENCIA de la semana.",
+      "Las medidas corporales (pecho, brazo, abdomen, etc.) son tan importantes como el peso, sobre todo si ganas mÃºsculo y pierdes grasa a la vez.",
+      "Toma las medidas una vez por semana, en el mismo momento y de la misma forma. Usa el icono â“˜ de cada medida para ver cÃ³mo medir correctamente.",
+      "El progreso real se ve en semanas y meses, no en dÃ­as. ConfÃ­a en el proceso y sÃ© constante.",
     ]},
-    { id:"rachas", emoji:"🔥", title:"Rachas y logros", body:[
-      "Tu racha sube cada día que registras tu comida. Si te saltas un día, vuelve a empezar desde cero.",
-      "Mantener la racha desbloquea logros: 3, 7, 15, 30 y 100 días seguidos.",
-      "También hay logros por constancia en el control de peso (semanal, mensual y anual) y en la nutrición.",
+    { id:"rachas", emoji:"ðŸ”¥", title:"Rachas y logros", body:[
+      "Tu racha sube cada dÃ­a que registras tu comida. Si te saltas un dÃ­a, vuelve a empezar desde cero.",
+      "Mantener la racha desbloquea logros: 3, 7, 15, 30 y 100 dÃ­as seguidos.",
+      "TambiÃ©n hay logros por constancia en el control de peso (semanal, mensual y anual) y en la nutriciÃ³n.",
       "Los logros son una forma de motivarte a ser constante. Al final, la constancia es lo que de verdad da resultados.",
     ]},
-    { id:"consejos", emoji:"💡", title:"Consejos para tener éxito", body:[
-      "Sé realista: una pérdida de grasa saludable es de 0,3-0,7 kg por semana. Ir más rápido suele significar perder músculo.",
-      "Para ganar músculo, come ligeramente por encima de tu mantenimiento y prioriza la proteína y el entrenamiento de fuerza.",
-      "Planifica tus comidas con antelación. Lo que no planificas, lo improvisas, y normalmente mal.",
-      "Duerme 7-8 horas: el descanso es cuando el cuerpo se recupera y construye músculo.",
-      "Bebe 2-3 litros de agua al día. Muchas veces confundimos sed con hambre.",
-      "Un día malo no arruina nada. Lo que cuenta es lo que haces la mayoría del tiempo, no la perfección.",
+    { id:"consejos", emoji:"ðŸ’¡", title:"Consejos para tener Ã©xito", body:[
+      "SÃ© realista: una pÃ©rdida de grasa saludable es de 0,3-0,7 kg por semana. Ir mÃ¡s rÃ¡pido suele significar perder mÃºsculo.",
+      "Para ganar mÃºsculo, come ligeramente por encima de tu mantenimiento y prioriza la proteÃ­na y el entrenamiento de fuerza.",
+      "Planifica tus comidas con antelaciÃ³n. Lo que no planificas, lo improvisas, y normalmente mal.",
+      "Duerme 7-8 horas: el descanso es cuando el cuerpo se recupera y construye mÃºsculo.",
+      "Bebe 2-3 litros de agua al dÃ­a. Muchas veces confundimos sed con hambre.",
+      "Un dÃ­a malo no arruina nada. Lo que cuenta es lo que haces la mayorÃ­a del tiempo, no la perfecciÃ³n.",
     ]},
   ];
 
@@ -4930,7 +4957,7 @@ function InfoTab({ onBack }) {
     const s = sections.find(x=>x.id===section);
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setSection(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={()=>setSection(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
         <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:18 }}>{s.emoji} {s.title}</div>
         {s.body.map((p,i) => (
           <p key={i} style={{ color:"#cde", fontSize:14, lineHeight:1.6, marginBottom:14 }}>{p}</p>
@@ -4941,16 +4968,16 @@ function InfoTab({ onBack }) {
 
   return (
     <div style={{ padding:"20px 16px 40px" }}>
-      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
       <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Resuelve tus dudas</div>
-      <div style={{ color:"#666", fontSize:13, marginBottom:20 }}>Guías y preguntas frecuentes para sacarle el máximo partido a la app</div>
+      <div style={{ color:"#666", fontSize:13, marginBottom:20 }}>GuÃ­as y preguntas frecuentes para sacarle el mÃ¡ximo partido a la app</div>
 
-      <div style={{ fontSize:12, color:"#888", fontWeight:700, marginBottom:10, textTransform:"uppercase", letterSpacing:1 }}>Guías</div>
+      <div style={{ fontSize:12, color:"#888", fontWeight:700, marginBottom:10, textTransform:"uppercase", letterSpacing:1 }}>GuÃ­as</div>
       {sections.map(s => (
         <button key={s.id} onClick={()=>setSection(s.id)} style={{ width:"100%", marginBottom:10, padding:"16px", borderRadius:14, border:"1px solid #2a2a3a", background:"#1a1a24", cursor:"pointer", display:"flex", alignItems:"center", gap:14, textAlign:"left" }}>
           <span style={{ fontSize:24 }}>{s.emoji}</span>
           <span style={{ color:"white", fontWeight:700, fontSize:15, flex:1 }}>{s.title}</span>
-          <span style={{ color:"#4caf50", fontSize:18 }}>→</span>
+          <span style={{ color:"#4caf50", fontSize:18 }}>â†’</span>
         </button>
       ))}
 
@@ -4959,7 +4986,7 @@ function InfoTab({ onBack }) {
         <div key={i} style={{ marginBottom:10, background:"#1a1a24", borderRadius:14, border:"1px solid #2a2a3a", overflow:"hidden" }}>
           <button onClick={()=>setOpenFaq(openFaq===i?null:i)} style={{ width:"100%", padding:"14px 16px", background:"none", border:"none", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", textAlign:"left", gap:10 }}>
             <span style={{ color:"white", fontWeight:700, fontSize:14 }}>{f.q}</span>
-            <span style={{ color:"#4caf50", fontSize:18, flexShrink:0 }}>{openFaq===i?"−":"+"}</span>
+            <span style={{ color:"#4caf50", fontSize:18, flexShrink:0 }}>{openFaq===i?"âˆ’":"+"}</span>
           </button>
           {openFaq===i && <div style={{ padding:"0 16px 14px", color:"#aaa", fontSize:13, lineHeight:1.55 }}>{f.a}</div>}
         </div>
@@ -4975,29 +5002,29 @@ function InstallTab({ onBack }) {
       id:"ios_safari", device:"iPhone / iPad", browser:"Safari", note:"La forma recomendada en Apple",
       steps:[
         "Abre esta web en Safari (no vale Chrome en iPhone para instalar).",
-        "Pulsa el botón de Compartir (el cuadrado con la flecha hacia arriba, abajo en el centro).",
-        "Desliza y pulsa «Añadir a pantalla de inicio».",
-        "Pon el nombre (SMINK FIT ya viene puesto) y pulsa «Añadir» arriba a la derecha.",
-        "¡Listo! El icono aparecerá en tu pantalla como una app normal.",
+        "Pulsa el botÃ³n de Compartir (el cuadrado con la flecha hacia arriba, abajo en el centro).",
+        "Desliza y pulsa Â«AÃ±adir a pantalla de inicioÂ».",
+        "Pon el nombre (SMINK FIT ya viene puesto) y pulsa Â«AÃ±adirÂ» arriba a la derecha.",
+        "Â¡Listo! El icono aparecerÃ¡ en tu pantalla como una app normal.",
       ],
     },
     {
-      id:"android_chrome", device:"Android", browser:"Chrome", note:"La forma más común en Android",
+      id:"android_chrome", device:"Android", browser:"Chrome", note:"La forma mÃ¡s comÃºn en Android",
       steps:[
         "Abre esta web en Google Chrome.",
-        "Pulsa los tres puntos (⋮) arriba a la derecha.",
-        "Pulsa «Instalar aplicación» o «Añadir a pantalla de inicio».",
-        "Confirma pulsando «Instalar».",
-        "El icono aparecerá en tu pantalla de inicio y se abrirá a pantalla completa.",
+        "Pulsa los tres puntos (â‹®) arriba a la derecha.",
+        "Pulsa Â«Instalar aplicaciÃ³nÂ» o Â«AÃ±adir a pantalla de inicioÂ».",
+        "Confirma pulsando Â«InstalarÂ».",
+        "El icono aparecerÃ¡ en tu pantalla de inicio y se abrirÃ¡ a pantalla completa.",
       ],
     },
     {
       id:"android_otros", device:"Android", browser:"Samsung Internet / otros", note:"Si no usas Chrome",
       steps:[
         "Abre la web en tu navegador.",
-        "Abre el menú del navegador (suele ser tres líneas o tres puntos).",
-        "Busca «Añadir página a» o «Añadir a pantalla de inicio».",
-        "Confirma y el icono quedará en tu pantalla.",
+        "Abre el menÃº del navegador (suele ser tres lÃ­neas o tres puntos).",
+        "Busca Â«AÃ±adir pÃ¡gina aÂ» o Â«AÃ±adir a pantalla de inicioÂ».",
+        "Confirma y el icono quedarÃ¡ en tu pantalla.",
       ],
     },
     {
@@ -5005,15 +5032,15 @@ function InstallTab({ onBack }) {
       steps:[
         "En iPhone, Chrome no permite instalar apps como Safari por limitaciones de Apple.",
         "Te recomendamos abrir la web en Safari y seguir los pasos de arriba.",
-        "Copia el enlace en Chrome, ábrelo en Safari y usa «Añadir a pantalla de inicio».",
+        "Copia el enlace en Chrome, Ã¡brelo en Safari y usa Â«AÃ±adir a pantalla de inicioÂ».",
       ],
     },
   ];
   return (
     <div style={{ padding:"20px 16px 40px" }}>
-      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
       <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Instalar app</div>
-      <div style={{ color:"#666", fontSize:13, marginBottom:20, lineHeight:1.5 }}>Instala SMINK FIT en tu móvil para abrirla como una app, a pantalla completa y con su icono. Elige tu caso:</div>
+      <div style={{ color:"#666", fontSize:13, marginBottom:20, lineHeight:1.5 }}>Instala SMINK FIT en tu mÃ³vil para abrirla como una app, a pantalla completa y con su icono. Elige tu caso:</div>
 
       {guides.map(g => {
         const isOpen = open===g.id;
@@ -5021,10 +5048,10 @@ function InstallTab({ onBack }) {
           <div key={g.id} style={{ background:"#1a1a24", borderRadius:16, marginBottom:12, border:`1px solid ${isOpen?"#2e7d32":"#2a2a3a"}`, overflow:"hidden" }}>
             <button onClick={()=>setOpen(isOpen?null:g.id)} style={{ width:"100%", padding:"16px", background:"none", border:"none", cursor:"pointer", textAlign:"left", display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
               <div>
-                <div style={{ color:isOpen?"#8bc34a":"white", fontWeight:800, fontSize:15 }}>{g.device} · {g.browser}</div>
+                <div style={{ color:isOpen?"#8bc34a":"white", fontWeight:800, fontSize:15 }}>{g.device} Â· {g.browser}</div>
                 <div style={{ color:"#777", fontSize:11.5, marginTop:2 }}>{g.note}</div>
               </div>
-              <span style={{ color:"#4caf50", fontSize:18, transform:isOpen?"rotate(90deg)":"none", transition:"transform 0.2s" }}>›</span>
+              <span style={{ color:"#4caf50", fontSize:18, transform:isOpen?"rotate(90deg)":"none", transition:"transform 0.2s" }}>â€º</span>
             </button>
             {isOpen && (
               <div style={{ padding:"0 16px 16px" }}>
@@ -5041,7 +5068,7 @@ function InstallTab({ onBack }) {
       })}
 
       <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:14, padding:"14px 16px", marginTop:8 }}>
-        <div style={{ color:"#8bc34a", fontSize:12.5, lineHeight:1.6 }}>Una vez instalada, ábrela desde el icono de tu pantalla de inicio. Funcionará a pantalla completa, sin la barra del navegador, como cualquier otra app. Tus datos se guardan en tu dispositivo.</div>
+        <div style={{ color:"#8bc34a", fontSize:12.5, lineHeight:1.6 }}>Una vez instalada, Ã¡brela desde el icono de tu pantalla de inicio. FuncionarÃ¡ a pantalla completa, sin la barra del navegador, como cualquier otra app. Tus datos se guardan en tu dispositivo.</div>
       </div>
     </div>
   );
@@ -5050,21 +5077,21 @@ function InstallTab({ onBack }) {
 function SupportTab({ onBack }) {
   return (
     <div style={{ padding:"20px 16px 40px" }}>
-      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
       <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Soporte</div>
-      <div style={{ color:"#666", fontSize:13, marginBottom:24 }}>¿Necesitas ayuda o tienes una sugerencia?</div>
+      <div style={{ color:"#666", fontSize:13, marginBottom:24 }}>Â¿Necesitas ayuda o tienes una sugerencia?</div>
       <div style={{ background:"#1a1a24", borderRadius:18, padding:"24px 18px", border:"1px solid #2a2a3a", textAlign:"center" }}>
-        <div style={{ fontSize:40, marginBottom:12 }}>💬</div>
-        <div style={{ color:"white", fontWeight:800, fontSize:16, marginBottom:8 }}>Estamos preparando esta sección</div>
-        <div style={{ color:"#888", fontSize:13, lineHeight:1.5 }}>Pronto podrás contactar con nosotros desde aquí para resolver dudas, reportar problemas o enviar sugerencias para mejorar la app.</div>
+        <div style={{ fontSize:40, marginBottom:12 }}>ðŸ’¬</div>
+        <div style={{ color:"white", fontWeight:800, fontSize:16, marginBottom:8 }}>Estamos preparando esta secciÃ³n</div>
+        <div style={{ color:"#888", fontSize:13, lineHeight:1.5 }}>Pronto podrÃ¡s contactar con nosotros desde aquÃ­ para resolver dudas, reportar problemas o enviar sugerencias para mejorar la app.</div>
       </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PESTAÑA: SUEÑO Y DESCANSO
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PESTAÃ‘A: SUEÃ‘O Y DESCANSO
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function SleepTab({ sleepLog, setSleepLog, onBack }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const dKey = dateKey(currentDate);
@@ -5074,56 +5101,56 @@ function SleepTab({ sleepLog, setSleepLog, onBack }) {
 
   const setVal = (field, value) => setSleepLog(prev => ({ ...prev, [dKey]: { ...(prev[dKey]||{}), [field]:value } }));
 
-  // Promedio de los últimos 7 días con registro
+  // Promedio de los Ãºltimos 7 dÃ­as con registro
   const last7 = [];
   for (let i=0;i<7;i++){ const k = dateKey(addDays(today,-i)); if (sleepLog[k]?.hours) last7.push(parseFloat(sleepLog[k].hours)); }
   const avg7 = last7.length ? (last7.reduce((a,b)=>a+b,0)/last7.length).toFixed(1) : null;
 
-  // Datos para la gráfica (últimos 14 días)
+  // Datos para la grÃ¡fica (Ãºltimos 14 dÃ­as)
   const chartData = [];
   for (let i=13;i>=0;i--){ const k = dateKey(addDays(today,-i)); const h = sleepLog[k]?.hours; chartData.push({ label: formatDateShort(addDays(today,-i)), value: h?parseFloat(h):0 }); }
   const hasData = chartData.some(d=>d.value>0);
 
   const qualityOpts = [
-    { id:"mala", label:"Mala", emoji:"😣", color:"#f44336" },
-    { id:"regular", label:"Regular", emoji:"😐", color:"#ff9800" },
-    { id:"buena", label:"Buena", emoji:"🙂", color:"#8bc34a" },
-    { id:"excelente", label:"Excelente", emoji:"😴", color:"#4caf50" },
+    { id:"mala", label:"Mala", emoji:"ðŸ˜£", color:"#f44336" },
+    { id:"regular", label:"Regular", emoji:"ðŸ˜", color:"#ff9800" },
+    { id:"buena", label:"Buena", emoji:"ðŸ™‚", color:"#8bc34a" },
+    { id:"excelente", label:"Excelente", emoji:"ðŸ˜´", color:"#4caf50" },
   ];
 
   const hoursColor = entry.hours ? (parseFloat(entry.hours)>=7 ? "#4caf50" : parseFloat(entry.hours)>=6 ? "#ff9800" : "#f44336") : "#666";
 
   return (
     <div style={{ padding:"20px 16px 40px" }}>
-      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-      <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Sueño y descanso</div>
+      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+      <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>SueÃ±o y descanso</div>
       <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>El descanso es cuando tu cuerpo se recupera y crece</div>
 
       {/* Promedio destacado */}
       {avg7 && (
         <div style={{ background:"linear-gradient(135deg,#1a1a2e,#1a1a24)", borderRadius:16, padding:"18px", marginBottom:18, border:"1px solid #2a2a3a", display:"flex", alignItems:"center", gap:16 }}>
-          <div style={{ fontSize:40 }}>🌙</div>
+          <div style={{ fontSize:40 }}>ðŸŒ™</div>
           <div>
             <div style={{ color:"#A8FF60", fontWeight:900, fontSize:28, lineHeight:1 }}>{avg7}h</div>
-            <div style={{ color:"#aaa", fontSize:13, marginTop:4 }}>Media de los últimos {last7.length} días</div>
+            <div style={{ color:"#aaa", fontSize:13, marginTop:4 }}>Media de los Ãºltimos {last7.length} dÃ­as</div>
           </div>
         </div>
       )}
 
-      {/* Navegación de fecha */}
+      {/* NavegaciÃ³n de fecha */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:"#1a1a24", border:"1px solid #2a2a3a", borderRadius:12, padding:"8px 6px", marginBottom:18 }}>
-        <button onClick={()=>setCurrentDate(addDays(currentDate,-1))} style={{ background:"none", border:"none", color:"#4caf50", fontSize:20, cursor:"pointer", padding:"4px 14px" }}>‹</button>
+        <button onClick={()=>setCurrentDate(addDays(currentDate,-1))} style={{ background:"none", border:"none", color:"#4caf50", fontSize:20, cursor:"pointer", padding:"4px 14px" }}>â€¹</button>
         <div style={{ textAlign:"center", flex:1 }}>
-          <div style={{ color:"white", fontWeight:700, fontSize:14 }}>{isToday?"📍 Hoy":formatDateLong(currentDate)}</div>
+          <div style={{ color:"white", fontWeight:700, fontSize:14 }}>{isToday?"ðŸ“ Hoy":formatDateLong(currentDate)}</div>
         </div>
-        <button onClick={()=>!isToday && setCurrentDate(addDays(currentDate,1))} disabled={isToday} style={{ background:"none", border:"none", color:isToday?"#333":"#4caf50", fontSize:20, cursor:isToday?"default":"pointer", padding:"4px 14px" }}>›</button>
+        <button onClick={()=>!isToday && setCurrentDate(addDays(currentDate,1))} disabled={isToday} style={{ background:"none", border:"none", color:isToday?"#333":"#4caf50", fontSize:20, cursor:isToday?"default":"pointer", padding:"4px 14px" }}>â€º</button>
       </div>
 
-      {/* Horas de sueño */}
+      {/* Horas de sueÃ±o */}
       <div style={{ background:"#1a1a24", borderRadius:16, padding:"18px", border:"1px solid #2a2a3a", marginBottom:14 }}>
-        <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:14 }}>¿Cuántas horas dormiste?</div>
+        <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:14 }}>Â¿CuÃ¡ntas horas dormiste?</div>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:16, marginBottom:8 }}>
-          <button onClick={()=>setVal("hours", Math.max(0,(parseFloat(entry.hours)||0)-0.5).toString())} style={{ width:44, height:44, borderRadius:"50%", border:"1px solid #2a2a3a", background:"#0f0f14", color:"#4caf50", fontSize:22, cursor:"pointer" }}>−</button>
+          <button onClick={()=>setVal("hours", Math.max(0,(parseFloat(entry.hours)||0)-0.5).toString())} style={{ width:44, height:44, borderRadius:"50%", border:"1px solid #2a2a3a", background:"#0f0f14", color:"#4caf50", fontSize:22, cursor:"pointer" }}>âˆ’</button>
           <div style={{ textAlign:"center", minWidth:90 }}>
             <span style={{ color:hoursColor, fontWeight:900, fontSize:38 }}>{entry.hours||"0"}</span>
             <span style={{ color:"#666", fontSize:16, fontWeight:700 }}>h</span>
@@ -5133,9 +5160,9 @@ function SleepTab({ sleepLog, setSleepLog, onBack }) {
         <div style={{ textAlign:"center", color:"#666", fontSize:12 }}>Lo recomendado es entre 7 y 9 horas</div>
       </div>
 
-      {/* Calidad del sueño */}
+      {/* Calidad del sueÃ±o */}
       <div style={{ background:"#1a1a24", borderRadius:16, padding:"18px", border:"1px solid #2a2a3a", marginBottom:14 }}>
-        <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:14 }}>¿Cómo descansaste?</div>
+        <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:14 }}>Â¿CÃ³mo descansaste?</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
           {qualityOpts.map(q => {
             const sel = entry.quality===q.id;
@@ -5151,14 +5178,14 @@ function SleepTab({ sleepLog, setSleepLog, onBack }) {
 
       {/* Nota */}
       <div style={{ background:"#1a1a24", borderRadius:16, padding:"18px", border:"1px solid #2a2a3a", marginBottom:18 }}>
-        <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:10 }}>📝 Notas (opcional)</div>
-        <textarea value={entry.note||""} onChange={e=>setVal("note",e.target.value)} placeholder="¿Te despertaste de noche? ¿Cómo te sentiste al levantarte?" rows={2} style={{ width:"100%", padding:"12px", borderRadius:12, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:14, outline:"none", boxSizing:"border-box", resize:"vertical", fontFamily:"inherit" }} />
+        <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:10 }}>ðŸ“ Notas (opcional)</div>
+        <textarea value={entry.note||""} onChange={e=>setVal("note",e.target.value)} placeholder="Â¿Te despertaste de noche? Â¿CÃ³mo te sentiste al levantarte?" rows={2} style={{ width:"100%", padding:"12px", borderRadius:12, border:"1px solid #2a2a3a", background:"#0f0f14", color:"white", fontSize:14, outline:"none", boxSizing:"border-box", resize:"vertical", fontFamily:"inherit" }} />
       </div>
 
-      {/* Gráfica de sueño */}
+      {/* GrÃ¡fica de sueÃ±o */}
       {hasData && (
         <div style={{ background:"#1a1a24", borderRadius:16, padding:"16px", border:"1px solid #2a2a3a", marginBottom:18 }}>
-          <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:14 }}>📊 Últimos 14 días</div>
+          <div style={{ color:"#ccc", fontWeight:700, fontSize:14, marginBottom:14 }}>ðŸ“Š Ãšltimos 14 dÃ­as</div>
           <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", gap:3, height:110 }}>
             {chartData.map((d,i) => {
               const color = d.value>=7?"#4caf50":d.value>=6?"#ff9800":d.value>0?"#f44336":"#232330";
@@ -5180,17 +5207,17 @@ function SleepTab({ sleepLog, setSleepLog, onBack }) {
 
       {/* Consejos de descanso */}
       <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:16, padding:"16px 18px" }}>
-        <div style={{ color:"#8bc34a", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>💡 Claves para dormir mejor</div>
+        <div style={{ color:"#8bc34a", fontSize:12, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>ðŸ’¡ Claves para dormir mejor</div>
         {[
-          "Acuéstate y levántate a la misma hora, también los fines de semana.",
-          "Evita pantallas (móvil, TV) al menos 1 hora antes de dormir.",
-          "No tomes cafeína por la tarde: te puede robar horas de sueño.",
-          "Mantén el dormitorio fresco, oscuro y silencioso.",
-          "El alcohol empeora la calidad del sueño aunque te duermas antes.",
-          "Dormir bien regula el hambre y mejora la recuperación muscular.",
+          "AcuÃ©state y levÃ¡ntate a la misma hora, tambiÃ©n los fines de semana.",
+          "Evita pantallas (mÃ³vil, TV) al menos 1 hora antes de dormir.",
+          "No tomes cafeÃ­na por la tarde: te puede robar horas de sueÃ±o.",
+          "MantÃ©n el dormitorio fresco, oscuro y silencioso.",
+          "El alcohol empeora la calidad del sueÃ±o aunque te duermas antes.",
+          "Dormir bien regula el hambre y mejora la recuperaciÃ³n muscular.",
         ].map((t,i) => (
           <div key={i} style={{ display:"flex", gap:8, marginBottom:8 }}>
-            <span style={{ color:"#4caf50", fontSize:13 }}>•</span>
+            <span style={{ color:"#4caf50", fontSize:13 }}>â€¢</span>
             <span style={{ color:"#cde", fontSize:13, lineHeight:1.45 }}>{t}</span>
           </div>
         ))}
@@ -5199,19 +5226,19 @@ function SleepTab({ sleepLog, setSleepLog, onBack }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PESTAÑA: RESUMEN SEMANAL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PESTAÃ‘A: RESUMEN SEMANAL
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function WeeklySummaryTab({ history, workoutLog, sleepLog, waterLog, measureLog, mealDist, macros, numMeals, onBack }) {
   const today = new Date();
   const mealList = getMeals(numMeals);
   const lastMealId = mealList[mealList.length-1].id;
 
-  // Días de la semana (últimos 7)
+  // DÃ­as de la semana (Ãºltimos 7)
   const days = [];
   for (let i=6;i>=0;i--) days.push({ key:dateKey(addDays(today,-i)), date:addDays(today,-i) });
 
-  // Calorías de un día (suma de comidas)
+  // CalorÃ­as de un dÃ­a (suma de comidas)
   const dayKcal = (key) => {
     const d = history[key]; if (!d) return 0;
     let total = 0;
@@ -5235,7 +5262,7 @@ function WeeklySummaryTab({ history, workoutLog, sleepLog, waterLog, measureLog,
     return Math.round(total);
   };
 
-  // Cálculos de la semana
+  // CÃ¡lculos de la semana
   const kcalDays = days.map(d=>dayKcal(d.key)).filter(k=>k>0);
   const avgKcal = kcalDays.length ? Math.round(kcalDays.reduce((a,b)=>a+b,0)/kcalDays.length) : 0;
   const daysRegistered = kcalDays.length;
@@ -5268,46 +5295,46 @@ function WeeklySummaryTab({ history, workoutLog, sleepLog, waterLog, measureLog,
 
   return (
     <div style={{ padding:"20px 16px 40px" }}>
-      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
       <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Resumen de tu semana</div>
-      <div style={{ color:"#666", fontSize:13, marginBottom:20 }}>Últimos 7 días de un vistazo</div>
+      <div style={{ color:"#666", fontSize:13, marginBottom:20 }}>Ãšltimos 7 dÃ­as de un vistazo</div>
 
       {/* Adherencia destacada */}
       <div style={{ background:"linear-gradient(135deg,#1a2e1a,#1a1a24)", borderRadius:18, padding:"20px", border:"1px solid #2e7d32", marginBottom:16, textAlign:"center" }}>
         <div style={{ color:"#4caf50", fontWeight:900, fontSize:36, lineHeight:1 }}>{adherence}%</div>
-        <div style={{ color:"#aaa", fontSize:13, marginTop:6 }}>Adherencia · registraste {daysRegistered} de 7 días</div>
+        <div style={{ color:"#aaa", fontSize:13, marginTop:6 }}>Adherencia Â· registraste {daysRegistered} de 7 dÃ­as</div>
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
-        <Card emoji="🔥" value={avgKcal>0?`${avgKcal}`:"—"} label="Calorías/día (media)" sub={avgKcal>0?`objetivo ${macros.targetKcal}`:"sin registros"} />
-        <Card emoji="🏋️" value={weekWorkouts} label="Entrenos esta semana" color="#8bc34a" />
-        <Card emoji="😴" value={avgSleep?`${avgSleep}h`:"—"} label="Sueño (media)" color="#A8FF60" sub={avgSleep?(parseFloat(avgSleep)>=7?"¡Buen descanso!":"Intenta dormir más"):"sin registros"} />
-        <Card emoji="💧" value={avgWater?`${avgWater}L`:"—"} label="Agua/día (media)" color="#4fc3f7" />
+        <Card emoji="ðŸ”¥" value={avgKcal>0?`${avgKcal}`:"â€”"} label="CalorÃ­as/dÃ­a (media)" sub={avgKcal>0?`objetivo ${macros.targetKcal}`:"sin registros"} />
+        <Card emoji="ðŸ‹ï¸" value={weekWorkouts} label="Entrenos esta semana" color="#8bc34a" />
+        <Card emoji="ðŸ˜´" value={avgSleep?`${avgSleep}h`:"â€”"} label="SueÃ±o (media)" color="#A8FF60" sub={avgSleep?(parseFloat(avgSleep)>=7?"Â¡Buen descanso!":"Intenta dormir mÃ¡s"):"sin registros"} />
+        <Card emoji="ðŸ’§" value={avgWater?`${avgWater}L`:"â€”"} label="Agua/dÃ­a (media)" color="#4fc3f7" />
       </div>
 
       {weightChange!==null && (
-        <Card emoji={parseFloat(weightChange)<0?"📉":parseFloat(weightChange)>0?"📈":"➡️"} value={`${weightChange>0?"+":""}${weightChange} kg`} label="Cambio de peso esta semana" color={parseFloat(weightChange)<0?"#4caf50":"#ff9800"} />
+        <Card emoji={parseFloat(weightChange)<0?"ðŸ“‰":parseFloat(weightChange)>0?"ðŸ“ˆ":"âž¡ï¸"} value={`${weightChange>0?"+":""}${weightChange} kg`} label="Cambio de peso esta semana" color={parseFloat(weightChange)<0?"#4caf50":"#ff9800"} />
       )}
 
       {/* Mensaje motivacional */}
       <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:16, padding:"16px 18px", marginTop:16 }}>
         <div style={{ color:"#cde", fontSize:13.5, lineHeight:1.5 }}>
-          {adherence>=85 ? "🌟 ¡Semana espectacular! Tu constancia es tu mayor fortaleza. Sigue así." :
-           adherence>=50 ? "💪 Buen trabajo esta semana. Intenta registrar algún día más para tener un control completo." :
-           "📌 Esta semana has registrado pocos días. ¡Ánimo! La constancia es la clave del progreso."}
+          {adherence>=85 ? "ðŸŒŸ Â¡Semana espectacular! Tu constancia es tu mayor fortaleza. Sigue asÃ­." :
+           adherence>=50 ? "ðŸ’ª Buen trabajo esta semana. Intenta registrar algÃºn dÃ­a mÃ¡s para tener un control completo." :
+           "ðŸ“Œ Esta semana has registrado pocos dÃ­as. Â¡Ãnimo! La constancia es la clave del progreso."}
         </div>
       </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PESTAÑA: LISTA DE LA COMPRA (planificador independiente)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PESTAÃ‘A: LISTA DE LA COMPRA (planificador independiente)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLists, macros, numMeals, customFoods, onCreateFood, onDeleteFood, onBack }) {
   const DIAS = [
-    { id:"lunes", label:"Lunes" }, { id:"martes", label:"Martes" }, { id:"miercoles", label:"Miércoles" },
-    { id:"jueves", label:"Jueves" }, { id:"viernes", label:"Viernes" }, { id:"sabado", label:"Sábado" }, { id:"domingo", label:"Domingo" },
+    { id:"lunes", label:"Lunes" }, { id:"martes", label:"Martes" }, { id:"miercoles", label:"MiÃ©rcoles" },
+    { id:"jueves", label:"Jueves" }, { id:"viernes", label:"Viernes" }, { id:"sabado", label:"SÃ¡bado" }, { id:"domingo", label:"Domingo" },
   ];
   const mealList = getMeals(numMeals);
   const lastMealId = mealList[mealList.length-1].id;
@@ -5348,9 +5375,9 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
     return { ...m, foods:{...m.foods,[blockId]:nf}, selected:{...m.selected,[blockId]:ns}, pct:{...m.pct,[blockId]:equalPct(ns)} };
   });
 
-  // Añadir receta completa a la comida activa del día que se edita (ingredientes con gramos fijos)
+  // AÃ±adir receta completa a la comida activa del dÃ­a que se edita (ingredientes con gramos fijos)
   const handleAddRecipeToDay = (idea, scaled, mealId) => {
-    const VERDURAS = ["Brócoli","Tomate","Tomate natural","Lechuga","Espinacas","Calabacín","Pimiento rojo","Espárragos","Zanahoria","Cebolla","Maíz dulce"];
+    const VERDURAS = ["BrÃ³coli","Tomate","Tomate natural","Lechuga","Espinacas","CalabacÃ­n","Pimiento rojo","EspÃ¡rragos","Zanahoria","Cebolla","MaÃ­z dulce"];
     const macroByName = {}; idea.ingredients.forEach(ing => { macroByName[ing.name] = ing; });
     updateMeal(editingDay, mealId, m => {
       const nm = JSON.parse(JSON.stringify(m));
@@ -5380,7 +5407,7 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
 
   const generate = () => {
     const totals = {};
-    const dayBreakdown = []; // desglose por día
+    const dayBreakdown = []; // desglose por dÃ­a
     DIAS.forEach(dia => {
       const d = plan.dias[dia.id];
       if (!d || !d.active) return;
@@ -5422,7 +5449,7 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
     resetPlan();
   };
 
-  // Resetear el planificador (días en blanco)
+  // Resetear el planificador (dÃ­as en blanco)
   const resetPlan = () => setShoppingPlan({ dias:{} });
 
   // Cargar una lista guardada de nuevo al planificador
@@ -5461,9 +5488,9 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
     return (
       <div style={{ paddingBottom:30 }}>
         <div style={{ padding:"20px 16px 14px", borderBottom:"1px solid #1e1e28" }}>
-          <button onClick={()=>setEditingDay(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-          <div style={{ fontWeight:900, fontSize:20, color:"white" }}>🛒 Planificar {dia.label}</div>
-          <div style={{ color:"#666", fontSize:12, marginTop:4 }}>Añade alimentos o recetas para este día</div>
+          <button onClick={()=>setEditingDay(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+          <div style={{ fontWeight:900, fontSize:20, color:"white" }}>ðŸ›’ Planificar {dia.label}</div>
+          <div style={{ color:"#666", fontSize:12, marginTop:4 }}>AÃ±ade alimentos o recetas para este dÃ­a</div>
         </div>
         <div style={{ display:"flex", borderBottom:"1px solid #1e1e28", background:"#0f0f14", overflowX:"auto" }}>
           {mealList.map(m => (
@@ -5475,8 +5502,8 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
         </div>
         <div style={{ padding:"14px" }}>
           <button onClick={()=>setShowRecipes(true)} style={{ width:"100%", background:"linear-gradient(135deg,#0d2818,#15201a)", border:"1px solid #2e7d32", borderRadius:12, padding:"12px 14px", cursor:"pointer", color:"#8bc34a", fontSize:13, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
-            <span>💡 Añadir una receta completa</span>
-            <span style={{ fontSize:15 }}>→</span>
+            <span>ðŸ’¡ AÃ±adir una receta completa</span>
+            <span style={{ fontSize:15 }}>â†’</span>
           </button>
           {activeBlocks.map(block => {
             const foods = mealData.foods?.[block.id]||[];
@@ -5484,19 +5511,19 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
               <div key={block.id} style={{ background:"#1a1a24", borderRadius:16, marginBottom:14, border:"1px solid #2a2a3a", overflow:"hidden" }}>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 14px", borderBottom:"1px solid #2a2a3a" }}>
                   <span style={{ color:"#ccc", fontWeight:800, fontSize:14 }}>{block.emoji} {block.label}</span>
-                  <button onClick={()=>setSearching({ mealId:meal.id, blockId:block.id })} style={{ background:block.color.accent, border:"none", borderRadius:8, color:"white", fontSize:13, fontWeight:700, padding:"6px 12px", cursor:"pointer" }}>+ Añadir</button>
+                  <button onClick={()=>setSearching({ mealId:meal.id, blockId:block.id })} style={{ background:block.color.accent, border:"none", borderRadius:8, color:"white", fontSize:13, fontWeight:700, padding:"6px 12px", cursor:"pointer" }}>+ AÃ±adir</button>
                 </div>
                 <div style={{ padding:"4px 14px 10px" }}>
-                  {foods.length===0 && <div style={{ color:"#555", fontSize:12, padding:"10px 0", textAlign:"center" }}>Nada añadido</div>}
+                  {foods.length===0 && <div style={{ color:"#555", fontSize:12, padding:"10px 0", textAlign:"center" }}>Nada aÃ±adido</div>}
                   {foods.map(food => {
                     const gr = calcGrams(meal.id, block.id, food, mealData);
                     return (
                       <div key={food.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 0", borderBottom:"1px solid #1e1e28" }}>
                         <div style={{ flex:1, minWidth:0 }}>
                           <div style={{ color:"white", fontWeight:600, fontSize:13 }}>{food.name}</div>
-                          <div style={{ color:block.color.border, fontSize:12, fontWeight:700, marginTop:2 }}>→ {gr}g</div>
+                          <div style={{ color:block.color.border, fontSize:12, fontWeight:700, marginTop:2 }}>â†’ {gr}g</div>
                         </div>
-                        <button onClick={()=>removeFood(editingDay, meal.id, block.id, food.id)} style={{ background:"none", border:"none", color:"#444", fontSize:18, cursor:"pointer", padding:"4px 8px" }}>✕</button>
+                        <button onClick={()=>removeFood(editingDay, meal.id, block.id, food.id)} style={{ background:"none", border:"none", color:"#444", fontSize:18, cursor:"pointer", padding:"4px 8px" }}>âœ•</button>
                       </div>
                     );
                   })}
@@ -5509,16 +5536,16 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
     );
   }
 
-  // ───────── PANTALLA: ver una lista guardada concreta ─────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€ PANTALLA: ver una lista guardada concreta â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (viewSaved) {
     const s = viewSaved;
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setViewSaved(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>📋 {s.name}</div>
-        <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>{s.list.length} alimentos · {s.dayBreakdown.length} días</div>
+        <button onClick={()=>setViewSaved(null)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>ðŸ“‹ {s.name}</div>
+        <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>{s.list.length} alimentos Â· {s.dayBreakdown.length} dÃ­as</div>
 
-        <button onClick={()=>loadSavedList(s)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:20 }}>↩️ Cargar esta lista en el planificador</button>
+        <button onClick={()=>loadSavedList(s)} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:20 }}>â†©ï¸ Cargar esta lista en el planificador</button>
 
         {/* Lista total */}
         <div style={{ fontSize:12, color:"#888", fontWeight:700, marginBottom:10, textTransform:"uppercase", letterSpacing:1 }}>Lista total</div>
@@ -5531,8 +5558,8 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
           ))}
         </div>
 
-        {/* Desglose por día */}
-        <div style={{ fontSize:12, color:"#888", fontWeight:700, marginBottom:10, textTransform:"uppercase", letterSpacing:1 }}>Por días</div>
+        {/* Desglose por dÃ­a */}
+        <div style={{ fontSize:12, color:"#888", fontWeight:700, marginBottom:10, textTransform:"uppercase", letterSpacing:1 }}>Por dÃ­as</div>
         {s.dayBreakdown.map((day,i) => (
           <div key={i} style={{ background:"#1a1a24", borderRadius:14, border:"1px solid #2a2a3a", marginBottom:10, overflow:"hidden" }}>
             <div style={{ padding:"10px 14px", borderBottom:"1px solid #232330", color:"#4caf50", fontWeight:800, fontSize:14 }}>{day.dia}</div>
@@ -5550,22 +5577,22 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
     );
   }
 
-  // ───────── PANTALLA: listas guardadas ─────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€ PANTALLA: listas guardadas â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (showSaved) {
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>setShowSaved(false)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>📋 Listas guardadas</div>
+        <button onClick={()=>setShowSaved(false)} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+        <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>ðŸ“‹ Listas guardadas</div>
         <div style={{ color:"#666", fontSize:13, marginBottom:20 }}>Tus listas de la compra guardadas</div>
         {savedLists.length===0 ? (
-          <div style={{ color:"#555", fontSize:14, textAlign:"center", padding:"40px 20px", background:"#15151c", borderRadius:14 }}>Aún no has guardado ninguna lista. Cuando generes una lista podrás guardarla aquí.</div>
+          <div style={{ color:"#555", fontSize:14, textAlign:"center", padding:"40px 20px", background:"#15151c", borderRadius:14 }}>AÃºn no has guardado ninguna lista. Cuando generes una lista podrÃ¡s guardarla aquÃ­.</div>
         ) : savedLists.map(s => (
           <div key={s.id} style={{ background:"#1a1a24", borderRadius:14, border:"1px solid #2a2a3a", marginBottom:10, overflow:"hidden", display:"flex", alignItems:"center" }}>
             <button onClick={()=>setViewSaved(s)} style={{ flex:1, padding:"15px 16px", background:"none", border:"none", cursor:"pointer", textAlign:"left" }}>
               <div style={{ color:"white", fontWeight:700, fontSize:15 }}>{s.name}</div>
-              <div style={{ color:"#666", fontSize:12, marginTop:2 }}>{s.list.length} alimentos · {s.dayBreakdown.length} días</div>
+              <div style={{ color:"#666", fontSize:12, marginTop:2 }}>{s.list.length} alimentos Â· {s.dayBreakdown.length} dÃ­as</div>
             </button>
-            <button onClick={()=>deleteSavedList(s.id)} style={{ background:"none", border:"none", color:"#a44", fontSize:13, cursor:"pointer", padding:"0 16px", fontWeight:600 }}>🗑</button>
+            <button onClick={()=>deleteSavedList(s.id)} style={{ background:"none", border:"none", color:"#a44", fontSize:13, cursor:"pointer", padding:"0 16px", fontWeight:600 }}>ðŸ—‘</button>
           </div>
         ))}
       </div>
@@ -5575,11 +5602,11 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
   if (result) {
     return (
       <div style={{ padding:"20px 16px 40px" }}>
-        <button onClick={()=>{ setResult(null); setAskSave(false); }} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+        <button onClick={()=>{ setResult(null); setAskSave(false); }} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
         <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Tu lista de la compra</div>
         <div style={{ color:"#666", fontSize:13, marginBottom:20 }}>{result.list.length} alimentos en total</div>
         {result.list.length===0 ? (
-          <div style={{ color:"#555", fontSize:14, textAlign:"center", padding:"40px 0", background:"#15151c", borderRadius:14 }}>No hay alimentos en los días activos.</div>
+          <div style={{ color:"#555", fontSize:14, textAlign:"center", padding:"40px 0", background:"#15151c", borderRadius:14 }}>No hay alimentos en los dÃ­as activos.</div>
         ) : (
           <div style={{ background:"#1a1a24", borderRadius:16, border:"1px solid #2a2a3a", overflow:"hidden" }}>
             {result.list.map((item,i) => (
@@ -5591,17 +5618,17 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
           </div>
         )}
         <div style={{ background:"#15201a", border:"1px solid #2e7d32", borderRadius:14, padding:"14px 16px", marginTop:18 }}>
-          <div style={{ color:"#cde", fontSize:12.5, lineHeight:1.5 }}>💡 Las cantidades están en crudo/seco. Compra un poco de más para tener margen.</div>
+          <div style={{ color:"#cde", fontSize:12.5, lineHeight:1.5 }}>ðŸ’¡ Las cantidades estÃ¡n en crudo/seco. Compra un poco de mÃ¡s para tener margen.</div>
         </div>
 
         {/* Pop-up de guardar */}
         {askSave && (
           <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
             <div style={{ background:"#1a1a24", borderRadius:20, padding:"26px 22px", maxWidth:380, width:"100%", border:"1px solid #2a2a3a" }}>
-              <div style={{ fontSize:36, textAlign:"center", marginBottom:12 }}>💾</div>
-              <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>¿Quieres guardar esta lista?</div>
-              <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:22 }}>Se guardará el plan completo con todos los días y comidas, para que puedas reutilizarlo en el futuro. El planificador se vaciará para empezar de nuevo.</div>
-              <button onClick={saveCurrentList} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>💾 Guardar lista</button>
+              <div style={{ fontSize:36, textAlign:"center", marginBottom:12 }}>ðŸ’¾</div>
+              <div style={{ color:"white", fontWeight:900, fontSize:18, textAlign:"center", marginBottom:8 }}>Â¿Quieres guardar esta lista?</div>
+              <div style={{ color:"#999", fontSize:13, textAlign:"center", lineHeight:1.5, marginBottom:22 }}>Se guardarÃ¡ el plan completo con todos los dÃ­as y comidas, para que puedas reutilizarlo en el futuro. El planificador se vaciarÃ¡ para empezar de nuevo.</div>
+              <button onClick={saveCurrentList} style={{ width:"100%", padding:"14px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>ðŸ’¾ Guardar lista</button>
               <button onClick={()=>{ setAskSave(false); resetPlan(); }} style={{ width:"100%", padding:"14px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>No guardar</button>
             </div>
           </div>
@@ -5613,13 +5640,13 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
   const activeDaysList = DIAS.filter(d=>plan.dias[d.id]?.active);
   return (
     <div style={{ padding:"20px 16px 40px" }}>
-      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
+      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
       <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Lista de la compra</div>
-      <div style={{ color:"#666", fontSize:13, marginBottom:16 }}>Planifica los días de la semana. Pulsa un día para añadir alimentos y actívalo. Cuando termines, genera la lista.</div>
+      <div style={{ color:"#666", fontSize:13, marginBottom:16 }}>Planifica los dÃ­as de la semana. Pulsa un dÃ­a para aÃ±adir alimentos y actÃ­valo. Cuando termines, genera la lista.</div>
 
       <button onClick={()=>setShowSaved(true)} style={{ width:"100%", background:"linear-gradient(135deg,#1a1a24,#1f1f2e)", border:"1px solid #2a2a3a", borderRadius:12, padding:"13px 16px", cursor:"pointer", color:"#ccc", fontSize:13, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:18 }}>
-        <span>📋 Listas guardadas{savedLists.length>0?` (${savedLists.length})`:""}</span>
-        <span style={{ color:"#4caf50", fontSize:15 }}>→</span>
+        <span>ðŸ“‹ Listas guardadas{savedLists.length>0?` (${savedLists.length})`:""}</span>
+        <span style={{ color:"#4caf50", fontSize:15 }}>â†’</span>
       </button>
       {DIAS.map(dia => {
         const d = plan.dias[dia.id];
@@ -5630,28 +5657,28 @@ function ShoppingListTab({ shoppingPlan, setShoppingPlan, savedLists, setSavedLi
             <div style={{ display:"flex", alignItems:"center" }}>
               <button onClick={()=>{ setEditingDay(dia.id); setActiveMeal(mealList[0].id); }} style={{ flex:1, padding:"15px 16px", background:"none", border:"none", cursor:"pointer", textAlign:"left" }}>
                 <div style={{ color:"white", fontWeight:700, fontSize:15 }}>{dia.label}</div>
-                <div style={{ color:"#666", fontSize:12, marginTop:2 }}>{hasFood?"Toca para editar":"Toca para añadir alimentos"}</div>
+                <div style={{ color:"#666", fontSize:12, marginTop:2 }}>{hasFood?"Toca para editar":"Toca para aÃ±adir alimentos"}</div>
               </button>
-              <button onClick={()=>hasFood && toggleActive(dia.id)} disabled={!hasFood} style={{ margin:"0 14px", padding:"7px 14px", borderRadius:20, border:"none", background:active?"#2e7d32":hasFood?"#2a2a3a":"#1e1e28", color:active?"white":hasFood?"#888":"#444", fontSize:12, fontWeight:700, cursor:hasFood?"pointer":"default", whiteSpace:"nowrap" }}>{active?"✓ Activo":"Activar"}</button>
+              <button onClick={()=>hasFood && toggleActive(dia.id)} disabled={!hasFood} style={{ margin:"0 14px", padding:"7px 14px", borderRadius:20, border:"none", background:active?"#2e7d32":hasFood?"#2a2a3a":"#1e1e28", color:active?"white":hasFood?"#888":"#444", fontSize:12, fontWeight:700, cursor:hasFood?"pointer":"default", whiteSpace:"nowrap" }}>{active?"âœ“ Activo":"Activar"}</button>
             </div>
           </div>
         );
       })}
-      <button onClick={generate} disabled={activeDaysList.length===0} style={{ width:"100%", marginTop:12, padding:"16px", borderRadius:14, border:"none", background:activeDaysList.length?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:activeDaysList.length?"white":"#555", fontWeight:900, fontSize:16, cursor:activeDaysList.length?"pointer":"default" }}>{activeDaysList.length?`Crear lista de la compra (${activeDaysList.length} día${activeDaysList.length!==1?"s":""})`:"Activa al menos un día"}</button>
+      <button onClick={generate} disabled={activeDaysList.length===0} style={{ width:"100%", marginTop:12, padding:"16px", borderRadius:14, border:"none", background:activeDaysList.length?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:activeDaysList.length?"white":"#555", fontWeight:900, fontSize:16, cursor:activeDaysList.length?"pointer":"default" }}>{activeDaysList.length?`Crear lista de la compra (${activeDaysList.length} dÃ­a${activeDaysList.length!==1?"s":""})`:"Activa al menos un dÃ­a"}</button>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PESTAÑA: AGUA
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PESTAÃ‘A: AGUA
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function WaterTab({ waterLog, setWaterLog, userData, onBack }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const dKey = dateKey(currentDate);
   const today = new Date();
   const isToday = isSameDay(currentDate, today);
 
-  // Objetivo personalizado según peso, objetivo y actividad
+  // Objetivo personalizado segÃºn peso, objetivo y actividad
   const weight = parseFloat(userData.weight) || 70;
   const goalMl = calcWaterGoal(userData);
   const currentMl = waterLog[dKey] || 0;
@@ -5660,22 +5687,22 @@ function WaterTab({ waterLog, setWaterLog, userData, onBack }) {
   const add = (ml) => setWaterLog(prev => ({ ...prev, [dKey]: Math.max(0, (prev[dKey]||0) + ml) }));
   const reset = () => setWaterLog(prev => ({ ...prev, [dKey]: 0 }));
 
-  // Media de los últimos 7 días
+  // Media de los Ãºltimos 7 dÃ­as
   const last7 = [];
   for (let i=0;i<7;i++){ const k=dateKey(addDays(today,-i)); if (waterLog[k]) last7.push(waterLog[k]); }
   const avg7 = last7.length ? Math.round(last7.reduce((a,b)=>a+b,0)/last7.length) : null;
 
   return (
     <div style={{ padding:"20px 16px 40px" }}>
-      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>← Atrás</button>
-      <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>Hidratación</div>
-      <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>Tu objetivo diario: {(goalMl/1000).toFixed(1)} L · calculado según tu peso, objetivo y actividad</div>
+      <button onClick={onBack} style={{ background:"none", border:"none", color:"#4caf50", fontSize:14, cursor:"pointer", marginBottom:16, padding:0 }}>â† AtrÃ¡s</button>
+      <div style={{ fontWeight:900, fontSize:22, color:"white", marginBottom:4 }}>HidrataciÃ³n</div>
+      <div style={{ color:"#666", fontSize:13, marginBottom:18 }}>Tu objetivo diario: {(goalMl/1000).toFixed(1)} L Â· calculado segÃºn tu peso, objetivo y actividad</div>
 
-      {/* Navegación de fecha */}
+      {/* NavegaciÃ³n de fecha */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:"#1a1a24", border:"1px solid #2a2a3a", borderRadius:12, padding:"8px 6px", marginBottom:18 }}>
-        <button onClick={()=>setCurrentDate(addDays(currentDate,-1))} style={{ background:"none", border:"none", color:"#4caf50", fontSize:20, cursor:"pointer", padding:"4px 14px" }}>‹</button>
-        <div style={{ color:"white", fontWeight:700, fontSize:14 }}>{isToday?"📍 Hoy":formatDateLong(currentDate)}</div>
-        <button onClick={()=>!isToday && setCurrentDate(addDays(currentDate,1))} disabled={isToday} style={{ background:"none", border:"none", color:isToday?"#333":"#4caf50", fontSize:20, cursor:isToday?"default":"pointer", padding:"4px 14px" }}>›</button>
+        <button onClick={()=>setCurrentDate(addDays(currentDate,-1))} style={{ background:"none", border:"none", color:"#4caf50", fontSize:20, cursor:"pointer", padding:"4px 14px" }}>â€¹</button>
+        <div style={{ color:"white", fontWeight:700, fontSize:14 }}>{isToday?"ðŸ“ Hoy":formatDateLong(currentDate)}</div>
+        <button onClick={()=>!isToday && setCurrentDate(addDays(currentDate,1))} disabled={isToday} style={{ background:"none", border:"none", color:isToday?"#333":"#4caf50", fontSize:20, cursor:isToday?"default":"pointer", padding:"4px 14px" }}>â€º</button>
       </div>
 
       {/* Vaso visual */}
@@ -5690,46 +5717,46 @@ function WaterTab({ waterLog, setWaterLog, userData, onBack }) {
         <div style={{ color:"#666", fontSize:13, marginTop:2 }}>de {(goalMl/1000).toFixed(1)} L</div>
       </div>
 
-      {/* Botones rápidos */}
+      {/* Botones rÃ¡pidos */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:12 }}>
         <button onClick={()=>add(250)} style={{ padding:"16px 8px", borderRadius:14, border:"1px solid #2a4a5a", background:"#15202a", cursor:"pointer", color:"#4fc3f7", fontWeight:700, fontSize:13 }}>+ Vaso<div style={{ fontSize:11, color:"#5a7a8a", marginTop:2 }}>250 ml</div></button>
         <button onClick={()=>add(500)} style={{ padding:"16px 8px", borderRadius:14, border:"1px solid #2a4a5a", background:"#15202a", cursor:"pointer", color:"#4fc3f7", fontWeight:700, fontSize:13 }}>+ Botella<div style={{ fontSize:11, color:"#5a7a8a", marginTop:2 }}>500 ml</div></button>
         <button onClick={()=>add(1000)} style={{ padding:"16px 8px", borderRadius:14, border:"1px solid #2a4a5a", background:"#15202a", cursor:"pointer", color:"#4fc3f7", fontWeight:700, fontSize:13 }}>+ Litro<div style={{ fontSize:11, color:"#5a7a8a", marginTop:2 }}>1 L</div></button>
       </div>
       <div style={{ display:"flex", gap:10, marginBottom:18 }}>
-        <button onClick={()=>add(-250)} style={{ flex:1, padding:"10px", borderRadius:12, border:"1px solid #2a2a3a", background:"transparent", cursor:"pointer", color:"#888", fontSize:13, fontWeight:600 }}>− Quitar vaso</button>
-        <button onClick={reset} style={{ flex:1, padding:"10px", borderRadius:12, border:"1px solid #2a2a3a", background:"transparent", cursor:"pointer", color:"#888", fontSize:13, fontWeight:600 }}>↺ Reiniciar</button>
+        <button onClick={()=>add(-250)} style={{ flex:1, padding:"10px", borderRadius:12, border:"1px solid #2a2a3a", background:"transparent", cursor:"pointer", color:"#888", fontSize:13, fontWeight:600 }}>âˆ’ Quitar vaso</button>
+        <button onClick={reset} style={{ flex:1, padding:"10px", borderRadius:12, border:"1px solid #2a2a3a", background:"transparent", cursor:"pointer", color:"#888", fontSize:13, fontWeight:600 }}>â†º Reiniciar</button>
       </div>
 
       {avg7 && (
         <div style={{ background:"#15202a", borderRadius:14, padding:"16px", border:"1px solid #2a4a5a", display:"flex", alignItems:"center", gap:14 }}>
-          <span style={{ fontSize:30 }}>💧</span>
-          <div><div style={{ color:"#4fc3f7", fontWeight:900, fontSize:20 }}>{(avg7/1000).toFixed(2)} L</div><div style={{ color:"#888", fontSize:12 }}>Media de los últimos {last7.length} días</div></div>
+          <span style={{ fontSize:30 }}>ðŸ’§</span>
+          <div><div style={{ color:"#4fc3f7", fontWeight:900, fontSize:20 }}>{(avg7/1000).toFixed(2)} L</div><div style={{ color:"#888", fontSize:12 }}>Media de los Ãºltimos {last7.length} dÃ­as</div></div>
         </div>
       )}
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MENÚ LATERAL (hamburguesa)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// MENÃš LATERAL (hamburguesa)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function SideMenu({ open, onClose, onNavigate, userName }) {
   if (!open) return null;
   const items = [
-    { id:"inicio", emoji:"🏠", label:"Inicio" },
-    { id:"nutricion", emoji:"🍽️", label:"Nutrición" },
-    { id:"entreno", emoji:"🏋️", label:"Entreno" },
-    { id:"medidas", emoji:"📊", label:"Peso y medidas" },
-    { id:"agua", emoji:"💧", label:"Hidratación" },
-    { id:"sueno", emoji:"😴", label:"Sueño y descanso" },
-    { id:"resumen", emoji:"📈", label:"Resumen semanal" },
-    { id:"compra", emoji:"🛒", label:"Lista de la compra" },
-    { id:"logros", emoji:"🏆", label:"Logros" },
+    { id:"inicio", emoji:"ðŸ ", label:"Inicio" },
+    { id:"nutricion", emoji:"ðŸ½ï¸", label:"NutriciÃ³n" },
+    { id:"entreno", emoji:"ðŸ‹ï¸", label:"Entreno" },
+    { id:"medidas", emoji:"ðŸ“Š", label:"Peso y medidas" },
+    { id:"agua", emoji:"ðŸ’§", label:"HidrataciÃ³n" },
+    { id:"sueno", emoji:"ðŸ˜´", label:"SueÃ±o y descanso" },
+    { id:"resumen", emoji:"ðŸ“ˆ", label:"Resumen semanal" },
+    { id:"compra", emoji:"ðŸ›’", label:"Lista de la compra" },
+    { id:"logros", emoji:"ðŸ†", label:"Logros" },
     { id:"sep1", sep:true },
-    { id:"instalar", emoji:"📲", label:"Instalar app" },
-    { id:"info", emoji:"💬", label:"Resuelve tus dudas" },
-    { id:"ajustes", emoji:"⚙️", label:"Ajustes" },
+    { id:"instalar", emoji:"ðŸ“²", label:"Instalar app" },
+    { id:"info", emoji:"ðŸ’¬", label:"Resuelve tus dudas" },
+    { id:"ajustes", emoji:"âš™ï¸", label:"Ajustes" },
   ];
   return (
     <div style={{ position:"fixed", inset:0, zIndex:300 }}>
@@ -5749,22 +5776,22 @@ function SideMenu({ open, onClose, onNavigate, userName }) {
           )
         )}
         <div style={{ padding:"20px", marginTop:12, borderTop:"1px solid #232330" }}>
-          <div style={{ color:"#444", fontSize:11, textAlign:"center" }}>SMINK FIT · v1.0</div>
+          <div style={{ color:"#444", fontSize:11, textAlign:"center" }}>SMINK FIT Â· v1.0</div>
         </div>
       </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// NAVEGACIÓN INFERIOR
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// NAVEGACIÃ“N INFERIOR
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function BottomNav({ active, onChange }) {
   const tabs = [
-    { id:"inicio", label:"Inicio", icon:"🏠" },
-    { id:"nutricion", label:"Nutrición", icon:"🍽️" },
-    { id:"entreno", label:"Entreno", icon:"🏋️" },
-    { id:"medidas", label:"Medidas", icon:"📊" },
+    { id:"inicio", label:"Inicio", icon:"ðŸ " },
+    { id:"nutricion", label:"NutriciÃ³n", icon:"ðŸ½ï¸" },
+    { id:"entreno", label:"Entreno", icon:"ðŸ‹ï¸" },
+    { id:"medidas", label:"Medidas", icon:"ðŸ“Š" },
   ];
   return (
     <div style={{ position:"fixed", bottom:0, left:0, right:0, background:"#15151c", borderTop:"1px solid #2a2a3a", display:"flex", zIndex:150, paddingBottom:"env(safe-area-inset-bottom)" }}>
@@ -5778,11 +5805,11 @@ function BottomNav({ active, onChange }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // APP PRINCIPAL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export default function App() {
-  // ── Estados con localStorage ──────────────────────────
+  // â”€â”€ Estados con localStorage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [userData, setUserData] = useLS("userData_v10", null);
   const [history, setHistory] = useLS("history_v10", {});
   const [measureLog, setMeasureLog] = useLS("measureLog_v10", {});
@@ -5812,7 +5839,7 @@ export default function App() {
   // La primera vez (tras el splash), preguntar si quiere instalar la app
   useEffect(() => {
     if (!showSplash && !installPromptSeen) {
-      // Detectar si ya está instalada (modo standalone) para no preguntar
+      // Detectar si ya estÃ¡ instalada (modo standalone) para no preguntar
       const standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
       if (!standalone) {
         const t = setTimeout(()=>setShowInstallPrompt(true), 600);
@@ -5821,13 +5848,13 @@ export default function App() {
     }
   }, [showSplash, installPromptSeen]);
 
-  // Al cambiar de pestaña, subir arriba del todo para ver la cabecera
+  // Al cambiar de pestaÃ±a, subir arriba del todo para ver la cabecera
   useEffect(() => { window.scrollTo(0, 0); }, [tab]);
 
   const macros = userData ? calcMacros(userData) : null;
   const numMeals = userData?.numMeals || DEFAULT_NUM_MEALS;
 
-  // Asegurar que el reparto cuadra con las comidas actuales (auto-reparación)
+  // Asegurar que el reparto cuadra con las comidas actuales (auto-reparaciÃ³n)
   useEffect(() => {
     if (!userData) return;
     const expectedIds = getMeals(numMeals).map(m=>m.id);
@@ -5841,7 +5868,7 @@ export default function App() {
 
   const handleSaveProfile = (data) => {
     const prevNum = userData?.numMeals || DEFAULT_NUM_MEALS;
-    // Convertir strings a números donde corresponde
+    // Convertir strings a nÃºmeros donde corresponde
     const clean = {
       ...data,
       weight: parseFloat(data.weight) || null,
@@ -5851,6 +5878,7 @@ export default function App() {
       kcalAdjust: parseInt(data.kcalAdjust) || 0,
     };
     setUserData(clean);
+    saveProfileToSupabase(clean);
     setEditing(false);
     if (!userData || clean.numMeals !== prevNum) {
       setMealDist(getDefaultDist(clean.numMeals));
@@ -5858,7 +5886,7 @@ export default function App() {
   };
 
   if (showSplash) return <SplashScreen />;
-  // Si userData está vacío (sin nombre) o editando, mostrar perfil
+  // Si userData estÃ¡ vacÃ­o (sin nombre) o editando, mostrar perfil
   if (!userData || !userData.name || editing) return <ProfileScreen initial={editing?userData:null} onSave={handleSaveProfile} />;
 
   const mainTabs = ["inicio","nutricion","entreno","medidas"];
@@ -5893,8 +5921,8 @@ export default function App() {
               </svg>
             </div>
             <div style={{ color:"white", fontWeight:900, fontSize:20, marginBottom:8 }}>Instala SMINK FIT</div>
-            <div style={{ color:"#aaa", fontSize:14, lineHeight:1.5, marginBottom:24 }}>Añádela a tu pantalla de inicio y úsala como una app, a pantalla completa y con su icono. ¿Quieres ver cómo se hace?</div>
-            <button onClick={()=>{ setInstallPromptSeen(true); localStorage.setItem("installPromptSeen","true"); setShowInstallPrompt(false); setTab("instalar"); }} style={{ width:"100%", padding:"15px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>Sí, enséñame cómo</button>
+            <div style={{ color:"#aaa", fontSize:14, lineHeight:1.5, marginBottom:24 }}>AÃ±Ã¡dela a tu pantalla de inicio y Ãºsala como una app, a pantalla completa y con su icono. Â¿Quieres ver cÃ³mo se hace?</div>
+            <button onClick={()=>{ setInstallPromptSeen(true); localStorage.setItem("installPromptSeen","true"); setShowInstallPrompt(false); setTab("instalar"); }} style={{ width:"100%", padding:"15px", borderRadius:14, border:"none", background:"linear-gradient(135deg,#4caf50,#2e7d32)", color:"white", fontWeight:800, fontSize:15, cursor:"pointer", marginBottom:10 }}>SÃ­, ensÃ©Ã±ame cÃ³mo</button>
             <button onClick={()=>{ setInstallPromptSeen(true); localStorage.setItem("installPromptSeen","true"); setShowInstallPrompt(false); }} style={{ width:"100%", padding:"15px", borderRadius:14, border:"1px solid #2a2a3a", background:"transparent", color:"#888", fontWeight:700, fontSize:14, cursor:"pointer" }}>Ahora no</button>
           </div>
         </div>
