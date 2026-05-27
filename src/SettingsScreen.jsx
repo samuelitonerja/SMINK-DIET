@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { supabase } from "./supabase.js";
 
@@ -31,6 +30,7 @@ export default function SettingsScreen({ userData, userId, userEmail, userPlan, 
   const [newEmail, setNewEmail] = useState("");
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [currentPass, setCurrentPass] = useState("");
   const [fbType, setFbType] = useState("sugerencia");
   const [fbMsg, setFbMsg] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,12 +55,20 @@ export default function SettingsScreen({ userData, userId, userEmail, userPlan, 
   };
 
   const handleChangePassword = async () => {
-    if (newPass.length < 6) { showToast("Mínimo 6 caracteres", false); return; }
-    if (newPass !== confirmPass) { showToast("Las contraseñas no coinciden", false); return; }
+    if (!currentPass) { showToast("Introduce tu contrasena actual", false); return; }
+    if (newPass.length < 6) { showToast("Minimo 6 caracteres", false); return; }
+    if (newPass !== confirmPass) { showToast("Las contrasenass no coinciden", false); return; }
     setLoading(true);
+    // Verificar contraseña actual re-autenticando
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: user.email, password: currentPass
+    });
+    if (signInErr) { showToast("La contrasena actual no es correcta", false); setLoading(false); return; }
+    // Cambiar contraseña
     const { error } = await supabase.auth.updateUser({ password: newPass });
     if (error) showToast(error.message, false);
-    else { showToast("Contraseña actualizada"); setSection(null); setNewPass(""); setConfirmPass(""); }
+    else { showToast("Contrasena actualizada"); setSection(null); setCurrentPass(""); setNewPass(""); setConfirmPass(""); }
     setLoading(false);
   };
 
@@ -215,15 +223,17 @@ export default function SettingsScreen({ userData, userId, userEmail, userPlan, 
         {section === "password" && (
           <div>
             <div style={{ color:"#888", fontSize:14, lineHeight:1.6, marginBottom:20 }}>
-              La nueva contrasena debe tener al menos 6 caracteres.
+              Por seguridad, introduce primero tu contrasena actual.
             </div>
+            <div style={{ color:"#555", fontSize:12, fontWeight:700, marginBottom:6, textTransform:"uppercase", letterSpacing:1 }}>Contrasena actual</div>
+            <input value={currentPass} onChange={e=>setCurrentPass(e.target.value)} type="password" placeholder="••••••••" style={inp} />
             <div style={{ color:"#555", fontSize:12, fontWeight:700, marginBottom:6, textTransform:"uppercase", letterSpacing:1 }}>Nueva contrasena</div>
             <input value={newPass} onChange={e=>setNewPass(e.target.value)} type="password" placeholder="••••••••" style={inp} />
             <div style={{ color:"#555", fontSize:12, fontWeight:700, marginBottom:6, textTransform:"uppercase", letterSpacing:1 }}>Confirmar contrasena</div>
             <input value={confirmPass} onChange={e=>setConfirmPass(e.target.value)} type="password" placeholder="••••••••" style={inp} />
-            <button onClick={handleChangePassword} disabled={loading||!newPass||!confirmPass}
-              style={{ width:"100%", padding:"15px", borderRadius:14, border:"none", background:(newPass&&confirmPass)?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:(newPass&&confirmPass)?"white":"#555", fontWeight:800, fontSize:16, cursor:(newPass&&confirmPass)?"pointer":"default", marginTop:4 }}>
-              {loading ? "Guardando..." : "Cambiar contrasena"}
+            <button onClick={handleChangePassword} disabled={loading||!newPass||!confirmPass||!currentPass}
+              style={{ width:"100%", padding:"15px", borderRadius:14, border:"none", background:(newPass&&confirmPass&&currentPass)?"linear-gradient(135deg,#4caf50,#2e7d32)":"#2a2a3a", color:(newPass&&confirmPass&&currentPass)?"white":"#555", fontWeight:800, fontSize:16, cursor:(newPass&&confirmPass&&currentPass)?"pointer":"default", marginTop:4 }}>
+              {loading ? "Verificando..." : "Cambiar contrasena"}
             </button>
           </div>
         )}
