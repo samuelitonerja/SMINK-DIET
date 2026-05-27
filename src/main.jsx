@@ -8,17 +8,33 @@ import { migrateFromLocalStorage, loadUserData } from './db.js'
 
 function Root() {
   const [state, setState] = useState({ status: 'loading', session: null, userPlan: null, cloudData: null });
+  const currentUserIdRef = React.useRef(null);
+
+  const clearLocalData = () => {
+    // Limpiar TODOS los datos del localStorage al cambiar de usuario
+    const keysToRemove = Object.keys(localStorage).filter(k =>
+      k.includes('_v10') || k.includes('sminkfit_')
+    );
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+  };
 
   const initUser = async (sess) => {
     if (!sess) {
+      clearLocalData();
+      currentUserIdRef.current = null;
       setState({ status: 'auth', session: null, userPlan: null, cloudData: null });
       return;
     }
 
+    // Si cambió de usuario, limpiar datos del anterior
+    if (currentUserIdRef.current && currentUserIdRef.current !== sess.user.id) {
+      clearLocalData();
+    }
+    currentUserIdRef.current = sess.user.id;
+
     setState(s => ({ ...s, status: 'loading' }));
 
     try {
-      // 1. Comprobar plan primero (decisión crítica: admin vs usuario normal)
       const { data: planData } = await supabase
         .from('user_plans')
         .select('plan')
@@ -27,13 +43,12 @@ function Root() {
 
       const plan = planData?.plan || 'free';
 
-      // 2. Si es admin → mostrar panel directamente, sin cargar nada más
       if (plan === 'admin') {
+        clearLocalData(); // admin nunca ve datos de otros usuarios
         setState({ status: 'admin', session: sess, userPlan: 'admin', cloudData: null });
         return;
       }
 
-      // 3. Usuario normal → migrar y cargar datos
       const timeout = new Promise(resolve => setTimeout(() => resolve({}), 8000));
       await migrateFromLocalStorage(sess.user.id);
       const data = await Promise.race([loadUserData(sess.user.id), timeout]);
@@ -42,20 +57,19 @@ function Root() {
 
     } catch(e) {
       console.error('Error iniciando usuario:', e);
-      // Si falla, entrar igual como usuario normal
       setState({ status: 'app', session: sess, userPlan: 'free', cloudData: {} });
     }
   };
 
   useEffect(() => {
-    // Sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       initUser(session);
     });
 
-    // Cambios de sesión
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
+        clearLocalData();
+        currentUserIdRef.current = null;
         setState({ status: 'auth', session: null, userPlan: null, cloudData: null });
       } else if (event === 'SIGNED_IN') {
         initUser(session);
@@ -66,10 +80,10 @@ function Root() {
   }, []);
 
   const handleLogout = async () => {
+    clearLocalData();
     await supabase.auth.signOut();
   };
 
-  // Pantalla de carga
   if (state.status === 'loading') {
     return (
       <div style={{ minHeight:"100vh", background:"#0a0d0a", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:16 }}>
