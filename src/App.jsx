@@ -5784,7 +5784,7 @@ function BottomNav({ active, onChange }) {
 // ═══════════════════════════════════════════════════════════════════════════
 export default function App({ userId, userEmail, cloudData }) {
   // ── Estados inicializados desde Supabase (cloudData) — SIN localStorage ──
-  // Los datos sensibles NUNCA se guardan en el dispositivo
+  // cloudData ya viene cargado desde main.jsx antes de montar App
   const cd = cloudData || {};
   const [userData, setUserDataRaw] = useState(cd.userData || null);
   const [history, setHistoryRaw] = useState(cd.history || {});
@@ -5799,22 +5799,6 @@ export default function App({ userId, userEmail, cloudData }) {
   const [waterLog, setWaterLogRaw] = useState(cd.waterLog || {});
   const [shoppingPlan, setShoppingPlan] = useState({ dias:{} });
   const [savedLists, setSavedLists] = useState([]);
-  const [cloudLoaded, setCloudLoaded] = useState(false);
-
-  // Al recibir cloudData, sobrescribir el estado local con los datos de Supabase
-  useEffect(() => {
-    if (!cloudData || cloudLoaded) return;
-    if (cloudData.userData) setUserDataRaw(cloudData.userData);
-    if (cloudData.history && Object.keys(cloudData.history).length) setHistoryRaw(cloudData.history);
-    if (cloudData.workoutLog && Object.keys(cloudData.workoutLog).length) setWorkoutLogRaw(cloudData.workoutLog);
-    if (cloudData.measureLog && Object.keys(cloudData.measureLog).length) setMeasureLogRaw(cloudData.measureLog);
-    if (cloudData.savedRoutine) setSavedRoutineRaw(cloudData.savedRoutine);
-    if (cloudData.racePlan) setRacePlanRaw(cloudData.racePlan);
-    if (cloudData.waterLog && Object.keys(cloudData.waterLog).length) setWaterLogRaw(cloudData.waterLog);
-    if (cloudData.sleepLog && Object.keys(cloudData.sleepLog).length) setSleepLogRaw(cloudData.sleepLog);
-    if (cloudData.customFoods && cloudData.customFoods.length) setCustomFoodsRaw(cloudData.customFoods);
-    setCloudLoaded(true);
-  }, [cloudData]);
 
   // Wrappers que guardan SOLO en Supabase (sin localStorage)
   const setUserData = useCallback(v => {
