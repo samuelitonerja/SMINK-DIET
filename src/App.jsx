@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { saveProfile, saveNutritionDay, saveWorkout, saveMeasure, saveRoutine, saveRacePlan, saveWater, saveSleep, saveCustomFoods } from "./db.js";
+import SettingsScreen from "./SettingsScreen.jsx";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // BASE DE DATOS Y LÓGICA — SMINK FIT
@@ -5765,6 +5766,7 @@ function BottomNav({ active, onChange }) {
     { id:"nutricion", label:"Nutrición", icon:"🍽️" },
     { id:"entreno", label:"Entreno", icon:"🏋️" },
     { id:"medidas", label:"Medidas", icon:"📊" },
+    { id:"ajustes", label:"Ajustes", icon:"⚙️" },
   ];
   return (
     <div style={{ position:"fixed", bottom:0, left:0, right:0, background:"#15151c", borderTop:"1px solid #2a2a3a", display:"flex", zIndex:150, paddingBottom:"env(safe-area-inset-bottom)" }}>
@@ -5955,7 +5957,7 @@ export default function App({ userId, userEmail, cloudData }) {
   // Si userData está vacío (sin nombre) o editando, mostrar perfil
   if (!userData || !userData.name || editing) return <ProfileScreen initial={editing?userData:null} onSave={handleSaveProfile} />;
 
-  const mainTabs = ["inicio","nutricion","entreno","medidas"];
+  const mainTabs = ["inicio","nutricion","entreno","medidas","ajustes"];
 
   return (
     <div style={{ minHeight:"100vh", background:"#0f0f14", paddingBottom:74 }}>
@@ -6024,6 +6026,7 @@ export default function App({ userId, userEmail, cloudData }) {
       {tab === "compra" && <ShoppingListTab shoppingPlan={shoppingPlan} setShoppingPlan={setShoppingPlan} savedLists={savedLists} setSavedLists={setSavedLists} macros={macros} numMeals={numMeals} customFoods={customFoods} onCreateFood={handleCreateFood} onDeleteFood={handleDeleteFood} onBack={()=>setTab("inicio")} />}
       {tab === "info" && <InfoTab onBack={()=>setTab("inicio")} />}
       {tab === "instalar" && <InstallTab onBack={()=>setTab("inicio")} />}
+      {tab === "ajustes" && <SettingsScreen userData={userData} userId={userId} userEmail={userEmail} userPlan={cloudData?.userPlan||"free"} onLogout={async()=>{ const {supabase:sb}=await import('./supabase.js'); await sb.auth.signOut(); window.location.reload(); }} onEditProfile={()=>setEditing(true)} />}
       {tab === "soporte" && <SupportTab onBack={()=>setTab("inicio")} />}
       </div>
 
