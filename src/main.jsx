@@ -1,40 +1,43 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import AuthScreen from './AuthScreen.jsx'
 import AdminPanel from './AdminPanel.jsx'
 import { supabase } from './supabase.js'
-import { migrateFromLocalStorage, loadUserData } from './db.js'
+import { loadUserData } from './db.js'
+
+// Limpia TODOS los datos del dispositivo excepto preferencias no sensibles
+function clearAllLocalData() {
+  const keep = ["installPromptSeen"];
+  Object.keys(localStorage).forEach(k => {
+    if (!keep.includes(k)) localStorage.removeItem(k);
+  });
+  // Limpiar también sessionStorage
+  sessionStorage.clear();
+}
 
 function Root() {
   const [state, setState] = useState({ status: 'loading', session: null, userPlan: null, cloudData: null });
-  const currentUserIdRef = React.useRef(null);
-
-  const clearLocalData = () => {
-    // Limpiar TODOS los datos del localStorage al cambiar de usuario
-    const keysToRemove = Object.keys(localStorage).filter(k =>
-      k.includes('_v10') || k.includes('sminkfit_')
-    );
-    keysToRemove.forEach(k => localStorage.removeItem(k));
-  };
+  const currentUserIdRef = useRef(null);
 
   const initUser = async (sess) => {
     if (!sess) {
-      clearLocalData();
+      clearAllLocalData();
       currentUserIdRef.current = null;
       setState({ status: 'auth', session: null, userPlan: null, cloudData: null });
       return;
     }
 
-    // Si cambió de usuario, limpiar datos del anterior
-    if (currentUserIdRef.current && currentUserIdRef.current !== sess.user.id) {
-      clearLocalData();
+    // Cambio de usuario → limpiar datos del anterior sin excepción
+    if (currentUserIdRef.current !== sess.user.id) {
+      clearAllLocalData();
+      currentUserIdRef.current = sess.user.id;
     }
-    currentUserIdRef.current = sess.user.id;
 
     setState(s => ({ ...s, status: 'loading' }));
 
     try {
+      // Comprobar plan
       const { data: planData } = await supabase
         .from('user_plans')
         .select('plan')
@@ -43,20 +46,21 @@ function Root() {
 
       const plan = planData?.plan || 'free';
 
+      // Admin → panel directo, sin datos de usuario
       if (plan === 'admin') {
-        clearLocalData(); // admin nunca ve datos de otros usuarios
+        clearAllLocalData();
         setState({ status: 'admin', session: sess, userPlan: 'admin', cloudData: null });
         return;
       }
 
+      // Usuario normal → cargar datos SOLO desde Supabase
       const timeout = new Promise(resolve => setTimeout(() => resolve({}), 8000));
-      await migrateFromLocalStorage(sess.user.id);
       const data = await Promise.race([loadUserData(sess.user.id), timeout]);
 
       setState({ status: 'app', session: sess, userPlan: plan, cloudData: data || {} });
 
     } catch(e) {
-      console.error('Error iniciando usuario:', e);
+      console.error('Error cargando usuario:', e);
       setState({ status: 'app', session: sess, userPlan: 'free', cloudData: {} });
     }
   };
@@ -68,7 +72,7 @@ function Root() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
-        clearLocalData();
+        clearAllLocalData();
         currentUserIdRef.current = null;
         setState({ status: 'auth', session: null, userPlan: null, cloudData: null });
       } else if (event === 'SIGNED_IN') {
@@ -80,7 +84,7 @@ function Root() {
   }, []);
 
   const handleLogout = async () => {
-    clearLocalData();
+    clearAllLocalData();
     await supabase.auth.signOut();
   };
 
