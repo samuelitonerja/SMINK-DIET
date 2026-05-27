@@ -5783,42 +5783,35 @@ function BottomNav({ active, onChange }) {
 // APP PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════
 export default function App({ userId, userEmail, cloudData }) {
-  // ── Estados con localStorage como caché + Supabase como fuente de verdad ──
-  // Al login: cloudData sobreescribe el localStorage con datos frescos de Supabase
-  // Al guardar: se escribe en ambos sitios simultáneamente
-  // Al logout: main.jsx limpia el localStorage completamente
-  const [userData, setUserDataRaw] = useLS("userData_v10", null);
-  const [history, setHistoryRaw] = useLS("history_v10", {});
-  const [measureLog, setMeasureLogRaw] = useLS("measureLog_v10", {});
-  const [mealDist, setMealDist] = useLS("mealDist_v10", DEFAULT_MEAL_DIST);
-  const [customFoods, setCustomFoodsRaw] = useLS("customFoods_v10", []);
-  const [trainingState, setTrainingState] = useLS("trainingState_v10", null);
-  const [savedRoutine, setSavedRoutineRaw] = useLS("savedRoutine_v10", null);
-  const [racePlan, setRacePlanRaw] = useLS("racePlan_v10", null);
-  const [workoutLog, setWorkoutLogRaw] = useLS("workoutLog_v10", {});
-  const [sleepLog, setSleepLogRaw] = useLS("sleepLog_v10", {});
-  const [waterLog, setWaterLogRaw] = useLS("waterLog_v10", {});
-  const [shoppingPlan, setShoppingPlan] = useLS("shoppingPlan_v10", { dias:{} });
-  const [savedLists, setSavedLists] = useLS("savedLists_v10", []);
+  // ── Estados: cloudData (Supabase) como fuente principal, localStorage como caché ──
+  // Cuando App se monta, cloudData ya está listo (main.jsx lo espera antes de montar App)
+  const _lsGet = (key, def) => { try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : def; } catch { return def; } };
+  const _lsSet = (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} };
 
-  // Al recibir cloudData (datos frescos de Supabase), sobreescribir localStorage
-  useEffect(() => {
-    if (!cloudData) return;
-    if (cloudData.userData) setUserDataRaw(cloudData.userData);
-    if (cloudData.history && Object.keys(cloudData.history).length) setHistoryRaw(cloudData.history);
-    if (cloudData.workoutLog && Object.keys(cloudData.workoutLog).length) setWorkoutLogRaw(cloudData.workoutLog);
-    if (cloudData.measureLog && Object.keys(cloudData.measureLog).length) setMeasureLogRaw(cloudData.measureLog);
-    if (cloudData.savedRoutine) setSavedRoutineRaw(cloudData.savedRoutine);
-    if (cloudData.racePlan) setRacePlanRaw(cloudData.racePlan);
-    if (cloudData.waterLog && Object.keys(cloudData.waterLog).length) setWaterLogRaw(cloudData.waterLog);
-    if (cloudData.sleepLog && Object.keys(cloudData.sleepLog).length) setSleepLogRaw(cloudData.sleepLog);
-    if (cloudData.customFoods && cloudData.customFoods.length) setCustomFoodsRaw(cloudData.customFoods);
-  }, [cloudData]);
+  const [userData, setUserDataRaw] = useState(() => cloudData?.userData || _lsGet("userData_v10", null));
+  const [history, setHistoryRaw] = useState(() => cloudData?.history && Object.keys(cloudData.history).length ? cloudData.history : _lsGet("history_v10", {}));
+  const [measureLog, setMeasureLogRaw] = useState(() => cloudData?.measureLog && Object.keys(cloudData.measureLog).length ? cloudData.measureLog : _lsGet("measureLog_v10", {}));
+  const [mealDist, setMealDistRaw] = useState(() => _lsGet("mealDist_v10", DEFAULT_MEAL_DIST));
+  const [customFoods, setCustomFoodsRaw] = useState(() => cloudData?.customFoods?.length ? cloudData.customFoods : _lsGet("customFoods_v10", []));
+  const [trainingState, setTrainingState] = useState(() => _lsGet("trainingState_v10", null));
+  const [savedRoutine, setSavedRoutineRaw] = useState(() => cloudData?.savedRoutine || _lsGet("savedRoutine_v10", null));
+  const [racePlan, setRacePlanRaw] = useState(() => cloudData?.racePlan || _lsGet("racePlan_v10", null));
+  const [workoutLog, setWorkoutLogRaw] = useState(() => cloudData?.workoutLog && Object.keys(cloudData.workoutLog).length ? cloudData.workoutLog : _lsGet("workoutLog_v10", {}));
+  const [sleepLog, setSleepLogRaw] = useState(() => cloudData?.sleepLog && Object.keys(cloudData.sleepLog).length ? cloudData.sleepLog : _lsGet("sleepLog_v10", {}));
+  const [waterLog, setWaterLogRaw] = useState(() => cloudData?.waterLog && Object.keys(cloudData.waterLog).length ? cloudData.waterLog : _lsGet("waterLog_v10", {}));
+  const [shoppingPlan, setShoppingPlanRaw] = useState(() => _lsGet("shoppingPlan_v10", { dias:{} }));
+  const [savedLists, setSavedListsRaw] = useState(() => _lsGet("savedLists_v10", []));
 
-  // Wrappers que guardan SOLO en Supabase (sin localStorage)
+  // Helpers para sincronizar con localStorage
+  const setMealDist = (v) => { setMealDistRaw(v); _lsSet("mealDist_v10", v); };
+  const setShoppingPlan = (v) => { const nv = typeof v === "function" ? v(shoppingPlan) : v; setShoppingPlanRaw(nv); _lsSet("shoppingPlan_v10", nv); };
+  const setSavedLists = (v) => { const nv = typeof v === "function" ? v(savedLists) : v; setSavedListsRaw(nv); _lsSet("savedLists_v10", nv); };
+
+  // Wrappers que guardan en localStorage (inmediato) + Supabase (en segundo plano)
   const setUserData = useCallback(v => {
     setUserDataRaw(prev => {
       const nv = typeof v === "function" ? v(prev) : v;
+      _lsSet("userData_v10", nv);
       if (userId) saveProfile(userId, { name:nv.name, weight:nv.weight, height:nv.height, age:nv.age, sex:nv.sex, activity:nv.activity, goal:nv.goal, num_meals:nv.numMeals, kcal_adjust:nv.kcalAdjust });
       return nv;
     });
@@ -5827,6 +5820,7 @@ export default function App({ userId, userEmail, cloudData }) {
   const setHistory = useCallback(v => {
     setHistoryRaw(prev => {
       const nv = typeof v === "function" ? v(prev) : v;
+      _lsSet("history_v10", nv);
       if (userId) {
         const changed = Object.keys(nv).filter(k => JSON.stringify(nv[k]) !== JSON.stringify(prev[k]));
         changed.forEach(k => saveNutritionDay(userId, k, nv[k]));
@@ -5838,6 +5832,7 @@ export default function App({ userId, userEmail, cloudData }) {
   const setWorkoutLog = useCallback(v => {
     setWorkoutLogRaw(prev => {
       const nv = typeof v === "function" ? v(prev) : v;
+      _lsSet("workoutLog_v10", nv);
       if (userId) {
         const changed = Object.keys(nv).filter(k => !prev[k]);
         changed.forEach(k => saveWorkout(userId, k, nv[k]));
@@ -5849,6 +5844,7 @@ export default function App({ userId, userEmail, cloudData }) {
   const setMeasureLog = useCallback(v => {
     setMeasureLogRaw(prev => {
       const nv = typeof v === "function" ? v(prev) : v;
+      _lsSet("measureLog_v10", nv);
       if (userId) {
         const changed = Object.keys(nv).filter(k => JSON.stringify(nv[k]) !== JSON.stringify(prev[k]));
         changed.forEach(k => saveMeasure(userId, k, nv[k]));
@@ -5860,6 +5856,7 @@ export default function App({ userId, userEmail, cloudData }) {
   const setSavedRoutine = useCallback(v => {
     setSavedRoutineRaw(prev => {
       const nv = typeof v === "function" ? v(prev) : v;
+      _lsSet("savedRoutine_v10", nv);
       if (userId) saveRoutine(userId, nv);
       return nv;
     });
@@ -5868,6 +5865,7 @@ export default function App({ userId, userEmail, cloudData }) {
   const setRacePlan = useCallback(v => {
     setRacePlanRaw(prev => {
       const nv = typeof v === "function" ? v(prev) : v;
+      _lsSet("racePlan_v10", nv);
       if (userId) saveRacePlan(userId, nv);
       return nv;
     });
@@ -5876,6 +5874,7 @@ export default function App({ userId, userEmail, cloudData }) {
   const setWaterLog = useCallback(v => {
     setWaterLogRaw(prev => {
       const nv = typeof v === "function" ? v(prev) : v;
+      _lsSet("waterLog_v10", nv);
       if (userId) {
         const changed = Object.keys(nv).filter(k => nv[k] !== prev[k]);
         changed.forEach(k => saveWater(userId, k, nv[k]));
@@ -5887,6 +5886,7 @@ export default function App({ userId, userEmail, cloudData }) {
   const setSleepLog = useCallback(v => {
     setSleepLogRaw(prev => {
       const nv = typeof v === "function" ? v(prev) : v;
+      _lsSet("sleepLog_v10", nv);
       if (userId) {
         const changed = Object.keys(nv).filter(k => JSON.stringify(nv[k]) !== JSON.stringify(prev[k]));
         changed.forEach(k => saveSleep(userId, k, nv[k]));
@@ -5898,6 +5898,7 @@ export default function App({ userId, userEmail, cloudData }) {
   const setCustomFoods = useCallback(v => {
     setCustomFoodsRaw(prev => {
       const nv = typeof v === "function" ? v(prev) : v;
+      _lsSet("customFoods_v10", nv);
       if (userId) saveCustomFoods(userId, nv);
       return nv;
     });
